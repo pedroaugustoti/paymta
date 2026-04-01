@@ -1,0 +1,132 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"] // Necessário para o adaptador pg que você usa
+}
+
+datasource db {
+  provider = "postgresql"
+  // A URL foi removida daqui, pois agora é gerenciada pelo prisma.config.ts
+}
+
+// --- MODELOS OBRIGATÓRIOS DO NEXTAUTH ---
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- SEU MODELO DE USUÁRIO (SaaS PayMTA) ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  slug          String?   @unique
+  mpAccessToken String?
+  isMaintenance Boolean   @default(false)
+  licenseKey    String    @unique @default(cuid())
+
+  // CONFIGURAÇÕES DE IDENTIDADE
+  logoUrl       String?
+  navbarName    String?   @default("BRP")
+  serverName    String?   @default("BRASIL RP")
+  footerName    String?   @default("Brasil Roleplay Oficial")
+  slogan        String?   @default("Sua nova vida começa aqui")
+  
+  // VISUAL
+  primaryColor  String?   @default("#facb11")
+  heroImageUrl  String?   @default("https://images.unsplash.com/photo-1514565131-fce0801e5785")
+  
+  // LINKS E CONTEÚDO
+  discordUrl    String?   @default("#")
+  instagramUrl  String?   @default("#")
+  youtubeUrl    String?   @default("#")
+  termsContent  String?   @db.Text
+
+  // RELACIONAMENTOS NEXTAUTH
+  accounts      Account[]
+  sessions      Session[]
+
+  // SEUS RELACIONAMENTOS DE NEGÓCIO
+  products      Product[]
+  rules         Rule[]
+  ranks         Rank[]
+  sales         Sale[]
+}
+
+// --- SEUS OUTROS MODELOS ---
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  category    String   
+  icon        String   
+  image       String?  // ESTA LINHA É OBRIGATÓRIA AQUI
+  active      Boolean  @default(true)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Rule {
+  id          String   @id @default(cuid())
+  category    String   // Geral, Convivência
+  title       String
+  description String
+  icon        String   // Ex: "user-x", "scale"
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Rank {
+  id        String   @id @default(cuid())
+  position  Int
+  nickname  String
+  level     Int
+  kills     Int
+  wallet    String
+  status    String   // VIP Diamante, Membro
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Sale {
+  id      String   @id @default(cuid())
+  amount  Float
+  status  String   @default("pending")
+  userId  String
+  user    User     @relation(fields: [userId], references: [id])
+}
