@@ -25,6 +25,14 @@ export async function GET(req: Request) {
         heroImageUrl: true,
         isMaintenance: true, // IMPORTANTE: Para o martelo aparecer!
         termsContent: true,
+        
+        // --- ADICIONADOS PARA O SHOPLAYOUT FUNCIONAR ---
+        navbarName: true,
+        footerName: true,
+        discordUrl: true,
+        instagramUrl: true,
+        youtubeUrl: true,
+        // -----------------------------------------------
 
         // RELAÇÕES (Incluindo apenas o necessário de cada uma)
         products: {

@@ -32,6 +32,11 @@ export async function PATCH(req: Request) {
     if (body.footerName !== undefined) updateData.footerName = body.footerName;
     if (body.slogan !== undefined) updateData.slogan = body.slogan;
     if (body.primaryColor !== undefined) updateData.primaryColor = body.primaryColor;
+    
+    // --- CORREÇÃO: CAMPO LOGO INSERIDO AQUI ---
+    if (body.logoUrl !== undefined) updateData.logoUrl = body.logoUrl;
+    // ------------------------------------------
+
     if (body.heroImageUrl !== undefined) updateData.heroImageUrl = body.heroImageUrl;
     if (body.discordUrl !== undefined) updateData.discordUrl = body.discordUrl;
     if (body.instagramUrl !== undefined) updateData.instagramUrl = body.instagramUrl;
