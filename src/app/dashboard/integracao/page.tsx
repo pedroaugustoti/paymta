@@ -18,11 +18,10 @@ export default function IntegrationsPage() {
   
   const [form, setForm] = useState({
     mpAccessToken: "",
-    serverApiKey: "", // NOVO: Senha de comunicação entre MTA e Site
+    licenseKey: "", // CORRIGIDO PARA O NOME DO SCHEMA
     slug: "", 
   });
 
-  // CARREGAMENTO SEGURO
   useEffect(() => {
     async function loadIntegrations() {
       try {
@@ -31,7 +30,7 @@ export default function IntegrationsPage() {
           const data = await res.json();
           setForm({
             mpAccessToken: data.mpAccessToken || "",
-            serverApiKey: data.serverApiKey || "", // NOVO CAMPO
+            licenseKey: data.licenseKey || "", // CORRIGIDO AQUI
             slug: data.slug || "",
           });
         }
@@ -75,7 +74,6 @@ export default function IntegrationsPage() {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
-      {/* HEADER TÉCNICO */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-10">
         <div>
           <div className="flex items-center gap-2 text-orange-500 mb-2">
@@ -109,7 +107,6 @@ export default function IntegrationsPage() {
               </div>
             </div>
             
-            {/* BOTÃO DIRETO PRO PAINEL DO MERCADO PAGO */}
             <a 
               href="https://www.mercadopago.com.br/developers/panel/app" 
               target="_blank" 
@@ -155,7 +152,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        {/* CARD 2: CONEXÃO COM O SERVIDOR (API KEY LUA) */}
+        {/* CARD 2: CONEXÃO COM O SERVIDOR (LICENSE KEY LUA) */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-10">
             <div className="p-3 bg-orange-500/10 rounded-2xl text-orange-500">
@@ -169,18 +166,17 @@ export default function IntegrationsPage() {
 
           <div className="space-y-8">
             
-            {/* NOVO CAMPO: TOKEN DO SERVIDOR */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Token de Autorização (API Key)</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">License Key (Licença do Servidor)</label>
               <div className="relative group">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600">
                   <Key className="w-4 h-4" />
                 </div>
                 <input 
                   type={showServerToken ? "text" : "password"}
-                  value={form.serverApiKey} 
-                  onChange={(e) => setForm({...form, serverApiKey: e.target.value.replace(/\s+/g, '')})}
-                  placeholder="Crie uma senha forte (Ex: invictus_secret_2026)" 
+                  value={form.licenseKey} 
+                  onChange={(e) => setForm({...form, licenseKey: e.target.value.replace(/\s+/g, '')})}
+                  placeholder="Sua chave de licença única" 
                   className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-14 pr-14 text-sm focus:border-orange-500 outline-none text-white font-mono transition-all"
                 />
                 <button 
@@ -191,7 +187,7 @@ export default function IntegrationsPage() {
                 </button>
               </div>
               <p className="text-[10px] text-zinc-500 leading-relaxed italic ml-1">
-                Crie uma senha segura. Você precisará colocar essa exata senha dentro do arquivo <code className="text-orange-400 bg-orange-400/10 px-1 py-0.5 rounded">config.lua</code> do seu MTA para o servidor ter permissão de acessar suas vendas.
+                Você precisará colocar essa exata chave de licença dentro do arquivo <code className="text-orange-400 bg-orange-400/10 px-1 py-0.5 rounded">config.lua</code> do seu MTA para o servidor ter permissão de acessar suas vendas.
               </p>
             </div>
 
