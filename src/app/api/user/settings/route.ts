@@ -1,74 +1,103 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth"; // Certifique-se que o caminho está correto para o seu projeto
 import { prisma } from "@/lib/prisma";
 
-export async function GET(req: Request) {
+// ============================================================
+// 📥 GET: BUSCA AS CONFIGURAÇÕES ATUAIS PARA O DASHBOARD
+// ============================================================
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const slug = searchParams.get("slug");
+    const session = await getServerSession(authOptions);
 
-    if (!slug) {
-      return NextResponse.json({ error: "Slug não fornecido" }, { status: 400 });
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    // Visão de Analista: Usamos SELECT para garantir que NUNCA enviaremos dados sensíveis
-    const store = await prisma.user.findUnique({
-      where: { 
-        slug: slug.toLowerCase().trim() 
-      },
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
       select: {
-        // CAMPOS PÚBLICOS (Seguros)
-        id: true,
+        slug: true,
         serverName: true,
+        navbarName: true,
+        footerName: true,
         slogan: true,
-        description: true, // <--- ADICIONADO PARA O TEXTO DE APRESENTAÇÃO
-        serverIp: true,    // <--- ADICIONADO PARA O CONTADOR DE JOGADORES DO MTA
+        description: true,
+        serverIp: true,
         primaryColor: true,
         logoUrl: true,
         heroImageUrl: true,
-        isMaintenance: true, // IMPORTANTE: Para o martelo aparecer!
-        termsContent: true,
-        
-        // --- ADICIONADOS PARA O SHOPLAYOUT FUNCIONAR ---
-        navbarName: true,
-        footerName: true,
         discordUrl: true,
         instagramUrl: true,
         youtubeUrl: true,
-        // -----------------------------------------------
-
-        // RELAÇÕES (Incluindo apenas o necessário de cada uma)
-        products: {
-          where: { active: true },
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            price: true,
-            category: true,
-            image: true,
-            icon: true,
-          }
-        },
-        rules: true,
-        ranks: true,
-        
-        // ⚠️ NUNCA COLOQUE password, email OU mpAccessToken AQUI!
+        isMaintenance: true,
       }
     });
 
-    if (!store) {
-      return NextResponse.json({ error: "Loja não encontrada" }, { status: 404 });
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("ERRO_GET_SETTINGS:", error);
+    return NextResponse.json({ error: "Erro ao carregar dados" }, { status: 500 });
+  }
+}
+
+// ============================================================
+// ✍️ PATCH: SALVA AS ALTERAÇÕES VINDAS DO DASHBOARD
+// ============================================================
+export async function PATCH(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    // Verificação de Segurança de Analista
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Sessão expirada ou inválida" }, { status: 401 });
     }
 
-    // Visão de ADS: Cache de borda para carregar mais rápido na Vercel
-    return NextResponse.json(store, {
-        headers: {
-            "Cache-Control": "public, s-maxage=10, stale-while-revalidate=59"
-        }
+    const body = await req.json();
+    const updateData: any = {};
+
+    // Mapeamento de campos para garantir que o Prisma receba tudo corretamente
+    if (body.serverName !== undefined) updateData.serverName = body.serverName;
+    if (body.navbarName !== undefined) updateData.navbarName = body.navbarName;
+    if (body.footerName !== undefined) updateData.footerName = body.footerName;
+    if (body.slogan !== undefined) updateData.slogan = body.slogan;
+    if (body.description !== undefined) updateData.description = body.description;
+    if (body.serverIp !== undefined) updateData.serverIp = body.serverIp;
+    if (body.primaryColor !== undefined) updateData.primaryColor = body.primaryColor;
+    if (body.logoUrl !== undefined) updateData.logoUrl = body.logoUrl;
+    if (body.heroImageUrl !== undefined) updateData.heroImageUrl = body.heroImageUrl;
+    if (body.discordUrl !== undefined) updateData.discordUrl = body.discordUrl;
+    if (body.instagramUrl !== undefined) updateData.instagramUrl = body.instagramUrl;
+    if (body.youtubeUrl !== undefined) updateData.youtubeUrl = body.youtubeUrl;
+    if (body.isMaintenance !== undefined) updateData.isMaintenance = body.isMaintenance;
+
+    // Lógica de proteção do SLUG (Não permite salvar vazio para não quebrar a URL da loja)
+    if (body.slug) {
+      const newSlug = body.slug.trim().toLowerCase();
+      if (newSlug.length > 0) {
+        updateData.slug = newSlug;
+      }
+    }
+
+    // Executa a atualização no banco de dados (usando a DIRECT_URL via Pooler no servidor)
+    const updatedUser = await prisma.user.update({
+      where: { email: session.user.email },
+      data: updateData,
     });
+
+    return NextResponse.json({
+      message: "Configurações atualizadas com sucesso!",
+      user: updatedUser
+    });
+
+  } catch (error: any) {
+    console.error("ERRO_PATCH_SETTINGS:", error);
     
-  } catch (error) {
-    console.error("ERRO_FETCH_SHOP_CONFIG:", error);
-    return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });
+    // Se tentar usar um slug que já existe em outro usuário
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: "Este link (slug) já está sendo usado por outra loja." }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Erro interno ao salvar no banco de dados." }, { status: 500 });
   }
 }
