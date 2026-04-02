@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { GameDig } from "gamedig";
 
 export async function GET(req: Request) {
-  // Pega o IP que o front-end enviou na URL (ex: ?ip=192.168.1.1:22003)
   const { searchParams } = new URL(req.url);
   const ipParam = searchParams.get("ip");
 
@@ -11,30 +9,30 @@ export async function GET(req: Request) {
   }
 
   try {
-    // Separa o IP da porta. Se o dono não colocar porta, usamos a padrão do MTA (22003)
     const [host, portStr] = ipParam.split(":");
     const port = portStr ? parseInt(portStr, 10) : 22003;
 
-    // Faz a consulta via UDP no servidor do cliente
-    const state = await GameDig.query({
-      type: 'mtasa',
-      host: host,
-      port: port,
-      maxAttempts: 2, // Tenta 2 vezes antes de desistir
-      socketTimeout: 2000 // Espera no máximo 2 segundos para não travar a página
-    });
+    // 🔴 COLOQUE AQUI A URL DA SUA API HOSPEDADA
+    // Exemplo: https://sua-api-mta.onrender.com
+    const API_URL = `https://URL_DA_API/api/server?ip=${host}&port=${port}`;
 
-    // Retorna os dados formatados do jeito que o nosso page.tsx espera
+    // Faz o fetch via HTTP (Permitido pela Vercel)
+    // O 'revalidate: 15' garante que o Next faça cache por 15 segundos para não spammar a API
+    const res = await fetch(API_URL, { next: { revalidate: 15 } });
+    
+    if (!res.ok) throw new Error("Falha na API externa");
+    
+    const data = await res.json();
+
     return NextResponse.json({
-      isOnline: true,
-      players: state.players.length || parseInt(state.raw.numplayers),
-      maxPlayers: parseInt(state.maxplayers),
-      ping: state.ping
+      isOnline: true, // Ou verifique o campo de status da API (ex: data.online)
+      players: data.players || 0,
+      maxPlayers: data.maxPlayers || 0,
+      ping: data.ping || 0
     });
 
   } catch (error) {
-    // Se o servidor estiver offline, reiniciando ou com IP errado, cai aqui.
-    // Retornamos status 200 para o front-end não dar erro vermelho, apenas mostrar "Offline".
+    // Se a API estiver offline, cai no catch graciosamente
     return NextResponse.json({
       isOnline: false,
       players: 0,

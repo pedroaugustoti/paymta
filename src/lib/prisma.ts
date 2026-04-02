@@ -14,12 +14,13 @@ if (!connectionString) {
   throw new Error("A variável DATABASE_URL não foi definida no seu .env");
 }
 
-// 3. Inicialização do Singleton com limite de Pool
+// 3. Inicialização do Singleton
 const createPrismaClient = () => {
   const pool = new Pool({ 
     connectionString,
-    max: process.env.NODE_ENV === "development" ? 2 : 10, // Limita no Dev para não estourar o banco
-    idleTimeoutMillis: 30000, // Fecha conexões inativas após 30 segundos
+    // O pulo do gato para a Vercel:
+    max: process.env.NODE_ENV === "development" ? 2 : 1, 
+    idleTimeoutMillis: 30000, 
   });
   
   const adapter = new PrismaPg(pool);
