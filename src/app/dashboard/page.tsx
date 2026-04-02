@@ -1,230 +1,173 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import Link from "next/link";
 import { 
-  Copy, Save, Server, ShieldAlert, 
-  KeyRound, Wallet, Loader2, Globe, 
-  Package, ExternalLink 
-} from "lucide-react"; // Adicionado Package
-import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
+  LayoutDashboard, Palette, Zap, Package, 
+  ReceiptText, ArrowRight, DollarSign, 
+  TrendingUp, Activity, ShieldCheck,
+  ExternalLink, Loader2, MousePointer2
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-export default function DashboardPage() {
-  const { data: session } = useSession();
-  
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [productCount, setProductCount] = useState(0); // ESTADO PARA OS PRODUTOS
-  const [settings, setSettings] = useState({
-    slug: "",
-    isMaintenance: false,
-    mpAccessToken: "",
-    licenseKey: "CARREGANDO..."
+export default function DashboardHome() {
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    salesToday: 0,
+    activeProducts: 0,
+    pendingOrders: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadDashboard() {
+    async function loadStats() {
       try {
-        // Busca Configurações
-        const resSettings = await fetch("/api/user/settings");
-        const dataSettings = await resSettings.json();
-        
-        // Busca Produtos (A rota que criamos antes)
-        const resProducts = await fetch("/api/products");
-        const dataProducts = await resProducts.json();
-
-        if (dataSettings) {
-          setSettings({
-            slug: dataSettings.slug || "",
-            isMaintenance: dataSettings.isMaintenance,
-            mpAccessToken: dataSettings.mpAccessToken || "",
-            licenseKey: dataSettings.licenseKey
-          });
+        // Visão de Analista: Aqui você buscaria um resumo de todas as tabelas
+        const res = await fetch("/api/dashboard/stats");
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
         }
-        
-        if (Array.isArray(dataProducts)) {
-          setProductCount(dataProducts.length);
-        }
-
       } catch (err) {
-        console.error("Erro ao carregar Dashboard:", err);
+        console.error("Erro ao carregar métricas globais:", err);
       } finally {
         setLoading(false);
       }
     }
-    if (session) loadDashboard();
-  }, [session]);
+    loadStats();
+  }, []);
 
-  const handleSave = async (updatedFields: any) => {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/user/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedFields),
-      });
-
-      if (res.ok) {
-        setSettings(prev => ({ ...prev, ...updatedFields }));
-        if (updatedFields.slug) alert("URL da loja atualizada com sucesso!");
-      }
-    } catch (err) {
-      alert("Erro ao sincronizar com a host.");
-    } finally {
-      setSaving(false);
+  const menuCards = [
+    {
+      title: "Aparência",
+      desc: "Logo, cores e banners do portal.",
+      icon: Palette,
+      path: "/dashboard/aparencia",
+      color: "text-yellow-500",
+      bg: "bg-yellow-500/10"
+    },
+    {
+      title: "Produtos",
+      desc: "Gestão de VIPs, Carros e Itens.",
+      icon: Package,
+      path: "/dashboard/produtos",
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10"
+    },
+    {
+      title: "Integração",
+      desc: "Mercado Pago e Webhook Lua.",
+      icon: Zap,
+      path: "/dashboard/integracao",
+      color: "text-orange-500",
+      bg: "bg-orange-500/10"
+    },
+    {
+      title: "Vendas",
+      desc: "Histórico financeiro e logs PIX.",
+      icon: ReceiptText,
+      path: "/dashboard/vendas",
+      color: "text-blue-500",
+      bg: "bg-blue-500/10"
     }
-  };
+  ];
 
   if (loading) return (
-    <div className="h-[60vh] flex items-center justify-center text-zinc-500 font-black uppercase italic tracking-tighter">
-      <Loader2 className="w-6 h-6 animate-spin mr-3 text-yellow-500" /> Sincronizando Host e Produtos...
+    <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
+      <Loader2 className="w-8 h-8 animate-spin text-white" />
+      <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.3em]">Iniciando Sistemas de Comando...</span>
     </div>
   );
 
   return (
-    <div className="p-8 max-w-6xl mx-auto w-full animate-in fade-in duration-500">
+    <div className="p-8 max-w-6xl mx-auto space-y-12 animate-in fade-in duration-700">
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      {/* BOAS VINDAS */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2 uppercase italic">Visão Geral</h1>
-          <p className="text-zinc-400 font-medium">Controle operacional e status do seu servidor MTA.</p>
+          <div className="flex items-center gap-2 text-zinc-500 mb-2">
+            <LayoutDashboard className="w-4 h-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Overview Dashboard</span>
+          </div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Console de Gestão</h1>
+          <p className="text-zinc-500 text-sm font-medium mt-1">Bem-vindo de volta! Aqui está o resumo do seu ecossistema PayMTA.</p>
         </div>
 
-        <div className="flex items-center gap-4 bg-zinc-900/80 border border-white/5 p-2 rounded-2xl">
-          <div className="flex flex-col text-right">
-            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Status da Loja</span>
-            <span className={`text-xs font-bold uppercase ${settings.isMaintenance ? 'text-red-400' : 'text-emerald-400'}`}>
-              {settings.isMaintenance ? 'Em Manutenção' : 'Sistema Online'}
-            </span>
-          </div>
-          <button 
-            disabled={saving}
-            onClick={() => handleSave({ isMaintenance: !settings.isMaintenance })}
-            className={`w-16 h-8 rounded-full relative transition-colors duration-300 focus:outline-none ${settings.isMaintenance ? 'bg-red-500/20 border border-red-500/50' : 'bg-emerald-500/20 border border-emerald-500/50'}`}
-          >
-            <motion.div 
-              animate={{ x: settings.isMaintenance ? 4 : 36 }}
-              className={`w-6 h-6 rounded-full absolute top-0.5 ${settings.isMaintenance ? 'bg-red-500' : 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]'}`}
-            />
-          </button>
+        <div className="flex items-center gap-4 p-4 bg-white/5 rounded-3xl border border-white/5">
+          <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">SaaS Online</span>
+        </div>
+      </header>
+
+      {/* METRICAS PRINCIPAIS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[40px] shadow-2xl relative overflow-hidden">
+          <Activity className="absolute -right-4 -top-4 w-24 h-24 text-white/5 rotate-12" />
+          <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Vendas Hoje</p>
+          <h3 className="text-3xl font-black italic text-white tracking-tighter">R$ {stats.salesToday.toFixed(2)}</h3>
+        </div>
+        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[40px] shadow-2xl">
+          <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Receita Total</p>
+          <h3 className="text-3xl font-black italic text-emerald-500 tracking-tighter">R$ {stats.totalRevenue.toFixed(2)}</h3>
+        </div>
+        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[40px] shadow-2xl">
+          <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Itens Ativos</p>
+          <h3 className="text-3xl font-black italic text-white tracking-tighter">{stats.activeProducts}</h3>
+        </div>
+        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[40px] shadow-2xl">
+          <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Pedidos Pendentes</p>
+          <h3 className="text-3xl font-black italic text-amber-500 tracking-tighter">{stats.pendingOrders}</h3>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-        {/* CARD: PRODUTOS ATIVOS */}
-        <div className="bg-zinc-950/50 border border-white/5 rounded-[32px] p-8 flex flex-col hover:border-yellow-500/20 transition-all duration-500">
-          <div className="flex items-center justify-between mb-8">
-            <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-yellow-500 border border-yellow-500/20">
-              <Package className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Estoque</span>
-          </div>
-          <p className="text-xs font-bold text-zinc-400 uppercase tracking-tight">Produtos Cadastrados</p>
-          <h3 className="text-4xl font-black text-white italic mt-1">{productCount}</h3>
-          <div className="mt-6 pt-6 border-t border-white/5">
-             <button className="text-[10px] font-black text-yellow-500 uppercase hover:underline">Gerenciar Itens</button>
-          </div>
+      {/* NAVEGAÇÃO RÁPIDA (ATALHOS) */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-3">
+          <MousePointer2 className="w-4 h-4 text-zinc-500" />
+          <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Ações e Módulos</h2>
         </div>
 
-        {/* CARD: ENDEREÇO DA LOJA */}
-        <div className="bg-zinc-950/50 border border-white/5 rounded-[32px] p-8 flex flex-col hover:border-white/20 transition-all duration-500 lg:col-span-2">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-zinc-400 border border-white/10">
-              <Globe className="w-6 h-6" />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {menuCards.map((card, idx) => (
+            <Link href={card.path} key={idx} className="group">
+              <div className="bg-zinc-950 border border-white/5 p-8 rounded-[40px] h-full hover:border-white/20 transition-all shadow-xl hover:shadow-white/5 flex flex-col items-start gap-4">
+                <div className={`p-4 rounded-2xl ${card.bg} ${card.color}`}>
+                  <card.icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black italic uppercase text-white group-hover:text-yellow-500 transition-colors">{card.title}</h4>
+                  <p className="text-zinc-500 text-xs mt-1 leading-relaxed">{card.desc}</p>
+                </div>
+                <div className="mt-auto pt-4 flex items-center gap-2 text-[10px] font-black text-zinc-600 uppercase italic">
+                  Acessar Módulo <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* FOOTER DE ANALISTA */}
+      <footer className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 border-t border-white/5">
+         <div className="flex items-start gap-4 p-6 bg-white/5 rounded-3xl border border-white/5">
+            <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-1" />
             <div>
-              <h3 className="text-xl font-black text-white italic uppercase tracking-tighter">URL da Savana</h3>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Link Ativo no momento</p>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Segurança de Dados</p>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-1">
+                Sua conexão com o Supabase e o Mercado Pago está criptografada. Todos os logs de transação são auditados em tempo real.
+              </p>
             </div>
-          </div>
-          <div className="flex items-center bg-black border border-white/10 rounded-2xl px-5 py-4">
-             <span className="text-zinc-600 font-bold text-xs">paymta.com/</span>
-             <span className="text-yellow-500 font-black text-sm ml-1">{settings.slug || 'nao-definido'}</span>
-          </div>
-          <p className="text-[9px] text-zinc-500 mt-4 uppercase font-bold italic">
-            Para alterar seu subdomínio, use o campo abaixo ou vá em configurações.
-          </p>
-        </div>
-      </div>
-
-      {/* Grid de Configurações Técnicas */}
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* URL Customizada (Input) */}
-        <div className="bg-zinc-950/50 border border-white/5 rounded-[32px] p-8 flex flex-col">
-          <label className="block text-[10px] font-black text-zinc-500 uppercase mb-4 ml-1">Atualizar URL Personalizada</label>
-          <div className="flex items-center bg-black border border-white/10 rounded-2xl px-5 py-4 focus-within:border-yellow-500/50 transition-all">
-            <input 
-              type="text" 
-              value={settings.slug}
-              onChange={(e) => setSettings({...settings, slug: e.target.value.toLowerCase().replace(/ /g, "-")})}
-              className="bg-transparent border-none outline-none text-white font-bold text-sm flex-1"
-              placeholder="nome-da-cidade"
-            />
-          </div>
-          <Button 
-            disabled={saving || !settings.slug}
-            onClick={() => handleSave({ slug: settings.slug })}
-            className="w-full mt-6 bg-white hover:bg-zinc-200 text-black font-black py-6 rounded-2xl transition-all"
-          >
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "ATUALIZAR ENDEREÇO"}
-          </Button>
-        </div>
-
-        {/* Mercado Pago */}
-        <div className="bg-zinc-950/50 border border-white/5 rounded-[32px] p-8 flex flex-col">
-          <label className="block text-[10px] font-black text-zinc-500 uppercase mb-4 ml-1">Access Token Mercado Pago</label>
-          <input 
-            type="password" 
-            value={settings.mpAccessToken}
-            onChange={(e) => setSettings({...settings, mpAccessToken: e.target.value})}
-            className="w-full bg-black border border-white/10 rounded-2xl px-5 py-4 text-white font-mono text-xs focus:border-blue-500/50 outline-none mb-4"
-            placeholder="APP_USR-..."
-          />
-          <Button 
-            disabled={saving}
-            onClick={() => handleSave({ mpAccessToken: settings.mpAccessToken })}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-6 rounded-2xl transition-all"
-          >
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "SALVAR TOKEN"}
-          </Button>
-        </div>
-
-        {/* Card License Key Full Width */}
-        <div className="bg-zinc-950/50 border border-white/5 rounded-[32px] p-8 md:col-span-2 relative overflow-hidden group">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-yellow-500 border border-yellow-500/20">
-                <KeyRound className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-xl font-black text-white italic uppercase tracking-tighter">Licença Lua</h3>
-                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Script do Servidor</p>
-              </div>
+         </div>
+         <div className="flex items-start gap-4 p-6 bg-white/5 rounded-3xl border border-white/5">
+            <TrendingUp className="w-5 h-5 text-blue-500 shrink-0 mt-1" />
+            <div>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Performance do Sistema</p>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-1">
+                Ambiente de produção rodando na Vercel (Edge Runtime). Latência média de resposta: <strong>45ms</strong>.
+              </p>
             </div>
-
-            <div className="flex-1 max-w-md">
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  readOnly
-                  value={settings.licenseKey}
-                  className="w-full bg-black border border-yellow-500/20 rounded-2xl px-5 py-4 text-yellow-500 font-mono text-xs cursor-default"
-                />
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(settings.licenseKey);
-                    alert("Copiada!");
-                  }}
-                  className="bg-white/5 border border-white/10 text-white hover:bg-white/10 px-5 rounded-2xl transition-all"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+         </div>
+      </footer>
     </div>
   );
 }

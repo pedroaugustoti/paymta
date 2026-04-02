@@ -1,185 +1,209 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Package, Plus, Trash2, Tag, DollarSign, Loader2, ImageIcon, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion"; // Adicione esta linha
+import { 
+  Plus, Package, Tag, DollarSign, 
+  Trash2, Edit3, Loader2, Image as ImageIcon,
+  CheckCircle2, AlertCircle, X, Search
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function ProdutosPage() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+interface Produto {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+  active: boolean;
+}
 
-  // ESTADO DO FORMULÁRIO COM O CAMPO IMAGE
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Produto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  
   const [form, setForm] = useState({
+    id: "",
     name: "",
     description: "",
     price: "",
     category: "vips",
-    icon: "gem",
-    image: "" // Campo para a URL da foto
+    image: "",
   });
 
-  const loadProducts = async () => {
-    try {
-      const res = await fetch("/api/products");
-      if (res.ok) setProducts(await res.json());
-    } catch (err) {
-      console.error("Erro ao carregar produtos:", err);
-    } finally {
-      setFetching(false);
-    }
-  };
-
-  useEffect(() => { loadProducts(); }, []);
-
-  const handleAddProduct = async () => {
-    if (!form.name || !form.price) return alert("Nome e preço são obrigatórios!");
-    
+  // 1. CARREGAR PRODUTOS (Visão de Analista: Sincronização em tempo real)
+  async function loadProducts() {
     setLoading(true);
     try {
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-
+      const res = await fetch("/api/products");
       if (res.ok) {
-        setShowModal(false);
-        setForm({ name: "", description: "", price: "", category: "vips", icon: "gem", image: "" });
-        loadProducts();
+        const data = await res.json();
+        setProducts(data);
       }
-    } catch (error) {
-      alert("Erro ao cadastrar produto.");
+    } catch (err) {
+      console.error("Erro ao buscar inventário:", err);
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => { loadProducts(); }, []);
+
+  // 2. SALVAR / EDITAR
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const method = form.id ? "PATCH" : "POST";
+    
+    try {
+      const res = await fetch("/api/products", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (res.ok) {
+        setIsModalOpen(false);
+        setForm({ id: "", name: "", description: "", price: "", category: "vips", image: "" });
+        loadProducts();
+      }
+    } catch (err) {
+      alert("Erro ao processar produto.");
+    }
   };
 
-  if (fetching) return (
-    <div className="flex items-center justify-center h-screen text-zinc-500 font-black uppercase italic tracking-tighter">
-      <Loader2 className="w-5 h-5 animate-spin text-yellow-500 mr-2" /> Sincronizando Estoque...
+  // 3. EXCLUIR
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover este item do catálogo?")) return;
+    await fetch(`/api/products?id=${id}`, { method: "DELETE" });
+    loadProducts();
+  };
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading && products.length === 0) return (
+    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+      <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+      <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-tighter">Sincronizando Inventário...</span>
     </div>
   );
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <header className="flex justify-between items-center">
+    <div className="p-8 max-w-6xl mx-auto space-y-10 animate-in fade-in duration-700">
+      
+      {/* HEADER E BUSCA */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-black italic uppercase tracking-tighter">Produtos & Vips</h1>
-          <p className="text-zinc-500 text-sm">Gerencie os itens da sua loja savana.</p>
+          <div className="flex items-center gap-2 text-emerald-500 mb-2">
+            <Package className="w-4 h-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Gestão de Catálogo</span>
+          </div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Produtos</h1>
         </div>
-        <Button 
-          onClick={() => setShowModal(true)}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-2xl px-6 py-6 shadow-[0_0_20px_rgba(234,179,8,0.2)] transition-all active:scale-95"
-        >
-          <Plus className="w-5 h-5 mr-2" /> NOVO PRODUTO
-        </Button>
+
+        <div className="flex w-full md:w-auto gap-4">
+           <div className="relative flex-1 md:w-64">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input 
+                type="text" placeholder="Filtrar itens..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-zinc-900 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-xs focus:border-yellow-500 outline-none text-white"
+              />
+           </div>
+           <Button 
+            onClick={() => { setForm({ id: "", name: "", description: "", price: "", category: "vips", image: "" }); setIsModalOpen(true); }}
+            className="bg-white hover:bg-zinc-200 text-black font-black px-8 py-7 rounded-2xl flex items-center gap-2 shadow-xl active:scale-95 transition-all"
+           >
+            <Plus className="w-5 h-5" /> NOVO ITEM
+           </Button>
+        </div>
       </header>
 
       {/* GRID DE PRODUTOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.length === 0 ? (
-          <div className="col-span-full py-20 border-2 border-dashed border-white/5 rounded-[40px] flex flex-col items-center justify-center text-zinc-600">
-            <Package className="w-12 h-12 mb-4 opacity-20" />
-            <p className="font-bold uppercase italic tracking-widest text-xs">Nenhum produto cadastrado</p>
-          </div>
-        ) : (
-          products.map((p: any) => (
-            <div key={p.id} className="bg-zinc-950 border border-white/5 rounded-[32px] overflow-hidden group hover:border-yellow-500/30 transition-all duration-500">
-              {/* FOTO DO PRODUTO */}
-              <div className="h-48 bg-zinc-900 relative overflow-hidden">
-                {p.image ? (
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-zinc-800 italic font-black uppercase text-[10px]">Sem Imagem</div>
-                )}
-                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase text-yellow-500 border border-yellow-500/20">
-                  {p.category}
-                </div>
+        {filteredProducts.map((product) => (
+          <div key={product.id} className="bg-zinc-950/50 border border-white/5 rounded-[32px] overflow-hidden group hover:border-yellow-500/30 transition-all shadow-2xl">
+            <div className="h-40 bg-zinc-900 relative">
+              {product.image ? (
+                <img src={product.image} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt={product.name} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-zinc-800"><ImageIcon className="w-10 h-10" /></div>
+              )}
+              <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black uppercase text-yellow-500 border border-yellow-500/20">
+                {product.category}
               </div>
-
-              <div className="p-6">
-                <h3 className="font-black text-xl uppercase italic tracking-tighter text-white mb-2">{p.name}</h3>
-                <p className="text-zinc-500 text-xs line-clamp-2 mb-6 font-medium leading-relaxed">{p.description}</p>
-                
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Preço Unitário</span>
-                    <span className="text-2xl font-black text-white italic">R$ {p.price.toFixed(2)}</span>
-                  </div>
-                  <button className="p-3 rounded-xl bg-red-500/5 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 transition-all">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+            </div>
+            
+            <div className="p-6">
+              <h3 className="text-lg font-black text-white uppercase italic truncate">{product.name}</h3>
+              <p className="text-zinc-500 text-[11px] line-clamp-2 mt-1 mb-6 leading-relaxed font-medium">{product.description}</p>
+              
+              <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                <span className="text-2xl font-black italic text-white">R$ {product.price.toFixed(2)}</span>
+                <div className="flex gap-2">
+                <button 
+                  onClick={() => { 
+                    setForm({ 
+                      ...product, 
+                      price: product.price.toString(), 
+                      image: product.image || "" // O "||" garante que se for undefined, vira uma string vazia
+                    }); 
+                    setIsModalOpen(true); 
+                  }}
+                  className="p-3 bg-white/5 rounded-xl hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => handleDelete(product.id)}
+                  className="p-3 bg-red-500/5 rounded-xl hover:bg-red-500/20 text-red-900 hover:text-red-500 transition-all"
+                  title="Excluir produto"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
                 </div>
               </div>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
 
-      {/* MODAL DE CADASTRO */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-zinc-950 border border-white/10 p-8 rounded-[40px] max-w-lg w-full shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 blur-[50px] -z-10"></div>
-            
-            <header className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-                <Tag className="text-yellow-500 w-6 h-6" /> Cadastrar Item
-              </h2>
-              <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:text-white"><X /></button>
-            </header>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-[10px] font-black text-zinc-500 uppercase ml-1 mb-2 block">Nome do Produto</label>
-                <input 
-                  placeholder="Ex: VIP OURO 30 DIAS" 
-                  className="w-full bg-black border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-yellow-500 transition-all"
-                  value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                />
+      {/* MODAL DE CADASTRO/EDIÇÃO */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md bg-black/60">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#0c0c0c] border border-white/10 w-full max-w-2xl rounded-[48px] shadow-3xl overflow-hidden">
+            <div className="p-10">
+              <div className="flex justify-between items-center mb-10">
+                <h2 className="text-3xl font-black italic uppercase tracking-tighter">{form.id ? "Editar Item" : "Novo Produto"}</h2>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-zinc-500"><X /></button>
               </div>
 
-              <div>
-                <label className="text-[10px] font-black text-zinc-500 uppercase ml-1 mb-2 block">Link da Foto (Imgur/Discord)</label>
-                <div className="relative">
-                  <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                  <input 
-                    placeholder="https://i.imgur.com/..." 
-                    className="w-full bg-black border border-white/10 py-4 pl-12 pr-4 rounded-2xl text-sm outline-none focus:border-yellow-500 transition-all"
-                    value={form.image} onChange={e => setForm({...form, image: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black text-zinc-500 uppercase ml-1 mb-2 block">Descrição dos Benefícios</label>
-                <textarea 
-                  placeholder="Liste o que o jogador ganha..." 
-                  className="w-full bg-black border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-yellow-500 h-28 resize-none"
-                  value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-black text-zinc-500 uppercase ml-1 mb-2 block">Valor (BRL)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+              <form onSubmit={handleSave} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Nome do Pacote</label>
                     <input 
-                      type="number" placeholder="0.00"
-                      className="w-full bg-black border border-white/10 py-4 pl-10 pr-4 rounded-2xl text-sm outline-none focus:border-yellow-500"
-                      value={form.price} onChange={e => setForm({...form, price: e.target.value})}
+                      required type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+                      placeholder="Ex: VIP DIAMANTE" className="w-full bg-black border border-white/10 rounded-2xl p-4 text-sm focus:border-yellow-500 outline-none text-white font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Preço (R$)</label>
+                    <input 
+                      required type="number" step="0.01" value={form.price} onChange={e => setForm({...form, price: e.target.value})}
+                      placeholder="49.90" className="w-full bg-black border border-white/10 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none text-white font-mono"
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="text-[10px] font-black text-zinc-500 uppercase ml-1 mb-2 block">Categoria</label>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Categoria na Loja</label>
                   <select 
-                    className="w-full bg-black border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-yellow-500 text-zinc-400 appearance-none cursor-pointer"
-                    value={form.category} 
-                    onChange={e => setForm({...form, category: e.target.value})}
+                    value={form.category} onChange={e => setForm({...form, category: e.target.value})}
+                    className="w-full bg-black border border-white/10 rounded-2xl p-4 text-sm focus:border-yellow-500 outline-none text-zinc-400 appearance-none cursor-pointer"
                   >
                     <option value="vips">VIPS</option>
                     <option value="veiculos">VEÍCULOS</option>
@@ -189,25 +213,31 @@ export default function ProdutosPage() {
                     <option value="outros">OUTROS</option>
                   </select>
                 </div>
-              </div>
-            </div>
 
-            <div className="flex gap-4 mt-10">
-              <Button 
-                onClick={() => setShowModal(false)} 
-                className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 font-bold rounded-2xl py-7"
-              >
-                CANCELAR
-              </Button>
-              <Button 
-                onClick={handleAddProduct} 
-                disabled={loading} 
-                className="flex-1 bg-white hover:bg-zinc-200 text-black font-black rounded-2xl py-7"
-              >
-                {loading ? <Loader2 className="animate-spin" /> : "CADASTRAR ITEM"}
-              </Button>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Descrição Breve</label>
+                  <textarea 
+                    rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+                    placeholder="O que o jogador ganha ao comprar?" className="w-full bg-black border border-white/10 rounded-2xl p-4 text-sm focus:border-yellow-500 outline-none text-zinc-300 min-h-[80px]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">URL da Imagem Ilustrativa</label>
+                  <input 
+                    type="text" value={form.image} onChange={e => setForm({...form, image: e.target.value})}
+                    placeholder="Link do Imgur ou Discord" className="w-full bg-black border border-white/10 rounded-2xl p-4 text-sm focus:border-purple-500 outline-none text-white"
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <Button type="submit" className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-black py-8 rounded-[24px] text-lg shadow-xl shadow-yellow-500/10 uppercase italic">
+                    {form.id ? "SALVAR ALTERAÇÕES" : "CRIAR PRODUTO NO BANCO"}
+                  </Button>
+                </div>
+              </form>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

@@ -10,26 +10,53 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Slug não fornecido" }, { status: 400 });
     }
 
-    // Buscamos o usuário pelo slug e trazemos os produtos vinculados
-    const config = await prisma.user.findUnique({
+    // Visão de Analista: Usamos SELECT para garantir que NUNCA enviaremos dados sensíveis
+    const store = await prisma.user.findUnique({
       where: { 
-        slug: slug.toLowerCase().trim() // Blindagem contra espaços ou letras maiúsculas
+        slug: slug.toLowerCase().trim() 
       },
-      include: { 
+      select: {
+        // CAMPOS PÚBLICOS (Seguros)
+        id: true,
+        serverName: true,
+        slogan: true,
+        primaryColor: true,
+        logoUrl: true,
+        heroImageUrl: true,
+        isMaintenance: true, // IMPORTANTE: Para o martelo aparecer!
+        termsContent: true,
+
+        // RELAÇÕES (Incluindo apenas o necessário de cada uma)
         products: {
-          where: { active: true } // Opcional: só traz produtos ativos
+          where: { active: true },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            category: true,
+            image: true,
+            icon: true,
+          }
         },
-        // Se você criou abas de regras ou ranks, pode dar include aqui também
         rules: true,
-        ranks: true 
+        ranks: true,
+        
+        // ⚠️ NUNCA COLOQUE password, email OU mpAccessToken AQUI!
       }
     });
 
-    if (!config) {
+    if (!store) {
       return NextResponse.json({ error: "Loja não encontrada" }, { status: 404 });
     }
 
-    return NextResponse.json(config);
+    // Visão de ADS: Cache de borda para carregar mais rápido na Vercel
+    return NextResponse.json(store, {
+        headers: {
+            "Cache-Control": "public, s-maxage=10, stale-while-revalidate=59"
+        }
+    });
+    
   } catch (error) {
     console.error("ERRO_FETCH_SHOP_CONFIG:", error);
     return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });

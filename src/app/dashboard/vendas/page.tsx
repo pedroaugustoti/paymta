@@ -1,114 +1,181 @@
 "use client";
 
-import { ArrowDownToLine, Search, Filter, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { 
+  ReceiptText, Search, Filter, 
+  CheckCircle2, Clock, XCircle, 
+  DollarSign, TrendingUp, Users,
+  ArrowUpRight, Download, Loader2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function VendasPage() {
-  // Mock data simulando o retorno do nosso banco de dados
-  const transacoes = [
-    { id: "TX-9871", jogador: "GamerPro99", item: "VIP Diamante", valor: "R$ 89,90", data: "Hoje, 14:32", status: "Aprovado" },
-    { id: "TX-9870", jogador: "ZezinSniper", item: "100k Dinheiro", valor: "R$ 15,00", data: "Hoje, 11:15", status: "Aprovado" },
-    { id: "TX-9869", jogador: "LucasMTA", item: "Carro Exclusivo", valor: "R$ 45,00", data: "Ontem, 22:40", status: "Pendente" },
-    { id: "TX-9868", jogador: "AnaClara", item: "VIP Ouro", valor: "R$ 49,90", data: "Ontem, 19:10", status: "Aprovado" },
-    { id: "TX-9867", jogador: "FelipeBR", item: "Desbanimento", valor: "R$ 30,00", data: "12 Mar, 08:22", status: "Recusado" },
-    { id: "TX-9866", jogador: "MTA_Lover", item: "VIP Prata", valor: "R$ 29,90", data: "11 Mar, 15:45", status: "Aprovado" },
-  ];
-
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "Aprovado":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-      case "Pendente":
-        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
-      case "Recusado":
-        return "bg-red-500/10 text-red-400 border-red-500/20";
-      default:
-        return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
-    }
+interface Venda {
+  id: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+  user: {
+    name: string;
   };
+  // Adicione aqui se tiver relação com o produto comprado
+}
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "Aprovado": return <CheckCircle2 className="w-3.5 h-3.5" />;
-      case "Pendente": return <Clock className="w-3.5 h-3.5" />;
-      case "Recusado": return <XCircle className="w-3.5 h-3.5" />;
-      default: return null;
+export default function SalesPage() {
+  const [sales, setSales] = useState<Venda[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    async function loadSales() {
+      try {
+        const res = await fetch("/api/sales");
+        if (res.ok) {
+          const data = await res.json();
+          setSales(data);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar vendas:", err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    loadSales();
+  }, []);
+
+  // Visão de Analista: Cálculos rápidos para os cards de KPI
+  const totalRevenue = sales
+    .filter(s => s.status === "approved")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const pendingCount = sales.filter(s => s.status === "pending").length;
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-tighter">Processando Transações...</span>
+    </div>
+  );
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full">
-      {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div className="p-8 max-w-6xl mx-auto space-y-10 animate-in fade-in duration-700">
+      
+      {/* HEADER E MÉTRICAS RÁPIDAS */}
+      <header className="space-y-8">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2">Histórico de Vendas</h1>
-          <p className="text-zinc-400 font-medium">Acompanhe todos os PIX recebidos e entregas no servidor.</p>
+          <div className="flex items-center gap-2 text-emerald-500 mb-2">
+            <ReceiptText className="w-4 h-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Fluxo de Caixa</span>
+          </div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Vendas & Pedidos</h1>
+          <p className="text-zinc-500 text-sm font-medium mt-1">Monitore em tempo real todos os pagamentos via PIX processados pelo Mercado Pago.</p>
         </div>
-        <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold py-5 rounded-xl transition-all flex items-center gap-2">
-          <ArrowDownToLine className="w-4 h-4" />
-          Exportar CSV
-        </Button>
-      </div>
 
-      {/* Barra de Ferramentas (Filtros e Busca) */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-          <input 
-            type="text" 
-            placeholder="Buscar por jogador, ID da transação ou item..." 
-            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl pl-12 pr-4 py-3.5 text-white font-medium text-sm focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/50 transition-all placeholder:text-zinc-600"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-zinc-950 border border-white/5 p-8 rounded-[32px] relative overflow-hidden group">
+            <DollarSign className="absolute -right-4 -top-4 w-24 h-24 text-emerald-500/10 rotate-12 group-hover:scale-110 transition-transform" />
+            <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Faturamento Aprovado</p>
+            <h3 className="text-3xl font-black italic text-white tracking-tighter">R$ {totalRevenue.toFixed(2)}</h3>
+            <div className="mt-4 flex items-center gap-2 text-[10px] text-emerald-500 font-bold uppercase italic">
+              <TrendingUp className="w-3 h-3" /> +12% em relação a ontem
+            </div>
+          </div>
+
+          <div className="bg-zinc-950 border border-white/5 p-8 rounded-[32px] relative overflow-hidden group">
+            <Clock className="absolute -right-4 -top-4 w-24 h-24 text-amber-500/10 rotate-12 group-hover:scale-110 transition-transform" />
+            <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Pedidos Pendentes</p>
+            <h3 className="text-3xl font-black italic text-white tracking-tighter">{pendingCount}</h3>
+            <p className="mt-4 text-[10px] text-zinc-500 font-bold uppercase italic">Aguardando compensação do PIX</p>
+          </div>
+
+          <div className="bg-zinc-950 border border-white/5 p-8 rounded-[32px] relative overflow-hidden group">
+            <Users className="absolute -right-4 -top-4 w-24 h-24 text-blue-500/10 rotate-12 group-hover:scale-110 transition-transform" />
+            <p className="text-[10px] font-black text-zinc-500 uppercase mb-2">Total de Clientes</p>
+            <h3 className="text-3xl font-black italic text-white tracking-tighter">{sales.length}</h3>
+            <p className="mt-4 text-[10px] text-zinc-500 font-bold uppercase italic">Histórico total de cadastros</p>
+          </div>
         </div>
-        <Button variant="outline" className="bg-zinc-900/50 border-white/5 text-zinc-300 hover:text-white hover:bg-white/5 py-6 px-6 rounded-xl flex items-center gap-2 font-bold">
-          <Filter className="w-4 h-4" />
-          Filtros
-        </Button>
-      </div>
+      </header>
 
-      {/* Tabela de Dados */}
-      <div className="bg-zinc-900/50 border border-white/5 rounded-[24px] overflow-hidden">
+      {/* TABELA DE VENDAS */}
+      <section className="bg-zinc-950/50 border border-white/5 rounded-[40px] shadow-2xl backdrop-blur-sm overflow-hidden">
+        <div className="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+          <h2 className="text-xl font-black italic uppercase text-white tracking-tighter">Histórico Recente</h2>
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <input 
+              type="text" placeholder="Buscar por Nickname..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-black border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-xs focus:border-emerald-500 outline-none text-white"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/5 bg-black/40 text-xs uppercase tracking-wider text-zinc-500 font-bold">
-                <th className="px-6 py-5">Transação</th>
-                <th className="px-6 py-5">Jogador (MTA)</th>
-                <th className="px-6 py-5">Item / Pacote</th>
-                <th className="px-6 py-5">Valor</th>
-                <th className="px-6 py-5">Data e Hora</th>
-                <th className="px-6 py-5">Status</th>
+              <tr className="bg-white/5">
+                <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">ID Pedido</th>
+                <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Jogador</th>
+                <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Valor</th>
+                <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Status</th>
+                <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Data/Hora</th>
+                <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {transacoes.map((tx) => (
-                <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors group">
-                  <td className="px-6 py-4">
-                    <span className="font-mono text-xs text-zinc-400 group-hover:text-yellow-400 transition-colors">{tx.id}</span>
-                  </td>
-                  <td className="px-6 py-4 font-bold text-white">{tx.jogador}</td>
-                  <td className="px-6 py-4 text-zinc-300 font-medium">{tx.item}</td>
-                  <td className="px-6 py-4 font-black text-white">{tx.valor}</td>
-                  <td className="px-6 py-4 text-sm text-zinc-400">{tx.data}</td>
-                  <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusStyle(tx.status)}`}>
-                      {getStatusIcon(tx.status)}
-                      {tx.status}
+              {sales.map((sale) => (
+                <tr key={sale.id} className="hover:bg-white/5 transition-colors group">
+                  <td className="p-6 text-[11px] font-mono text-zinc-400">#{sale.id.slice(-6).toUpperCase()}</td>
+                  <td className="p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-[10px] font-black text-white italic">
+                        {sale.user?.name?.substring(0, 2).toUpperCase()}
+                      </div>
+                      <span className="text-sm font-bold text-white">{sale.user?.name}</span>
                     </div>
+                  </td>
+                  <td className="p-6">
+                    <span className="text-sm font-black text-white italic">R$ {sale.amount.toFixed(2)}</span>
+                  </td>
+                  <td className="p-6">
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase italic border ${
+                      sale.status === "approved" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                      sale.status === "pending" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                      "bg-red-500/10 text-red-500 border-red-500/20"
+                    }`}>
+                      {sale.status === "approved" ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      {sale.status === "approved" ? "Aprovado" : "Pendente"}
+                    </div>
+                  </td>
+                  <td className="p-6 text-[11px] text-zinc-500">
+                    {new Date(sale.createdAt).toLocaleDateString("pt-BR")} às {new Date(sale.createdAt).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                  <td className="p-6 text-center">
+                    <button className="p-2 hover:bg-white/10 rounded-xl text-zinc-500 hover:text-white transition-all">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        
-        {/* Paginação Simples */}
-        <div className="p-4 border-t border-white/5 flex items-center justify-between text-sm text-zinc-500 font-medium">
-          <span>Mostrando 1 a 6 de 148 transações</span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="border-white/5 bg-transparent text-zinc-400 hover:text-white" disabled>Anterior</Button>
-            <Button variant="outline" size="sm" className="border-white/5 bg-white/5 text-white hover:bg-white/10">Próxima</Button>
+
+        {sales.length === 0 && (
+          <div className="p-20 text-center space-y-4">
+            <ReceiptText className="w-12 h-12 text-zinc-800 mx-auto" />
+            <p className="text-zinc-500 font-medium italic text-sm">Nenhuma venda registrada até o momento. Divulgue sua loja!</p>
           </div>
+        )}
+      </section>
+
+      {/* DICA TÉCNICA */}
+      <div className="flex items-start gap-4 p-6 bg-blue-500/5 rounded-[32px] border border-blue-500/10">
+        <Download className="w-5 h-5 text-blue-500 shrink-0 mt-1" />
+        <div>
+          <h4 className="text-blue-500 font-black text-[10px] uppercase tracking-widest">Relatório de Analista</h4>
+          <p className="text-[11px] text-zinc-400 leading-relaxed font-medium mt-1">
+            As vendas são sincronizadas via <strong>IPN (Instant Payment Notification)</strong>. Caso um pagamento seja aprovado no Mercado Pago mas continue como "Pendente" aqui, verifique os logs do seu Webhook na aba de Integrações.
+          </p>
         </div>
       </div>
     </div>

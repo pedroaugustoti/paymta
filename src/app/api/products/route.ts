@@ -1,55 +1,65 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth"; // Verifique se seu authOptions está aqui
+import { NextResponse } from "next/server";
 
-// 1. LISTAR PRODUTOS DO PEDRO
+// 1. BUSCAR PRODUTOS (GET)
 export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { products: true } // Traz a lista de produtos vinculada ao User
-    });
+  const products = await prisma.product.findMany({
+    where: { userId: session.user.id },
+    orderBy: { name: "asc" }
+  });
 
-    return NextResponse.json(user?.products || []);
-  } catch (error) {
-    return NextResponse.json({ error: "Erro ao buscar produtos" }, { status: 500 });
-  }
+  return NextResponse.json(products);
 }
 
-// 2. CADASTRAR NOVO PRODUTO
+// 2. CRIAR PRODUTO (POST)
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  const data = await req.json();
+  
+  const product = await prisma.product.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      price: parseFloat(data.price),
+      category: data.category,
+      image: data.image,
+      icon: data.icon || "package",
+      userId: session.user.id,
+    }
+  });
+
+  return NextResponse.json(product);
+}
+
+// 3. APAGAR PRODUTO (DELETE) - O QUE VOCÊ PRECISAVA!
+export async function DELETE(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  // Pegamos o ID que vem na URL: /api/products?id=clx...
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (!id) return NextResponse.json({ error: "ID não fornecido" }, { status: 400 });
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const body = await req.json();
-    const { name, description, price, category, icon, image } = body;
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
-    const newProduct = await prisma.product.create({
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        category,
-        icon: icon || "package",
-        image: image || null, // SALVANDO A FOTO
-        userId: user.id
+    // Visão de Analista: Verificamos se o produto pertence ao usuário antes de apagar
+    await prisma.product.delete({
+      where: { 
+        id: id,
+        userId: session.user.id // Blindagem extra de segurança
       }
     });
 
-    return NextResponse.json(newProduct);
+    return NextResponse.json({ message: "Produto removido com sucesso!" });
   } catch (error) {
-    console.error("POST_PRODUCT_ERROR", error);
-    return NextResponse.json({ error: "Erro ao criar produto" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao excluir ou produto não encontrado" }, { status: 500 });
   }
 }
