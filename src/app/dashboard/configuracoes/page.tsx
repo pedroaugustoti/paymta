@@ -19,6 +19,8 @@ export default function GeneralSettingsPage() {
     navbarName: "",
     serverName: "",
     slogan: "",
+    description: "", // NOVO CAMPO: Texto de Boas-Vindas
+    serverIp: "",    // NOVO CAMPO: IP do Servidor MTA
     isMaintenance: false,
     termsContent: "",
   });
@@ -34,6 +36,8 @@ export default function GeneralSettingsPage() {
             navbarName: data.navbarName || "",
             serverName: data.serverName || "",
             slogan: data.slogan || "",
+            description: data.description || "", // NOVO CAMPO
+            serverIp: data.serverIp || "",       // NOVO CAMPO
             isMaintenance: data.isMaintenance || false,
             termsContent: data.termsContent || "",
           });
@@ -94,30 +98,48 @@ export default function GeneralSettingsPage() {
 
       <div className="grid grid-cols-1 gap-10">
         
-        {/* SEÇÃO 1: ACESSO E URL */}
+        {/* SEÇÃO 1: ACESSO E CONEXÃO */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500">
               <Globe className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-xl font-black italic uppercase text-white leading-tight">Endereço do Portal</h3>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Defina como os jogadores acessam sua loja.</p>
+              <h3 className="text-xl font-black italic uppercase text-white leading-tight">Acesso e Conexão</h3>
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Defina a URL da loja e o IP do seu servidor MTA.</p>
             </div>
           </div>
 
           <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slug da URL (Único)</label>
-              <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 font-bold text-xs uppercase tracking-tighter">
-                  paymta.com/
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* SLUG */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slug da URL (Único)</label>
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 font-bold text-xs uppercase tracking-tighter">
+                    paymta.com/
+                  </div>
+                  <input 
+                    type="text" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                    placeholder="nome-da-sua-cidade" 
+                    className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-28 pr-6 text-sm focus:border-blue-500 outline-none text-white font-bold transition-all"
+                  />
                 </div>
-                <input 
-                  type="text" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
-                  placeholder="nome-da-sua-cidade" 
-                  className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-28 pr-6 text-sm focus:border-blue-500 outline-none text-white font-bold transition-all"
-                />
+              </div>
+
+              {/* IP DO SERVIDOR (NOVO) */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">IP do Servidor (Para o Botão Jogar)</label>
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 font-bold text-xs uppercase tracking-tighter">
+                    mtasa://
+                  </div>
+                  <input 
+                    type="text" value={form.serverIp} onChange={(e) => setForm({...form, serverIp: e.target.value})}
+                    placeholder="192.168.1.1:22003" 
+                    className="w-full bg-black border border-white/10 rounded-2xl py-5 pl-24 pr-6 text-sm focus:border-blue-500 outline-none text-white font-bold transition-all"
+                  />
+                </div>
               </div>
             </div>
 
@@ -126,22 +148,22 @@ export default function GeneralSettingsPage() {
               <div>
                 <h4 className="text-blue-500 font-black text-[10px] uppercase tracking-widest italic">Aviso de Analista</h4>
                 <p className="text-[11px] text-zinc-400 leading-relaxed font-medium mt-1">
-                  Alterar o Slug mudará o link da sua loja imediatamente. Links antigos enviados no Discord ou salvos por jogadores pararão de funcionar. Use com cautela!
+                  Alterar o Slug mudará o link da sua loja imediatamente. Links antigos pararão de funcionar. O IP do Servidor é usado para calcular os jogadores online e conectar os usuários direto pelo site.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SEÇÃO 2: IDENTIDADE BÁSICA */}
+        {/* SEÇÃO 2: IDENTIDADE BÁSICA E TEXTOS */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-zinc-800 rounded-2xl text-white">
               <Monitor className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-xl font-black italic uppercase text-white leading-tight">Textos e Slogan</h3>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Nomes que aparecem em todo o portal.</p>
+              <h3 className="text-xl font-black italic uppercase text-white leading-tight">Textos e Apresentação</h3>
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Identidade visual e carta de boas-vindas.</p>
             </div>
           </div>
 
@@ -162,10 +184,20 @@ export default function GeneralSettingsPage() {
             </div>
           </div>
           <div className="mt-8 space-y-2">
-            <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slogan Principal</label>
+            <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slogan Principal (Destaque colorido)</label>
             <input 
               type="text" value={form.slogan} onChange={(e) => setForm({...form, slogan: e.target.value})}
               placeholder="Onde sua jornada começa..." className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm focus:border-blue-500 outline-none text-zinc-300"
+            />
+          </div>
+
+          {/* DESCRIÇÃO DA HOME (NOVO) */}
+          <div className="mt-8 space-y-2">
+            <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Texto de Apresentação (Abaixo do Slogan)</label>
+            <textarea 
+              rows={4} value={form.description} onChange={(e) => setForm({...form, description: e.target.value})}
+              placeholder="Ex: Seja bem-vindo ao Invictus Roleplay. Mais do que apenas um servidor, criamos um ecossistema para jogadores que buscam o verdadeiro alto nível no MTA..." 
+              className="w-full bg-black border border-white/10 rounded-[24px] p-6 text-sm focus:border-blue-500 outline-none text-zinc-400 font-medium leading-relaxed"
             />
           </div>
         </section>

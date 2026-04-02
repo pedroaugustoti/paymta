@@ -17,14 +17,21 @@ export default function CityPortalHome() {
 
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Estado para armazenar os dados em tempo real do servidor MTA
+  const [serverStatus, setServerStatus] = useState({
+    online: 0,
+    max: 0,
+    ping: 0,
+    isOnline: false
+  });
 
   // ============================================================
-  // 🛡️ REGRAS DOS HOOKS: TOPO DO COMPONENTE
+  // 🛡️ REGRAS DOS HOOKS
   // ============================================================
   const mouseX = useMotionValue(-1000);
   const mouseY = useMotionValue(-1000);
   
-  // SPOTLIGHT: Cria a máscara radial exata na ponta do mouse
   const spotlightMask = useMotionTemplate`radial-gradient(150px circle at ${mouseX}px ${mouseY}px, black 0%, transparent 100%)`;
 
   function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
@@ -45,13 +52,39 @@ export default function CityPortalHome() {
           cache: 'no-store'
         });
         const data = await res.json();
-        if (data) setSettings(data);
+        if (data) {
+          setSettings(data);
+          
+          // Se tiver um IP cadastrado, busca os dados em tempo real
+          if (data.serverIp) {
+            fetchMtaStatus(data.serverIp);
+          }
+        }
       } catch (error) {
         console.error("Erro ao carregar shop:", error);
       } finally {
         setLoading(false);
       }
     }
+
+    async function fetchMtaStatus(ip: string) {
+      try {
+        // Esta rota será criada no back-end para consultar o servidor via UDP
+        const res = await fetch(`/api/shop/mta-status?ip=${ip}`);
+        if(res.ok) {
+           const statusData = await res.json();
+           setServerStatus({
+             online: statusData.players || 0,
+             max: statusData.maxPlayers || 0,
+             ping: statusData.ping || 0,
+             isOnline: true
+           });
+        }
+      } catch (error) {
+        console.error("Falha ao buscar status do MTA:", error);
+      }
+    }
+
     if (slug) loadShopData();
   }, [slug]);
 
@@ -90,17 +123,23 @@ export default function CityPortalHome() {
   return (
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
-      {/* HERO SECTION */}
+      {/* HERO SECTION - MAIS ESCURA E CONTRASTADA */}
+      {/* HERO SECTION - CONTRASTE EQUILIBRADO */}
       <section className="relative h-[90vh] flex items-center justify-center px-6 overflow-hidden">
+        {/* IMAGEM DE FUNDO: Aumentei a opacidade para 30% para a imagem aparecer bem */}
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-30 scale-105 transition-all duration-1000"
-          style={{ backgroundImage: `url(${settings.heroImageUrl || ""})` }}
+          style={{ backgroundImage: `url(${settings.heroImageUrl || "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2070&auto=format&fit=crop"})` }} // Coloquei um wallpaper provisório caso o DB esteja vazio, só para você ver o efeito!
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/40 to-transparent"></div>
+        
+        {/* PELÍCULA ESCURA: Reduzi para 60% para não "engolir" o banner */}
+        <div className="absolute inset-0 bg-black/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/80 to-transparent"></div>
         
         <div className="relative z-10 text-center max-w-5xl">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-6xl md:text-[10rem] font-black leading-[0.85] bg-gradient-to-b from-white to-zinc-600 bg-clip-text text-transparent uppercase italic pr-10 drop-shadow-2xl">
+            {/* O drop-shadow continua aqui para destacar o INVICTUS */}
+            <h1 className="text-6xl md:text-[10rem] font-black leading-[0.85] bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent uppercase italic pr-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
               {settings.serverName}
             </h1>
           </motion.div>
@@ -109,23 +148,27 @@ export default function CityPortalHome() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
             className="mt-12 max-w-3xl mx-auto space-y-6"
           >
-            <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1 rounded-full bg-[var(--primary)]/5">
+            <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1 rounded-full bg-[var(--primary)]/10 backdrop-blur-md shadow-xl">
               {settings.slogan}
             </span>
-            <p className="text-sm md:text-xl text-zinc-400 font-medium italic leading-relaxed px-4">
+            <p className="text-sm md:text-xl text-zinc-300 font-medium italic leading-relaxed px-4 drop-shadow-md">
               {settings.description || "O melhor servidor de Roleplay do Brasil."}
             </p>
           </motion.div>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16">
-            <Button 
-              className="font-black px-14 py-9 rounded-3xl text-xl transition-all hover:scale-105 shadow-2xl border-none"
-              style={{ backgroundColor: "var(--primary)", color: "#000", boxShadow: `0 20px 60px ${settings.primaryColor}33` }}
-            >
-              <Play className="w-6 h-6 mr-3 fill-current" /> JOGAR AGORA
-            </Button>
+            {/* PROTOCOLO MTASA */}
+            <a href={settings.serverIp ? `mtasa://${settings.serverIp}` : "#"} className="group">
+              <Button 
+                className="font-black px-14 py-9 rounded-3xl text-xl transition-all group-hover:scale-105 shadow-2xl border-none"
+                style={{ backgroundColor: "var(--primary)", color: "#000", boxShadow: `0 20px 60px ${settings.primaryColor}40` }}
+              >
+                <Play className="w-6 h-6 mr-3 fill-current" /> JOGAR AGORA
+              </Button>
+            </a>
+            
             <Link href={`/${slug}/loja`}>
-              <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-14 py-9 rounded-3xl text-xl backdrop-blur-xl hover:bg-white/10 transition-all">
+              <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-14 py-9 rounded-3xl text-xl backdrop-blur-xl hover:bg-white/10 transition-all shadow-2xl">
                 <ShoppingBag className="w-6 h-6 mr-3" /> VER LOJA VIP
               </Button>
             </Link>
@@ -133,11 +176,26 @@ export default function CityPortalHome() {
         </div>
       </section>
 
-      {/* STATUS CARDS */}
+      {/* STATUS CARDS COM DADOS DINÂMICOS */}
       <section className="max-w-7xl mx-auto -mt-24 relative z-20 px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatusCard icon={<Users style={{ color: "var(--primary)" }} />} label="Cidadãos Online" value="124/200" sub="Servidor Estável" />
-        <StatusCard icon={<Activity className="text-emerald-500" />} label="Latência" value="15ms" sub="Infraestrutura Dedicada" />
-        <StatusCard icon={<ShieldCheck className="text-blue-500" />} label="Segurança" value="ATIVO" sub="Anti-Cheat Protegido" />
+        <StatusCard 
+          icon={<Users style={{ color: "var(--primary)" }} />} 
+          label="Cidadãos Online" 
+          value={serverStatus.isOnline ? `${serverStatus.online}/${serverStatus.max}` : "Offline"} 
+          sub="Status do Servidor" 
+        />
+        <StatusCard 
+          icon={<Activity className="text-emerald-500" />} 
+          label="Latência" 
+          value={serverStatus.isOnline ? `${serverStatus.ping}ms` : "--"} 
+          sub="Conexão com a Host" 
+        />
+        <StatusCard 
+          icon={<ShieldCheck className="text-blue-500" />} 
+          label="Segurança" 
+          value="ATIVO" 
+          sub="Anti-Cheat Protegido" 
+        />
       </section>
 
       {/* DIFERENCIAIS */}
@@ -166,15 +224,12 @@ export default function CityPortalHome() {
       <section 
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        // h-[14vw] mantém a altura proporcional ao texto e alinhamos por baixo (items-end)
         className="relative flex items-end justify-center w-full overflow-hidden cursor-default h-[14vw] min-h-[100px] mt-10"
       >
-        {/* TEXTO BASE: Empurrado 20% para baixo para a base encostar ou cortar levemente no footer */}
         <h2 className="text-[18vw] font-black uppercase italic leading-[0.75] tracking-tighter text-[#0a0a0a] m-0 select-none pointer-events-none translate-y-[20%]">
           {firstName} <span className="text-[3vw] align-top ml-2 italic font-black">TM</span>
         </h2>
 
-        {/* TEXTO ACESO: O Spotlight */}
         <motion.div
           className="absolute inset-0 flex items-end justify-center pointer-events-none"
           style={{
@@ -200,7 +255,7 @@ function StatusCard({ icon, label, value, sub }: { icon: any, label: string, val
         <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shadow-inner">{icon}</div>
         {label}
       </div>
-      <p className="text-5xl font-black text-white italic tracking-tighter mb-2 leading-none">{value}</p>
+      <p className="text-5xl font-black text-white italic tracking-tighter mb-2 leading-none truncate">{value}</p>
       <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest italic">{sub}</p>
     </div>
   );
