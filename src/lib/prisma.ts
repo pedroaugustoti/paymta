@@ -14,13 +14,19 @@ if (!connectionString) {
   throw new Error("A variável DATABASE_URL não foi definida no seu .env");
 }
 
-// 3. Inicialização do Singleton
+// 3. Inicialização do Singleton com limite de Pool
 const createPrismaClient = () => {
-  const pool = new Pool({ connectionString });
+  const pool = new Pool({ 
+    connectionString,
+    max: process.env.NODE_ENV === "development" ? 2 : 10, // Limita no Dev para não estourar o banco
+    idleTimeoutMillis: 30000, // Fecha conexões inativas após 30 segundos
+  });
+  
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 };
 
+// 4. A EXPORTAÇÃO OBRIGATÓRIA (É isso que a rota API está procurando!)
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
