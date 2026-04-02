@@ -26,7 +26,9 @@ export async function PATCH(req: Request) {
     const updateData: any = {};
 
     // SÓ ATUALIZA SE O CAMPO VIER NO CORPO DA REQUISIÇÃO
-    if (body.slug !== undefined) updateData.slug = body.slug?.trim().toLowerCase() || null;
+// Visão de Analista: Impede que o usuário quebre a própria loja enviando espaços em branco
+    if (body.slug !== undefined) {const newSlug = body.slug?.trim().toLowerCase();
+    if (newSlug.length > 0) {updateData.slug = newSlug;}}
     if (body.serverName !== undefined) updateData.serverName = body.serverName;
     if (body.navbarName !== undefined) updateData.navbarName = body.navbarName;
     if (body.footerName !== undefined) updateData.footerName = body.footerName;
