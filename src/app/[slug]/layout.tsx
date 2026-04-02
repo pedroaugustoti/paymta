@@ -83,15 +83,20 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
           
           {/* BRANDING */}
           <Link href={`/${slug}`} className="flex items-center gap-4 group shrink-0">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
-              {settings.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
+            {settings.logoUrl ? (
+              <img 
+                src={settings.logoUrl} 
+                alt="Logo do Servidor" 
+                className="h-12 w-auto max-w-[150px] object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
                 <span className="font-black text-black text-xl uppercase italic">
                   {(settings.navbarName || settings.serverName || "B").charAt(0)}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
+            
             <div className="flex flex-col">
               <span className="text-xl font-black text-white tracking-tighter leading-none uppercase italic group-hover:text-[var(--primary)] transition-colors">
                 {settings.navbarName || settings.serverName}
