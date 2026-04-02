@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Palette, ImageIcon, Monitor, Info, 
   Save, Loader2, CheckCircle2, AlertCircle,
-  LayoutTemplate, Disc as Discord, Camera, Video, Link2
+  LayoutTemplate, Disc as Discord, Camera, Video, Link2, Type
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
@@ -16,6 +16,7 @@ export default function AppearancePage() {
   const [fetching, setFetching] = useState(true);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   
+  // 1. ADICIONADO: slogan e description no state inicial
   const [form, setForm] = useState({
     primaryColor: "#facb11",
     logoUrl: "",
@@ -23,6 +24,8 @@ export default function AppearancePage() {
     discordUrl: "",
     instagramUrl: "",
     youtubeUrl: "",
+    slogan: "",
+    description: "",
   });
 
   // CARREGAMENTO DOS DADOS
@@ -39,6 +42,8 @@ export default function AppearancePage() {
             discordUrl: data.discordUrl || "",
             instagramUrl: data.instagramUrl || "",
             youtubeUrl: data.youtubeUrl || "",
+            slogan: data.slogan || "",           // 2. ADICIONADO: Puxando do banco
+            description: data.description || "", // 2. ADICIONADO: Puxando do banco
           });
         }
       } catch (err) {
@@ -157,6 +162,52 @@ export default function AppearancePage() {
           </div>
         </section>
 
+        {/* CARD NOVO: TEXTOS PRINCIPAIS */}
+        <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="p-3 bg-yellow-500/10 rounded-2xl text-yellow-500">
+              <Type className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black italic uppercase text-white leading-tight">Textos Principais</h3>
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Defina a mensagem principal do seu servidor.</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* SLOGAN */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Slogan (Frase de Efeito)</label>
+              </div>
+              <input 
+                type="text" 
+                value={form.slogan} 
+                onChange={(e) => setForm({...form, slogan: e.target.value})}
+                placeholder="Ex: O melhor servidor de Roleplay do Brasil." 
+                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm focus:border-yellow-500 outline-none text-white font-bold transition-all"
+              />
+            </div>
+
+            {/* DESCRIÇÃO / TEXTO DE APRESENTAÇÃO */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Texto de Apresentação</label>
+              </div>
+              <textarea 
+                rows={3}
+                value={form.description} 
+                onChange={(e) => setForm({...form, description: e.target.value})}
+                placeholder="Uma breve descrição sobre o que torna o seu servidor único..." 
+                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm focus:border-yellow-500 outline-none text-white font-medium transition-all resize-none"
+              />
+              <p className="text-[10px] text-zinc-500 leading-relaxed px-1">
+                Este texto aparecerá logo abaixo do nome do servidor na tela inicial. Deixe em branco se quiser esconder.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* CARD 2: IDENTIDADE VISUAL (IMAGENS) */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-10">
@@ -234,7 +285,7 @@ export default function AppearancePage() {
           </div>
         </section>
 
-        {/* CARD 3: REDES SOCIAIS (NOVO) */}
+        {/* CARD 3: REDES SOCIAIS */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-10">
             <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
