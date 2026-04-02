@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 
-// Interfaces para tipagem
 interface Produto {
   id: string;
   name: string;
@@ -36,7 +35,6 @@ export default function LojaVipPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  // 1. ESTADOS GERAIS
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<any>(null);
@@ -47,12 +45,10 @@ export default function LojaVipPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewProduct, setViewProduct] = useState<Produto | null>(null);
   
-  // 2. ESTADOS DE CHECKOUT (PIX)
   const [checkoutStep, setCheckoutStep] = useState<"none" | "pix">("none");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [pixData, setPixData] = useState<{ qrCodeBase64: string, copiaECola: string } | null>(null);
 
-  // 3. BUSCA DADOS DO BANCO
   useEffect(() => {
     async function loadShopData() {
       if (!slug) return;
@@ -72,14 +68,12 @@ export default function LojaVipPage() {
     loadShopData();
   }, [slug]);
 
-  // 4. LÓGICA DAS CATEGORIAS DINÂMICAS
   const categoriasDisponiveis = useMemo(() => {
     if (produtos.length === 0) return ["todos"];
     const unicas = Array.from(new Set(produtos.map((p) => p.category.toLowerCase())));
     return ["todos", ...unicas];
   }, [produtos]);
 
-  // 5. LÓGICA DO CARRINHO (Sem lag)
   const addToCart = (id: string) => {
     setCart((prev) => {
       const item = prev.find((i) => i.id === id);
@@ -112,13 +106,9 @@ export default function LojaVipPage() {
     (catAtiva === "todos" || p.category.toLowerCase() === catAtiva.toLowerCase())
   );
 
-  // =================================================================
-  // 6. INTEGRAÇÃO DE PAGAMENTO (Geração Dinâmica Mercado Pago)
-  // =================================================================
   const handleGeneratePix = async () => {
     setCheckoutLoading(true);
     try {
-      // Aqui faremos a chamada para a nossa futura API de Checkout
       const res = await fetch("/api/shop/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,13 +118,7 @@ export default function LojaVipPage() {
       if (!res.ok) throw new Error("Falha ao gerar o PIX");
 
       const data = await res.json();
-      
-      // Recebe o QR Code Base64 e o texto Copia e Cola da API
-      setPixData({
-        qrCodeBase64: data.qr_code_base64,
-        copiaECola: data.qr_code
-      });
-      
+      setPixData({ qrCodeBase64: data.qr_code_base64, copiaECola: data.qr_code });
       setCheckoutStep("pix");
     } catch (error) {
       console.error(error);
@@ -152,46 +136,50 @@ export default function LojaVipPage() {
   };
 
   if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center gap-4 bg-black">
-      <Loader2 className="w-10 h-10 animate-spin text-yellow-500" />
-      <span className="text-zinc-500 font-black uppercase italic">Sincronizando Host...</span>
+    <div className="h-screen flex flex-col items-center justify-center gap-4 bg-[#050505]">
+      <Loader2 className="w-10 h-10 animate-spin text-zinc-600" />
+      <span className="text-zinc-600 font-black uppercase tracking-[0.3em] text-[10px]">Acessando Catálogo...</span>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-[#050505] text-white" style={{ "--primary": settings?.primaryColor || "#facb11" } as any}>
-      {/* HEADER / HERO */}
-      <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
-         <img src={settings?.heroImageUrl || ""} className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" alt="Banner" />
-         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent" />
-         <div className="relative z-10 text-center px-6">
-            <h1 className="text-5xl md:text-8xl font-black italic tracking-tighter uppercase mb-4 drop-shadow-2xl">
+      {/* HERO SECTION REDUZIDA E MAIS LEVE */}
+      <section className="relative h-[45vh] flex items-center justify-center overflow-hidden border-b border-white/5">
+         <div 
+            className="absolute inset-0 bg-cover bg-center opacity-10"
+            style={{ backgroundImage: `url(${settings?.heroImageUrl || ""})` }}
+         />
+         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+         
+         <div className="relative z-10 text-center px-6 mt-10">
+            <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase mb-4 text-white">
                {settings?.serverName || "MTA SHOP"}
             </h1>
-            <p className="text-[var(--primary)] font-bold uppercase tracking-[0.3em] text-xs italic">
+            <p className="text-[var(--primary)] font-bold uppercase tracking-[0.3em] text-[10px] py-2 px-4 rounded-full border border-[var(--primary)]/20 bg-[var(--primary)]/5 inline-block">
               {settings?.slogan || "Sua nova vida começa aqui"}
             </p>
          </div>
       </section>
 
-      <div className="p-8 max-w-7xl mx-auto w-full -mt-20 relative z-20">
+      <div className="p-6 max-w-7xl mx-auto w-full -mt-10 relative z-20">
         
-        {/* BUSCA E FILTROS */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 bg-zinc-950/80 backdrop-blur-xl p-6 rounded-[32px] border border-white/5">
-          <div className="relative w-full md:max-w-md">
+        {/* BUSCA E FILTROS (Sem Blur Pesado) */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10 bg-[#0a0a0a] p-4 rounded-3xl border border-white/5 shadow-2xl">
+          <div className="relative w-full md:max-w-xs">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input 
-              type="text" placeholder="Procurar produtos..." 
+              type="text" placeholder="Buscar..." 
               value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm focus:border-[var(--primary)] outline-none transition-all"
+              className="w-full bg-black border border-white/10 rounded-2xl pl-10 pr-4 py-3 text-sm focus:border-[var(--primary)] outline-none transition-colors text-white"
             />
           </div>
           
-          <div className="flex gap-2 p-1 bg-black rounded-2xl border border-white/5 overflow-x-auto w-full md:w-auto scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto w-full md:w-auto scrollbar-hide py-1">
             {categoriasDisponiveis.map((c) => (
               <button 
                 key={c} onClick={() => setCatAtiva(c)}
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap ${catAtiva === c ? 'bg-[var(--primary)] text-black shadow-lg' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-colors whitespace-nowrap border ${catAtiva === c ? 'bg-[var(--primary)] text-black border-[var(--primary)]' : 'bg-black text-zinc-500 border-white/5 hover:border-white/20 hover:text-white'}`}
               >
                 {c}
               </button>
@@ -199,111 +187,113 @@ export default function LojaVipPage() {
           </div>
         </div>
 
-        {/* GRID DE PRODUTOS - O Lag foi resolvido removendo o layout prop aqui */}
+        {/* GRID DE PRODUTOS (Tags HTML normais para máxima performance) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filtered.map((p) => (
-            <motion.div key={p.id} className="bg-zinc-950 border border-white/5 rounded-[40px] overflow-hidden hover:border-[var(--primary)]/40 transition-all group flex flex-col shadow-2xl">
-              <div className="h-56 bg-zinc-900 relative overflow-hidden">
+            <div key={p.id} className="bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden hover:border-[var(--primary)]/30 transition-colors group flex flex-col">
+              <div className="h-52 bg-black relative overflow-hidden flex items-center justify-center">
                 {p.image ? (
-                   <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.name} />
+                   <img src={p.image} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt={p.name} />
                 ) : (
-                   <div className="w-full h-full flex items-center justify-center bg-zinc-900/50">
-                      <Package className="w-12 h-12 text-zinc-800" />
-                   </div>
+                   <Package className="w-10 h-10 text-zinc-800" />
                 )}
-                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black uppercase text-[var(--primary)] border border-[var(--primary)]/20">
+                <div className="absolute top-3 right-3 bg-black px-3 py-1 rounded-full text-[9px] font-black uppercase text-[var(--primary)] border border-white/10 shadow-lg">
                   {p.category}
                 </div>
               </div>
 
-              <div className="p-7 flex-1 flex flex-col">
-                <h3 className="font-black text-xl text-white mb-2 uppercase italic leading-tight tracking-tighter">{p.name}</h3>
-                <p className="text-zinc-500 text-xs mb-8 line-clamp-2 leading-relaxed">{p.description}</p>
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="font-black text-xl text-white mb-1 uppercase tracking-tight truncate">{p.name}</h3>
+                <p className="text-zinc-500 text-[11px] mb-6 line-clamp-2 leading-relaxed">{p.description}</p>
                 
-                <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
-                   <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Preço</span>
-                      <p className="text-3xl font-black text-white italic tracking-tighter">R$ {p.price.toFixed(2)}</p>
+                {/* RODAPÉ DO CARD - Corrigido o esmagamento */}
+                <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+                   <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Valor</span>
+                      <p className="text-2xl font-black text-white truncate">R$ {p.price.toFixed(2)}</p>
                    </div>
-                   <div className="flex gap-2">
+                   <div className="flex gap-2 shrink-0">
                       <button onClick={() => setViewProduct(p)} className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors text-zinc-400">
-                         <Eye className="w-5 h-5" />
+                         <Eye className="w-4 h-4" />
                       </button>
-                      <button onClick={() => addToCart(p.id)} className="p-3 bg-[var(--primary)] text-black rounded-xl hover:opacity-90 transition-all shadow-lg shadow-[var(--primary)]/20">
-                         <Plus className="w-5 h-5" />
+                      <button onClick={() => addToCart(p.id)} className="p-3 bg-[var(--primary)] text-black rounded-xl hover:opacity-80 transition-opacity">
+                         <Plus className="w-4 h-4" />
                       </button>
                    </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* CARRINHO FLUTUANTE */}
+      {/* CARRINHO FLUTUANTE (Mantido com AnimatePresence pois é um elemento único) */}
       <AnimatePresence>
         {totalItens > 0 && (
           <motion.button 
-            initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
+            initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
             onClick={() => setIsCartOpen(true)}
-            className="fixed bottom-8 right-8 bg-[var(--primary)] text-black pl-8 pr-4 py-4 rounded-3xl font-black shadow-2xl flex items-center gap-6 z-40 group hover:scale-105 transition-transform"
+            className="fixed bottom-6 right-6 bg-[var(--primary)] text-black pl-6 pr-3 py-3 rounded-2xl font-black shadow-2xl flex items-center gap-4 z-40 transition-transform active:scale-95 border-2 border-black"
           >
             <div className="flex flex-col items-start leading-none">
-                <span className="text-[10px] uppercase opacity-60 mb-1">Checkout</span>
-                <span className="text-xl italic tracking-tighter">R$ {totalGeral.toFixed(2)}</span>
+                <span className="text-[9px] uppercase opacity-60 mb-1">Ver Pedido</span>
+                <span className="text-lg tracking-tighter">R$ {totalGeral.toFixed(2)}</span>
             </div>
-            <div className="bg-black text-white w-12 h-12 rounded-2xl flex items-center justify-center relative">
-                <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[var(--primary)] font-black">{totalItens}</span>
+            <div className="bg-black text-white w-10 h-10 rounded-xl flex items-center justify-center relative">
+                <ShoppingCart className="w-4 h-4" />
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-black">{totalItens}</span>
             </div>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* DRAWER DO CARRINHO */}
+      {/* DRAWER DO CARRINHO (Animação Tween mais suave) */}
       <AnimatePresence>
         {isCartOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100]" />
-            <motion.aside initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25 }} className="fixed top-0 right-0 h-full w-full max-w-md bg-[#080808] border-l border-white/5 z-[101] flex flex-col shadow-2xl">
-              <div className="p-8 border-b border-white/5 flex items-center justify-between">
-                <h2 className="text-2xl font-black italic uppercase tracking-tighter">Meu Pedido</h2>
-                <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-white/5 rounded-xl transition-colors"><X /></button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black/80 z-[100]" />
+            <motion.aside 
+              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} 
+              transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }} 
+              className="fixed top-0 right-0 h-full w-full max-w-md bg-[#0a0a0a] border-l border-white/5 z-[101] flex flex-col shadow-2xl"
+            >
+              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black">
+                <h2 className="text-xl font-black uppercase tracking-tighter">Carrinho</h2>
+                <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500"><X className="w-5 h-5"/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {cartDetails.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 bg-white/5 p-4 rounded-[24px] border border-white/5">
-                    <div className="w-12 h-12 bg-black rounded-xl overflow-hidden shrink-0">
-                      {item.image ? <img src={item.image} className="w-full h-full object-cover" /> : <Package className="w-full h-full p-3 text-zinc-800" />}
+                  <div key={item.id} className="flex items-center gap-4 bg-black p-3 rounded-2xl border border-white/5">
+                    <div className="w-12 h-12 bg-[#050505] rounded-xl overflow-hidden shrink-0 flex items-center justify-center border border-white/5">
+                      {item.image ? <img src={item.image} className="w-full h-full object-cover" /> : <Package className="w-6 h-6 text-zinc-800" />}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-black text-sm text-white uppercase italic leading-none mb-1">{item.name}</p>
-                      <p className="text-xs font-bold text-[var(--primary)] italic">R$ {item.price.toFixed(2)}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-xs text-white uppercase truncate mb-1">{item.name}</p>
+                      <p className="text-[11px] font-bold text-[var(--primary)]">R$ {item.price.toFixed(2)}</p>
                     </div>
-                    <div className="flex items-center gap-3 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
-                        <button onClick={() => removeFromCart(item.id)} className="hover:text-[var(--primary)] transition-colors"><Minus className="w-3 h-3" /></button>
+                    <div className="flex items-center gap-2 bg-[#050505] px-2 py-1 rounded-lg border border-white/5 shrink-0">
+                        <button onClick={() => removeFromCart(item.id)} className="p-1 text-zinc-500 hover:text-white transition-colors"><Minus className="w-3 h-3" /></button>
                         <span className="text-xs font-black w-4 text-center">{item.qtd}</span>
-                        <button onClick={() => addToCart(item.id)} className="hover:text-[var(--primary)] transition-colors"><Plus className="w-3 h-3" /></button>
+                        <button onClick={() => addToCart(item.id)} className="p-1 text-zinc-500 hover:text-[var(--primary)] transition-colors"><Plus className="w-3 h-3" /></button>
                     </div>
-                    <button onClick={() => removeTotal(item.id)} className="text-zinc-700 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => removeTotal(item.id)} className="p-2 text-zinc-700 hover:text-red-500 transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
               </div>
 
-              <div className="p-8 bg-black/40 border-t border-white/5 space-y-6">
-                <div className="flex justify-between items-end">
-                    <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest italic">Total Final</span>
-                    <span className="text-4xl font-black italic text-white tracking-tighter">R$ {totalGeral.toFixed(2)}</span>
+              <div className="p-6 bg-black border-t border-white/5 space-y-4">
+                <div className="flex justify-between items-end pb-2">
+                    <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Total da Compra</span>
+                    <span className="text-3xl font-black text-white tracking-tighter">R$ {totalGeral.toFixed(2)}</span>
                 </div>
                 
-                {/* BOTÃO QUE CHAMA A API DO MERCADO PAGO */}
                 <Button 
                   onClick={handleGeneratePix} 
                   disabled={checkoutLoading || cart.length === 0}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-black py-8 rounded-[32px] text-xl border-none shadow-lg shadow-emerald-500/10 transition-all flex justify-center"
+                  className="w-full bg-[var(--primary)] hover:brightness-110 text-black font-black py-6 rounded-2xl text-lg border-none shadow-xl transition-all flex justify-center"
                 >
-                  {checkoutLoading ? <Loader2 className="w-6 h-6 animate-spin text-black" /> : "PAGAR VIA PIX"}
+                  {checkoutLoading ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : "PAGAR VIA PIX"}
                 </Button>
               </div>
             </motion.aside>
@@ -311,30 +301,30 @@ export default function LojaVipPage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL PIX - Agora recebendo dados REAIS da API */}
+      {/* MODAL PIX */}
       <AnimatePresence>
         {checkoutStep === "pix" && pixData && (
-            <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-                <div onClick={() => setCheckoutStep("none")} className="absolute inset-0 bg-black/98 backdrop-blur-xl" />
-                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#0c0c0c] border border-white/10 p-10 rounded-[48px] max-w-sm w-full text-center shadow-3xl">
-                    <Smartphone className="w-10 h-10 text-emerald-400 mx-auto mb-8 animate-bounce" />
-                    <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter italic">Checkout PIX</h3>
-                    <p className="text-zinc-500 font-medium mb-8 text-xs uppercase">Escaneie para liberar seus itens no MTA.</p>
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                <div onClick={() => setCheckoutStep("none")} className="absolute inset-0 bg-black/90" />
+                <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+                    <button onClick={() => setCheckoutStep("none")} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X className="w-5 h-5"/></button>
+                    <Smartphone className="w-8 h-8 text-[var(--primary)] mx-auto mb-6 animate-pulse" />
+                    <h3 className="text-2xl font-black mb-1 uppercase tracking-tighter text-white">Checkout PIX</h3>
+                    <p className="text-zinc-500 font-medium mb-6 text-[11px] uppercase">Escaneie pelo app do seu banco</p>
                     
-                    <div className="bg-white p-4 rounded-[32px] mb-8 shadow-xl">
-                        {/* Imagem Real do QR Code */}
+                    <div className="bg-white p-3 rounded-2xl mb-6 flex justify-center border-4 border-white/5 shadow-inner">
                         <img 
                           src={`data:image/jpeg;base64,${pixData.qrCodeBase64}`} 
                           alt="QR Code PIX"
-                          className="w-full aspect-square rounded-2xl"
+                          className="w-48 h-48 object-contain rounded-xl"
                         />
                     </div>
                     
-                    <Button onClick={handleCopyPix} variant="outline" className="w-full border-white/5 bg-white/5 py-7 rounded-2xl font-black text-sm mb-4 uppercase italic">
+                    <Button onClick={handleCopyPix} className="w-full bg-[#111] hover:bg-[#222] text-white border border-white/10 py-6 rounded-xl font-black text-xs mb-3 uppercase">
                         <Copy className="w-4 h-4 mr-2" /> Copiar Código PIX
                     </Button>
-                    <div className="flex items-center justify-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic">
-                        <CheckCircle2 className="w-4 h-4 animate-pulse" /> Aguardando Pagamento...
+                    <div className="flex items-center justify-center gap-2 text-[var(--primary)] text-[10px] font-black uppercase tracking-widest mt-2">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Aguardando Pagamento
                     </div>
                 </motion.div>
             </div>
@@ -344,19 +334,22 @@ export default function LojaVipPage() {
       {/* MODAL DETALHES */}
       <AnimatePresence>
         {viewProduct && (
-            <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-                <div onClick={() => setViewProduct(null)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative bg-[#080808] border border-white/10 p-10 rounded-[56px] max-w-lg w-full shadow-3xl">
-                    <button onClick={() => setViewProduct(null)} className="absolute top-8 right-8 text-zinc-500 hover:text-white"><X /></button>
-                    <div className="w-16 h-16 bg-[var(--primary)]/10 rounded-2xl flex items-center justify-center text-[var(--primary)] mb-8 border border-[var(--primary)]/20 shadow-inner">
-                        {ICON_MAP[viewProduct.icon] || <Gem className="w-8 h-8" />}
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div onClick={() => setViewProduct(null)} className="absolute inset-0 bg-black/80" />
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl max-w-md w-full shadow-2xl">
+                    <button onClick={() => setViewProduct(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white"><X className="w-5 h-5"/></button>
+                    <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-[var(--primary)] mb-6 border border-white/5 shadow-inner">
+                        {ICON_MAP[viewProduct.icon] || <Gem className="w-6 h-6" />}
                     </div>
-                    <h2 className="text-5xl font-black mb-4 uppercase italic tracking-tighter leading-none">{viewProduct.name}</h2>
-                    <p className="text-zinc-500 font-medium mb-12 leading-relaxed text-sm">{viewProduct.description}</p>
-                    <div className="flex items-center justify-between bg-white/5 p-6 rounded-[32px] border border-white/5">
-                        <p className="text-4xl font-black text-white italic tracking-tighter">R$ {viewProduct.price.toFixed(2)}</p>
-                        <Button onClick={() => { addToCart(viewProduct.id); setViewProduct(null); }} className="bg-[var(--primary)] text-black font-black py-8 px-10 rounded-[24px] border-none shadow-2xl transition-all active:scale-95 italic">
-                            ADICIONAR AGORA
+                    <h2 className="text-3xl font-black mb-3 uppercase tracking-tighter leading-tight text-white">{viewProduct.name}</h2>
+                    <p className="text-zinc-400 font-medium mb-8 leading-relaxed text-sm">{viewProduct.description}</p>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-black p-4 rounded-2xl border border-white/5 gap-4">
+                        <div className="flex flex-col">
+                           <span className="text-[10px] font-bold uppercase text-zinc-500">Valor</span>
+                           <p className="text-3xl font-black text-white tracking-tighter">R$ {viewProduct.price.toFixed(2)}</p>
+                        </div>
+                        <Button onClick={() => { addToCart(viewProduct.id); setViewProduct(null); }} className="w-full sm:w-auto bg-[var(--primary)] hover:brightness-110 text-black font-black py-6 px-8 rounded-xl border-none transition-all active:scale-95">
+                            ADICIONAR
                         </Button>
                     </div>
                 </motion.div>
