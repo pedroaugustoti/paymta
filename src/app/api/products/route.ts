@@ -99,4 +99,4 @@ export async function PATCH(req: Request) {
     console.error("Erro ao atualizar produto:", error);
     return NextResponse.json({ error: "Erro interno ao atualizar ou produto não encontrado" }, { status: 500 });
   }
-}
+} 
