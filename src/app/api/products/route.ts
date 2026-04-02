@@ -63,3 +63,40 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Erro ao excluir ou produto não encontrado" }, { status: 500 });
   }
 }
+
+// 4. ATUALIZAR PRODUTO (PATCH)
+export async function PATCH(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  try {
+    const data = await req.json();
+    
+    // Verifica se o ID foi enviado
+    if (!data.id) {
+      return NextResponse.json({ error: "ID do produto não fornecido" }, { status: 400 });
+    }
+
+    // Atualiza o produto no banco
+    const updatedProduct = await prisma.product.update({
+      where: { 
+        id: data.id,
+        userId: session.user.id // Blindagem extra: garante que ele é o dono
+      },
+      data: {
+        name: data.name,
+        description: data.description,
+        price: parseFloat(data.price), // Convertendo para número, igual no POST
+        category: data.category,
+        image: data.image,
+        icon: data.icon || "package",
+      }
+    });
+
+    return NextResponse.json(updatedProduct);
+    
+  } catch (error) {
+    console.error("Erro ao atualizar produto:", error);
+    return NextResponse.json({ error: "Erro interno ao atualizar ou produto não encontrado" }, { status: 500 });
+  }
+}

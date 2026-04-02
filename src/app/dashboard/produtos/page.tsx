@@ -74,7 +74,7 @@ export default function ProductsPage() {
   // 2. SALVAR / EDITAR (Corrigido!)
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const method = form.id ? "PATCH" : "POST"; // Verifique se sua API usa PATCH ou PUT para edição
+    const method = form.id ? "PUT" : "POST"; // Verifique se sua API usa PATCH ou PUT para edição
     
     // Tratamento crucial: Converter o preço de volta para número antes de enviar
     const payload = {
