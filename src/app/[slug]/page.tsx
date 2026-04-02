@@ -152,7 +152,7 @@ export default function CityPortalHome() {
               {settings.slogan}
             </span>
             <p className="text-sm md:text-xl text-zinc-300 font-medium italic leading-relaxed px-4 drop-shadow-md">
-              {settings.description || "O melhor servidor de Roleplay do Brasil."}
+              {settings.description}
             </p>
           </motion.div>
           
