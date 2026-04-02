@@ -7,7 +7,8 @@ dotenv.config();
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   datasource: {
-    // Se o process.env falhar, ele dá um erro mais claro
-    url: process.env.DATABASE_URL as string,
+    // Como este arquivo serve para o Prisma CLI (Terminal),
+    // usamos APENAS a conexão direta (porta 5432) para ele conseguir formatar o banco.
+    url: process.env.DIRECT_URL as string,
   },
 });

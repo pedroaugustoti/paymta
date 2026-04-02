@@ -4,9 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // A URL foi removida daqui, pois agora é gerenciada pelo prisma.config.ts
-}
+  provider  = "postgresql"
+} 
 
 // --- MODELOS OBRIGATÓRIOS DO NEXTAUTH ---
 
