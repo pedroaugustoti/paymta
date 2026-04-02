@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 
-// Interfaces para tipagem (Padrão ADS)
+// Interfaces para tipagem
 interface Produto {
   id: string;
   name: string;
@@ -36,7 +36,7 @@ export default function LojaVipPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  // 1. ESTADOS
+  // 1. ESTADOS GERAIS
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<any>(null);
@@ -46,9 +46,13 @@ export default function LojaVipPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewProduct, setViewProduct] = useState<Produto | null>(null);
+  
+  // 2. ESTADOS DE CHECKOUT (PIX)
   const [checkoutStep, setCheckoutStep] = useState<"none" | "pix">("none");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [pixData, setPixData] = useState<{ qrCodeBase64: string, copiaECola: string } | null>(null);
 
-  // 2. BUSCA DADOS DO BANCO
+  // 3. BUSCA DADOS DO BANCO
   useEffect(() => {
     async function loadShopData() {
       if (!slug) return;
@@ -68,21 +72,16 @@ export default function LojaVipPage() {
     loadShopData();
   }, [slug]);
 
-  // 3. LÓGICA DAS CATEGORIAS DINÂMICAS (SaaS Logic)
+  // 4. LÓGICA DAS CATEGORIAS DINÂMICAS
   const categoriasDisponiveis = useMemo(() => {
     if (produtos.length === 0) return ["todos"];
-    
-    // Extrai categorias únicas dos produtos vindos do banco
-    const unicas = Array.from(
-      new Set(produtos.map((p) => p.category.toLowerCase()))
-    );
-    
+    const unicas = Array.from(new Set(produtos.map((p) => p.category.toLowerCase())));
     return ["todos", ...unicas];
   }, [produtos]);
 
-  // 4. LÓGICA DO CARRINHO
+  // 5. LÓGICA DO CARRINHO (Sem lag)
   const addToCart = (id: string) => {
-    setCart((prev: CartItem[]) => {
+    setCart((prev) => {
       const item = prev.find((i) => i.id === id);
       if (item) return prev.map((i) => (i.id === id ? { ...i, qtd: i.qtd + 1 } : i));
       return [...prev, { id, qtd: 1 }];
@@ -90,13 +89,13 @@ export default function LojaVipPage() {
   };
 
   const removeFromCart = (id: string) => {
-    setCart((prev: CartItem[]) => 
+    setCart((prev) => 
       prev.map((i) => (i.id === id ? { ...i, qtd: Math.max(0, i.qtd - 1) } : i))
           .filter((i) => i.qtd > 0)
     );
   };
 
-  const removeTotal = (id: string) => setCart((prev: CartItem[]) => prev.filter((i) => i.id !== id));
+  const removeTotal = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id));
 
   const cartDetails = useMemo(() => {
     return cart.map(item => {
@@ -105,13 +104,52 @@ export default function LojaVipPage() {
     });
   }, [cart, produtos]);
 
-  const totalGeral = useMemo(() => cartDetails.reduce((acc: number, curr) => acc + curr.total, 0), [cartDetails]);
-  const totalItens = useMemo(() => cart.reduce((acc: number, curr) => acc + curr.qtd, 0), [cart]);
+  const totalGeral = useMemo(() => cartDetails.reduce((acc, curr) => acc + curr.total, 0), [cartDetails]);
+  const totalItens = useMemo(() => cart.reduce((acc, curr) => acc + curr.qtd, 0), [cart]);
 
   const filtered = produtos.filter((p) => 
     p.name.toLowerCase().includes(search.toLowerCase()) && 
     (catAtiva === "todos" || p.category.toLowerCase() === catAtiva.toLowerCase())
   );
+
+  // =================================================================
+  // 6. INTEGRAÇÃO DE PAGAMENTO (Geração Dinâmica Mercado Pago)
+  // =================================================================
+  const handleGeneratePix = async () => {
+    setCheckoutLoading(true);
+    try {
+      // Aqui faremos a chamada para a nossa futura API de Checkout
+      const res = await fetch("/api/shop/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, items: cartDetails, total: totalGeral })
+      });
+
+      if (!res.ok) throw new Error("Falha ao gerar o PIX");
+
+      const data = await res.json();
+      
+      // Recebe o QR Code Base64 e o texto Copia e Cola da API
+      setPixData({
+        qrCodeBase64: data.qr_code_base64,
+        copiaECola: data.qr_code
+      });
+      
+      setCheckoutStep("pix");
+    } catch (error) {
+      console.error(error);
+      alert("Houve um erro ao conectar com o Mercado Pago. Tente novamente.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const handleCopyPix = () => {
+    if (pixData?.copiaECola) {
+      navigator.clipboard.writeText(pixData.copiaECola);
+      alert("Código PIX Copiado!");
+    }
+  };
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-black">
@@ -121,17 +159,10 @@ export default function LojaVipPage() {
   );
 
   return (
-    <div 
-      className="min-h-screen bg-[#050505] text-white"
-      style={{ "--primary": settings?.primaryColor || "#facb11" } as any}
-    >
-      {/* HEADER / HERO DINÂMICO */}
+    <div className="min-h-screen bg-[#050505] text-white" style={{ "--primary": settings?.primaryColor || "#facb11" } as any}>
+      {/* HEADER / HERO */}
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
-         <img 
-            src={settings?.heroImageUrl || ""} 
-            className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale"
-            alt="Banner"
-         />
+         <img src={settings?.heroImageUrl || ""} className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" alt="Banner" />
          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent" />
          <div className="relative z-10 text-center px-6">
             <h1 className="text-5xl md:text-8xl font-black italic tracking-tighter uppercase mb-4 drop-shadow-2xl">
@@ -145,7 +176,7 @@ export default function LojaVipPage() {
 
       <div className="p-8 max-w-7xl mx-auto w-full -mt-20 relative z-20">
         
-        {/* BUSCA E FILTROS DINÂMICOS */}
+        {/* BUSCA E FILTROS */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 bg-zinc-950/80 backdrop-blur-xl p-6 rounded-[32px] border border-white/5">
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -168,10 +199,10 @@ export default function LojaVipPage() {
           </div>
         </div>
 
-        {/* GRID DE PRODUTOS */}
+        {/* GRID DE PRODUTOS - O Lag foi resolvido removendo o layout prop aqui */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filtered.map((p) => (
-            <motion.div layout key={p.id} className="bg-zinc-950 border border-white/5 rounded-[40px] overflow-hidden hover:border-[var(--primary)]/40 transition-all group flex flex-col shadow-2xl">
+            <motion.div key={p.id} className="bg-zinc-950 border border-white/5 rounded-[40px] overflow-hidden hover:border-[var(--primary)]/40 transition-all group flex flex-col shadow-2xl">
               <div className="h-56 bg-zinc-900 relative overflow-hidden">
                 {p.image ? (
                    <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.name} />
@@ -265,8 +296,14 @@ export default function LojaVipPage() {
                     <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest italic">Total Final</span>
                     <span className="text-4xl font-black italic text-white tracking-tighter">R$ {totalGeral.toFixed(2)}</span>
                 </div>
-                <Button onClick={() => setCheckoutStep("pix")} className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-black py-8 rounded-[32px] text-xl border-none shadow-lg shadow-emerald-500/10 transition-all">
-                  PAGAR VIA PIX
+                
+                {/* BOTÃO QUE CHAMA A API DO MERCADO PAGO */}
+                <Button 
+                  onClick={handleGeneratePix} 
+                  disabled={checkoutLoading || cart.length === 0}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-black py-8 rounded-[32px] text-xl border-none shadow-lg shadow-emerald-500/10 transition-all flex justify-center"
+                >
+                  {checkoutLoading ? <Loader2 className="w-6 h-6 animate-spin text-black" /> : "PAGAR VIA PIX"}
                 </Button>
               </div>
             </motion.aside>
@@ -274,23 +311,30 @@ export default function LojaVipPage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL PIX */}
+      {/* MODAL PIX - Agora recebendo dados REAIS da API */}
       <AnimatePresence>
-        {checkoutStep === "pix" && (
+        {checkoutStep === "pix" && pixData && (
             <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
                 <div onClick={() => setCheckoutStep("none")} className="absolute inset-0 bg-black/98 backdrop-blur-xl" />
                 <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#0c0c0c] border border-white/10 p-10 rounded-[48px] max-w-sm w-full text-center shadow-3xl">
                     <Smartphone className="w-10 h-10 text-emerald-400 mx-auto mb-8 animate-bounce" />
                     <h3 className="text-3xl font-black mb-2 uppercase tracking-tighter italic">Checkout PIX</h3>
                     <p className="text-zinc-500 font-medium mb-8 text-xs uppercase">Escaneie para liberar seus itens no MTA.</p>
+                    
                     <div className="bg-white p-4 rounded-[32px] mb-8 shadow-xl">
-                        <div className="w-full aspect-square bg-zinc-100 flex items-center justify-center rounded-2xl border-4 border-white font-black text-zinc-300 uppercase text-[10px] italic">QR Code Mockup</div>
+                        {/* Imagem Real do QR Code */}
+                        <img 
+                          src={`data:image/jpeg;base64,${pixData.qrCodeBase64}`} 
+                          alt="QR Code PIX"
+                          className="w-full aspect-square rounded-2xl"
+                        />
                     </div>
-                    <Button variant="outline" className="w-full border-white/5 bg-white/5 py-7 rounded-2xl font-black text-sm mb-4 uppercase italic">
+                    
+                    <Button onClick={handleCopyPix} variant="outline" className="w-full border-white/5 bg-white/5 py-7 rounded-2xl font-black text-sm mb-4 uppercase italic">
                         <Copy className="w-4 h-4 mr-2" /> Copiar Código PIX
                     </Button>
                     <div className="flex items-center justify-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic">
-                        <CheckCircle2 className="w-4 h-4 animate-pulse" /> Aguardando Sincronização...
+                        <CheckCircle2 className="w-4 h-4 animate-pulse" /> Aguardando Pagamento...
                     </div>
                 </motion.div>
             </div>
