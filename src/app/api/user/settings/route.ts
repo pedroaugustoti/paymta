@@ -38,6 +38,7 @@ export async function PATCH(req: Request) {
     if (body.youtubeUrl !== undefined) updateData.youtubeUrl = body.youtubeUrl;
     if (body.termsContent !== undefined) updateData.termsContent = body.termsContent;
     if (body.mpAccessToken !== undefined) updateData.mpAccessToken = body.mpAccessToken;
+    if (body.licenseKey !== undefined) updateData.licenseKey = body.licenseKey;
     
     // --- NOVOS CAMPOS INJETADOS AQUI ---
     if (body.description !== undefined) updateData.description = body.description;
