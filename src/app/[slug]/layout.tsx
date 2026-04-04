@@ -229,11 +229,8 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
           <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
             <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em] text-center md:text-left italic">
               © {new Date().getFullYear()} {settings.serverName}. TODOS OS DIREITOS RESERVADOS. <br className="md:hidden" />
-              <span className="text-zinc-800">Developed in Recife-PE</span>
             </p>
             <div className="flex items-center gap-3 px-5 py-2 bg-white/5 rounded-full border border-white/5 group hover:border-[var(--primary)]/20 transition-all">
-              <Globe className="w-3 h-3 text-zinc-600 group-hover:text-[var(--primary)] transition-colors" />
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors italic">Infraestrutura Global PayMTA</span>
             </div>
           </div>
         </div>
