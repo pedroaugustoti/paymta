@@ -164,10 +164,6 @@ function Footer() {
             <p className="text-zinc-400 text-sm leading-relaxed max-w-xs mx-auto sm:mx-0 font-medium">
               Profissionalizando a economia dos servidores de MTA:SA com tecnologia de ponta e segurança para donos de cidades.
             </p>
-            <div className="flex items-center justify-center sm:justify-start gap-2 mt-6">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Sistemas Operacionais Brasil</span>
-            </div>
           </div>
 
           <div>
