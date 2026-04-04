@@ -202,9 +202,6 @@ function Footer() {
           <p className="text-[11px] md:text-xs text-zinc-600 font-bold uppercase tracking-widest">
             © {new Date().getFullYear()} PayMTA. Todos os direitos reservados.
           </p>
-          <p className="text-[11px] md:text-xs text-zinc-600 font-bold uppercase tracking-widest">
-            Não afiliado à Rockstar Games ou MTA:SA.
-          </p>
         </div>
       </div>
     </footer>
