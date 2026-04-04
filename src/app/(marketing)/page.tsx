@@ -1,207 +1,159 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { 
-  Rocket, ShieldCheck, Zap, Check, ChevronRight, 
-  BarChart3, Users, DollarSign, DatabaseZap, 
-  Activity, ShieldAlert, Terminal, Cpu, Globe, Box, Lock, MousePointer2 
+  LayoutDashboard, 
+  CreditCard, 
+  Package, 
+  Settings, 
+  LogOut, 
+  TrendingUp, 
+  Users, 
+  Zap, 
+  Search,
+  Bell,
+  CheckCircle2,
+  Clock
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default function MarketingPage() {
+export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-[#030303] text-white overflow-hidden selection:bg-yellow-500/30 font-sans">
-      {/* Background Grid Dinâmico */}
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="min-h-screen bg-[#000000] text-zinc-300 flex font-sans">
       
-      {/* Luzes Neon */}
-      <div className="fixed top-[-15%] left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-yellow-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+      {/* 1. SIDEBAR (Fixa na esquerda) */}
+      <aside className="w-64 border-r border-white/5 hidden lg:flex flex-col p-6 sticky top-0 h-screen bg-[#050505]">
+        <div className="flex items-center gap-3 mb-10 px-2">
+          <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center font-black text-black text-xs">P</div>
+          <span className="text-xl font-black text-white tracking-tighter">PayMTA</span>
+        </div>
 
-      <div className="relative z-10 pt-28 px-6">
+        <nav className="flex-1 space-y-2">
+          <SidebarLink icon={<LayoutDashboard size={18} />} label="Visão Geral" active />
+          <SidebarLink icon={<CreditCard size={18} />} label="Transações" />
+          <SidebarLink icon={<Package size={18} />} label="Meus Pacotes" />
+          <SidebarLink icon={<Zap size={18} />} label="Integração (API)" />
+          <SidebarLink icon={<Settings size={18} />} label="Configurações" />
+        </nav>
+
+        <div className="pt-6 border-t border-white/5">
+          <button className="flex items-center gap-3 text-sm font-bold text-zinc-500 hover:text-red-400 transition-colors px-2 w-full">
+            <LogOut size={18} /> Sair da Conta
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. CONTEÚDO PRINCIPAL */}
+      <main className="flex-1 p-4 md:p-8 lg:p-12">
         
-        {/* 1. HERO SECTION */}
-        <section className="max-w-6xl mx-auto flex flex-col items-center mb-24">
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="flex flex-col items-center text-center"
-          >
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-[11px] font-bold uppercase tracking-widest mb-8 backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-              </span>
-              Infraestrutura Financeira Nativa para MTA
+        {/* Header do Dashboard */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Dashboard</h1>
+            <p className="text-zinc-500 text-sm font-medium">Bem-vindo de volta, <span className="text-zinc-300">Augustinho</span>.</p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="relative hidden sm:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
+              <input 
+                type="text" 
+                placeholder="Buscar transação..." 
+                className="bg-[#09090b] border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-xs w-64 focus:outline-none focus:border-yellow-500/50 transition-colors"
+              />
             </div>
-            
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 bg-gradient-to-b from-white via-white to-zinc-500 bg-clip-text text-transparent leading-[1.1] max-w-4xl italic">
-              Seu servidor vendendo <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 filter drop-shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                24h no automático.
-              </span>
-            </h1>
-            
-            <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-              Esqueça as entregas manuais. Integre o Mercado Pago ao seu servidor e automatize VIPs e Itens instantaneamente com nosso script de alta performance.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full max-w-md mx-auto sm:max-w-none">
-              <Link href="/login" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-black px-10 py-7 text-lg rounded-2xl shadow-[0_0_30px_rgba(234,179,8,0.3)] transition-all hover:scale-105 flex items-center gap-2 group italic">
-                  Começar a Faturar
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white/10 bg-white/5 text-white hover:bg-white/10 px-10 py-7 text-lg rounded-2xl transition-all font-bold">
-                Ler Documentação
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* MOCKUP VISUAL */}
-          <motion.div 
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.3 }}
-            className="w-full max-w-[1100px] mx-auto mt-20 relative"
-          >
-            <div className="relative bg-[#080808] border border-white/10 rounded-[28px] p-2.5 shadow-2xl grid grid-cols-12 gap-2.5 backdrop-blur-xl">
-              <div className="col-span-12 xl:col-span-7 bg-zinc-950/60 rounded-[24px] border border-white/5 p-6 flex flex-col">
-                <div className="flex items-center gap-2 mb-6 text-yellow-400">
-                    <DollarSign size={20} />
-                    <h3 className="text-lg font-bold text-white uppercase italic tracking-tighter">Live Sales Dashboard</h3>
-                </div>
-                <div className="grid grid-cols-3 gap-4 mb-6 text-white font-mono">
-                    <StatCard icon={<BarChart3 size={14}/>} label="Hoje" value="R$ 1.450" accent />
-                    <StatCard icon={<Users size={14}/>} label="Jogadores" value="189" />
-                    <StatCard icon={<Activity size={14}/>} label="API" value="99.9%" />
-                </div>
-                <div className="h-32 bg-zinc-900 rounded-xl border border-white/5 p-4 flex items-end gap-1.5 overflow-hidden">
-                    {[40, 60, 45, 80, 75, 100, 90, 50, 70, 85].map((h, i) => (
-                        <div key={i} style={{height: `${h}%`}} className="flex-1 bg-yellow-500/20 border-t border-yellow-400/40 rounded-t-sm" />
-                    ))}
-                </div>
-              </div>
-
-              <div className="col-span-12 xl:col-span-5 bg-black rounded-[24px] border border-white/5 p-5 flex flex-col font-mono text-[10px]">
-                <div className="flex items-center gap-2 mb-4 border-b border-white/5 pb-2">
-                    <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500/50" />
-                        <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
-                        <div className="w-2 h-2 rounded-full bg-green-500/50" />
-                    </div>
-                    <span className="text-zinc-600">server_console.log</span>
-                </div>
-                <div className="space-y-1 text-zinc-500">
-                  <p>[14:20] <span className="text-emerald-400">PAYMTA:</span> Conexão estabelecida.</p>
-                  <p>[14:21] <span className="text-yellow-400">PAYMTA:</span> Webhook escutando...</p>
-                  <p>[14:25] <span className="text-white">INFO:</span> Pix Recebido (R$ 50,00)</p>
-                  <p>[14:25] <span className="text-emerald-400">SUCCESS:</span> Comando 'addvip user1' executado.</p>
-                  <div className="w-1.5 h-3 bg-white animate-pulse inline-block" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* 2. BENTO FEATURES */}
-        <section className="max-w-6xl mx-auto py-20 grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-zinc-950/40 border border-white/5 p-8 rounded-3xl hover:border-yellow-500/30 transition-all group">
-            <Zap className="text-yellow-400 mb-4" />
-            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Engenharia Cloud</h3>
-            <p className="text-zinc-400">Nossa API processa os pagamentos fora do seu servidor. Isso significa zero lag e zero queda de FPS para os seus jogadores durante as transações.</p>
+            <button className="w-10 h-10 rounded-xl bg-[#09090b] border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+              <Bell size={20} />
+            </button>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 border border-white/10" />
           </div>
-          <div className="bg-zinc-950/40 border border-white/5 p-8 rounded-3xl hover:border-white/10 transition-all">
-            <ShieldAlert className="text-white mb-4" />
-            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Inviolável</h3>
-            <p className="text-zinc-400 text-sm">Scripts compilados em Luac e validação por token JWT. Segurança de nível bancário para sua economia in-game.</p>
+        </header>
+
+        {/* Grid de Métricas (Stats) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
+          <StatCard title="Faturamento Total" value="R$ 1.450,00" icon={<TrendingUp className="text-emerald-500" />} percent="+12%" />
+          <StatCard title="Vendas Hoje" value="14" icon={<CreditCard className="text-yellow-400" />} percent="+5" />
+          <StatCard title="Jogadores Ativos" value="128" icon={<Users className="text-blue-400" />} />
+          <StatCard title="Status do Script" value="Online" icon={<CheckCircle2 className="text-emerald-400" />} status />
+        </div>
+
+        {/* Seção de Transações Recentes */}
+        <div className="bg-[#09090b] border border-white/5 rounded-[32px] p-6 md:p-8">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-lg font-black text-white">Transações Recentes</h3>
+            <Button variant="link" className="text-yellow-400 text-xs font-bold uppercase tracking-widest">Ver Todas</Button>
           </div>
-        </section>
 
-        {/* 3. DEVELOPER SECTION (Config.lua) */}
-        <section className="max-w-6xl mx-auto py-20 flex flex-col lg:flex-row gap-12 items-center">
-          <div className="flex-1">
-            <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-6">Instalação <br/><span className="text-yellow-400">Plug & Play</span></h2>
-            <p className="text-zinc-400 font-medium mb-6">
-              Não pedimos acesso ao seu banco de dados. Você apenas configura os comandos que o servidor deve executar ao confirmar um pagamento. Simples assim.
-            </p>
-            <ul className="space-y-3 text-sm font-bold text-zinc-500 italic">
-              <li className="flex items-center gap-2"><Check size={16} className="text-yellow-400" /> Resource em ZIP pronto para uso</li>
-              <li className="flex items-center gap-2"><Check size={16} className="text-yellow-400" /> Comandos de console nativos</li>
-              <li className="flex items-center gap-2"><Check size={16} className="text-yellow-400" /> Suporte para qualquer gamemode</li>
-            </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[10px] uppercase tracking-[0.2em] text-zinc-600 border-b border-white/5">
+                  <th className="pb-4 font-black">Jogador</th>
+                  <th className="pb-4 font-black">Pacote</th>
+                  <th className="pb-4 font-black">Data</th>
+                  <th className="pb-4 font-black text-right">Valor</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm font-medium">
+                <TransactionRow name="PedroAugusto" pack="VIP Diamante (30 dias)" date="Hoje, 14:20" price="R$ 89,00" />
+                <TransactionRow name="Dante_RP" pack="100k Dinheiro Sujo" date="Hoje, 12:05" price="R$ 25,00" />
+                <TransactionRow name="Neymar_Junior" pack="VIP Ouro (30 dias)" date="Ontem, 23:50" price="R$ 49,00" />
+                <TransactionRow name="Skinny_MTA" pack="Unban Global" date="Ontem, 20:15" price="R$ 120,00" />
+              </tbody>
+            </table>
           </div>
-          <div className="flex-1 w-full bg-[#050505] border border-white/10 rounded-2xl overflow-hidden shadow-2xl font-mono text-xs">
-            <div className="bg-zinc-900 px-4 py-2 border-b border-white/5 text-zinc-500">paymta/config.lua</div>
-            <pre className="p-6 text-zinc-300 overflow-x-auto">
-              <code>{`Config = {}
-Config.License = "PAYMTA-A1B2-C3D4"
+        </div>
 
-Config.Pacotes = {
-  ["vip_ouro"] = "addvip {player} Ouro 30",
-  ["money_100k"] = "givemoney {player} 100000"
-}
-
--- Simples, Seguro, PayMTA.`}</code>
-            </pre>
-          </div>
-        </section>
-
-        {/* 4. PRICING */}
-        <PricingSection />
-
-      </div>
-    </main>
-  );
-}
-
-// --- SUBCOMPONENTES ---
-
-function StatCard({ icon, label, value, accent = false }: any) {
-  return (
-    <div className="bg-white/[0.03] border border-white/5 p-3 rounded-xl">
-      <div className={`flex items-center gap-1.5 mb-1 ${accent ? 'text-yellow-400' : 'text-zinc-500'}`}>
-        {icon} <span className="text-[10px] font-bold uppercase">{label}</span>
-      </div>
-      <p className="text-lg font-black italic">{value}</p>
+      </main>
     </div>
   );
 }
 
-function PricingSection() {
-  const plans = [
-    { name: "Iniciante", price: "14", features: ["1 Servidor", "Entrega Automática", "Logs 7 dias"], highlight: false },
-    { name: "Profissional", price: "25", features: ["Até 3 Servidores", "Suporte Prioritário", "Painel Customizado"], highlight: true },
-    { name: "Enterprise", price: "42", features: ["Servidores Ilimitados", "API de Integração", "Webhook Custom"], highlight: false }
-  ];
+// --- COMPONENTES AUXILIARES ---
 
+function SidebarLink({ icon, label, active = false }: any) {
   return (
-    <section className="max-w-6xl mx-auto py-24">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Planos para escala</h2>
+    <a href="#" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+      active ? "bg-yellow-400 text-black shadow-lg shadow-yellow-500/10" : "text-zinc-500 hover:text-white hover:bg-white/5"
+    }`}>
+      {icon}
+      {label}
+    </a>
+  );
+}
+
+function StatCard({ title, value, icon, percent, status }: any) {
+  return (
+    <div className="bg-[#09090b] border border-white/5 p-6 rounded-[24px] hover:border-white/10 transition-colors">
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+          {icon}
+        </div>
+        {percent && (
+          <span className="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-md">
+            {percent}
+          </span>
+        )}
       </div>
-      <div className="grid md:grid-cols-3 gap-8">
-        {plans.map((plan) => (
-          <div key={plan.name} className={`p-8 rounded-3xl border transition-all ${plan.highlight ? 'border-yellow-400 bg-yellow-400/5 shadow-2xl shadow-yellow-400/10' : 'border-white/5 bg-zinc-950/40'}`}>
-            <h3 className="text-xl font-black text-white uppercase italic mb-4">{plan.name}</h3>
-            <div className="flex items-baseline gap-1 mb-8">
-              <span className="text-4xl font-black">R$ {plan.price}</span>
-              <span className="text-zinc-500 font-bold text-sm">/mês</span>
-            </div>
-            <ul className="space-y-4 mb-10">
-              {plan.features.map(f => (
-                <li key={f} className="flex items-center gap-3 text-sm font-medium text-zinc-400">
-                  <Check size={14} className="text-yellow-400" /> {f}
-                </li>
-              ))}
-            </ul>
-            <Button className={`w-full py-6 rounded-xl font-black ${plan.highlight ? 'bg-yellow-400 text-black' : 'bg-white/5 text-white'}`}>Selecionar</Button>
-          </div>
-        ))}
-      </div>
-    </section>
+      <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest mb-1">{title}</p>
+      <h4 className={`text-2xl font-black text-white tracking-tight ${status ? "text-emerald-400" : ""}`}>
+        {value}
+      </h4>
+    </div>
+  );
+}
+
+function TransactionRow({ name, pack, date, price }: any) {
+  return (
+    <tr className="border-b border-white/5 last:border-0 group">
+      <td className="py-5 font-bold text-zinc-300">{name}</td>
+      <td className="py-5">
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-400">{pack}</span>
+        </div>
+      </td>
+      <td className="py-5 text-zinc-600 text-xs font-bold">{date}</td>
+      <td className="py-5 text-right font-black text-white">{price}</td>
+    </tr>
   );
 }
