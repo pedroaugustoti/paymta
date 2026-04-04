@@ -16,8 +16,6 @@ export default function MarketingPage() {
         <BentoFeatures />
         <DeveloperSection />
       </div>
-      
-      <Footer />
     </main>
   );
 }
@@ -165,77 +163,5 @@ function DeveloperSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-// ---------------------------------------------------------
-// 5. RODAPÉ PREMIUM (Caprichado e Profissional)
-// ---------------------------------------------------------
-function Footer() {
-  return (
-    <footer className="border-t border-white/10 bg-[#030303] pt-20 pb-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-8 mb-16">
-          
-          {/* Coluna 1 - Branding */}
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center font-black text-black text-sm">P</div>
-              <span className="text-2xl font-black text-white tracking-tighter">PayMTA</span>
-            </div>
-            <p className="text-zinc-400 text-sm leading-relaxed max-w-xs mb-6">
-              Nossa missão é profissionalizar a economia dos servidores de Multi Theft Auto, entregando tecnologia financeira de ponta para a comunidade.
-            </p>
-            <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Sistemas Operacionais</span>
-            </div>
-          </div>
-
-          {/* Coluna 2 - Produto */}
-          <div>
-            <h4 className="text-white font-bold mb-6 tracking-wide">Produto</h4>
-            <ul className="space-y-4 text-sm font-medium text-zinc-400">
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Visão Geral</a></li>
-              <li><a href="/planos" className="hover:text-yellow-400 transition-colors">Preços e Planos</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Integrações</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Changelog (Updates)</a></li>
-            </ul>
-          </div>
-
-          {/* Coluna 3 - Desenvolvedores */}
-          <div>
-            <h4 className="text-white font-bold mb-6 tracking-wide">Desenvolvedores</h4>
-            <ul className="space-y-4 text-sm font-medium text-zinc-400">
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Documentação API</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Webhooks</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Baixar Resource</a></li>
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">Comunidade Discord</a></li>
-            </ul>
-          </div>
-
-          {/* Coluna 4 - Legal */}
-          <div>
-            <h4 className="text-white font-bold mb-6 tracking-wide">Legal</h4>
-            <ul className="space-y-4 text-sm font-medium text-zinc-400">
-              <li><a href="#" className="hover:text-white transition-colors">Termos de Serviço</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Política de Privacidade</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Política de Reembolso</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contato Comercial</a></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Direitos Autorais */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-zinc-600 font-semibold">
-            © {new Date().getFullYear()} PayMTA. Todos os direitos reservados.
-          </p>
-          <p className="text-xs text-zinc-600 font-semibold">
-            Desenvolvido no Brasil. Não afiliado oficialmente à Rockstar Games ou Multi Theft Auto.
-          </p>
-        </div>
-      </div>
-    </footer>
   );
 }
