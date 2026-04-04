@@ -230,8 +230,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em] text-center md:text-left italic">
               © {new Date().getFullYear()} {settings.serverName}. TODOS OS DIREITOS RESERVADOS. <br className="md:hidden" />
             </p>
-            <div className="flex items-center gap-3 px-5 py-2 bg-white/5 rounded-full border border-white/5 group hover:border-[var(--primary)]/20 transition-all">
-            </div>
           </div>
         </div>
       </footer>
