@@ -19,11 +19,14 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  // Resetar estados ao trocar de rota
   useEffect(() => {
     setMobileMenuOpen(false);
     window.scrollTo(0, 0);
+    setIsScrolled(false);
   }, [pathname]);
 
+  // Monitorar Scroll para efeitos da Navbar
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 15);
     window.addEventListener("scroll", handleScroll);
@@ -49,6 +52,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       >
         <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between">
           
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-3 cursor-pointer group shrink-0">
             <div className={`transition-all duration-500 flex items-center justify-center font-black text-black rounded-lg bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_15px_rgba(234,179,8,0.2)] ${isScrolled ? "w-8 h-8 text-[10px]" : "w-10 h-10 text-xs md:text-sm"}`}>
               P
@@ -58,6 +62,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             </span>
           </Link>
 
+          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-10">
             <div className="flex items-center gap-8 text-[13px] xl:text-sm font-semibold text-zinc-400">
               {navLinks.map((link) => (
@@ -85,6 +90,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
+          {/* Mobile Toggle Button */}
           <button 
             className="lg:hidden text-white p-2.5 bg-zinc-900/50 border border-white/10 rounded-xl active:bg-zinc-800 transition-colors" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -93,6 +99,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </button>
         </div>
 
+        {/* Mobile Menu Dropdown */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div 
@@ -140,6 +147,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   );
 }
 
+// ---------------------------------------------------------
+// Componente Footer (Global para o Marketing)
+// ---------------------------------------------------------
 function Footer() {
   return (
     <footer className="border-t border-white/10 bg-[#030303] pt-20 pb-10 mt-auto">
@@ -174,6 +184,7 @@ function Footer() {
             <ul className="space-y-4 text-sm text-zinc-500 font-medium">
               <li><Link href="/docs" className="hover:text-yellow-400 transition-colors">Documentação</Link></li>
               <li><a href="https://discord.gg/seu-link" target="_blank" className="hover:text-yellow-400 transition-colors">Discord Oficial</a></li>
+              <li><Link href="/docs#troubleshooting" className="hover:text-yellow-400 transition-colors">FAQ</Link></li>
             </ul>
           </div>
 
