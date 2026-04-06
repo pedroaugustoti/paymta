@@ -100,7 +100,7 @@ export default function CityPortalHome() {
 
   if (!settings) return null;
 
-  const firstName = settings.serverName?.split(' ')[0]?.toUpperCase() || "CITY";
+  const firstName = settings.slug?.replace(/-/g, ' ').toUpperCase() || slug?.replace(/-/g, ' ').toUpperCase() || "CITY";
 
   if (settings.isMaintenance) {
     return (
