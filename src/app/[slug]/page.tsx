@@ -123,34 +123,37 @@ export default function CityPortalHome() {
   return (
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
-    {/* 1. HERO SECTION - ULTRA COMPACTA (ESTILO HEADER IMPACT) */}
-    <section className="relative h-[38vh] md:h-[48vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
+    {/* 1. HERO SECTION - AJUSTADA PARA NÃO CORTAR O TEXTO */}
+    <section className="relative h-[42vh] md:h-[52vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
       
-      {/* BACKGROUND COM MÁSCARA - Reduzi a opacidade para 15% para o texto saltar mais */}
+      {/* BACKGROUND - Mantido com baixa opacidade */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-15 scale-105 transition-all duration-1000"
         style={{ 
           backgroundImage: `url(${settings.heroImageUrl || "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2070&auto=format&fit=crop"})`,
-          maskImage: 'linear-gradient(to bottom, black 30%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 30%, transparent 100%)'
+          maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
         }}
       ></div>
       
       <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-transparent"></div>
       
-      <div className="relative z-10 text-center max-w-5xl">
-        <motion.div initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }}>
-          {/* Mantivemos o tamanho grande, mas usamos leading-tight para economizar espaço vertical */}
-          <h1 className="text-5xl md:text-8xl font-black leading-tight bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter">
+      <div className="relative z-10 text-center max-w-5xl flex flex-col items-center">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          {/* MUDANÇA CHAVE: 
+              - leading-[0.9]: Coloca as letras bem juntas verticalmente sem cortar.
+              - pb-2: Pequeno padding na base para garantir que o brilho (drop-shadow) apareça.
+          */}
+          <h1 className="text-5xl md:text-8xl font-black leading-[0.9] bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter pb-2">
             {settings.serverName}
           </h1>
         </motion.div>
 
-        {/* Agrupamos Slogan e Descrição com margens menores para ganhar espaço */}
-        <div className="flex flex-col items-center gap-3 mt-4">
+        {/* Slogan e Descrição com margens mais controladas */}
+        <div className="flex flex-col items-center gap-4 mt-2">
           {settings.slogan && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-              <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.4em] text-[9px] border border-[var(--primary)]/20 px-3 py-1 rounded-full bg-[var(--primary)]/5 backdrop-blur-md">
+              <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.4em] text-[9px] border border-[var(--primary)]/20 px-3 py-1.5 rounded-full bg-[var(--primary)]/5 backdrop-blur-md">
                 {settings.slogan}
               </span>
             </motion.div>
@@ -165,7 +168,7 @@ export default function CityPortalHome() {
           )}
         </div>
 
-        {/* BOTÕES DE AÇÃO - Margem superior reduzida de mt-12 para mt-8 */}
+        {/* BOTÕES DE AÇÃO */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
           <a href={settings.serverIp ? `mtasa://${settings.serverIp}` : "#"} className="group">
             <Button 
