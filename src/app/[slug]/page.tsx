@@ -227,7 +227,7 @@ export default function CityPortalHome() {
         className="relative flex items-end justify-center w-full overflow-hidden cursor-default h-[14vw] min-h-[100px] mt-10"
       >
         <h2 className="text-[18vw] font-black uppercase italic leading-[0.75] tracking-tighter text-[#0a0a0a] m-0 select-none pointer-events-none translate-y-[20%]">
-          {firstName} <span className="text-[3vw] align-top ml-2 italic font-black">TM</span>
+          {firstName} <span className="text-[3vw] align-top ml-2 italic font-black">T M</span>
         </h2>
 
         <motion.div
