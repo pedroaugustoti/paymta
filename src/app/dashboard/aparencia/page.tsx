@@ -25,6 +25,7 @@ export default function AppearancePage() {
     youtubeUrl: "",
     slogan: "",
     description: "",
+    footerName: "",
   });
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function AppearancePage() {
             youtubeUrl: data.youtubeUrl || "",
             slogan: data.slogan || "",
             description: data.description || "",
+            footerName: data.footerName || "",
           });
         }
       } catch (err) {
@@ -117,6 +119,18 @@ export default function AppearancePage() {
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Carta de Boas-Vindas</label>
               <textarea rows={3} value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-medium" />
             </div>
+            <div className="space-y-4 mt-6">
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">
+              Nome de Copyright (Rodapé)
+            </label>
+            <input 
+              type="text" 
+              value={form.footerName} 
+              onChange={(e) => setForm({...form, footerName: e.target.value})}
+              placeholder="Ex: Brasil Roleplay Oficial" 
+              className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm focus:border-yellow-500 outline-none text-white font-bold transition-all"
+            />
+          </div>
           </div>
         </section>
 

@@ -72,6 +72,8 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     { label: "Loja VIP", href: `/${slug}/loja` },
   ];
 
+  const displayFooterName = settings.footerName || settings.serverName;
+
   return (
     <div 
       className="min-h-screen flex flex-col bg-[#030303] text-white font-sans selection:bg-[var(--primary)] selection:text-black"
@@ -166,13 +168,24 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             {/* BRANDING */}
             <div className="md:col-span-4 space-y-8">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center font-black text-white text-sm border border-white/10 uppercase italic shadow-inner">
-                  {(settings.footerName || settings.serverName || "B").charAt(0)}
-                </div>
+                {/* Se houver logo cadastrada, ela aparece aqui também */}
+                {settings.logoUrl ? (
+                  <img 
+                    src={settings.logoUrl} 
+                    alt="Logo" 
+                    className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300" 
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center font-black text-white text-sm border border-white/10 uppercase italic shadow-inner">
+                    {(displayFooterName || "B").charAt(0)}
+                  </div>
+                )}
+                
                 <span className="text-2xl font-black uppercase tracking-tighter italic text-white">
-                  {settings.footerName || settings.serverName}
+                  {displayFooterName}
                 </span>
               </div>
+              
               <p className="text-[11px] text-zinc-500 font-bold leading-relaxed uppercase italic tracking-widest max-w-xs">
                 {settings.slogan || "Elevando o nível do seu Roleplay com tecnologia PayMTA."}
               </p>
@@ -227,8 +240,9 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
           {/* COPYRIGHT & TECH STACK */}
           <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+            {/* Substitua o settings.serverName por displayFooterName */}
             <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em] text-center md:text-left italic">
-              © {new Date().getFullYear()} {settings.serverName}. TODOS OS DIREITOS RESERVADOS. <br className="md:hidden" />
+              © {new Date().getFullYear()} {displayFooterName}. TODOS OS DIREITOS RESERVADOS.
             </p>
           </div>
         </div>
