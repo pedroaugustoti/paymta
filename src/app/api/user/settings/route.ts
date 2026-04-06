@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Certifique-se que o caminho está correto para o seu projeto
+import { authOptions } from "@/lib/auth"; 
 import { prisma } from "@/lib/prisma";
 
 // ============================================================
@@ -31,6 +31,7 @@ export async function GET() {
         instagramUrl: true,
         youtubeUrl: true,
         isMaintenance: true,
+        termsContent: true, // <-- ADICIONADO PARA OS TERMOS CARREGAREM
       }
     });
 
@@ -70,8 +71,9 @@ export async function PATCH(req: Request) {
     if (body.instagramUrl !== undefined) updateData.instagramUrl = body.instagramUrl;
     if (body.youtubeUrl !== undefined) updateData.youtubeUrl = body.youtubeUrl;
     if (body.isMaintenance !== undefined) updateData.isMaintenance = body.isMaintenance;
+    if (body.termsContent !== undefined) updateData.termsContent = body.termsContent; // <-- ADICIONADO PARA OS TERMOS SALVAREM
 
-    // Lógica de proteção do SLUG (Não permite salvar vazio para não quebrar a URL da loja)
+    // Lógica de proteção do SLUG
     if (body.slug) {
       const newSlug = body.slug.trim().toLowerCase();
       if (newSlug.length > 0) {
@@ -79,7 +81,7 @@ export async function PATCH(req: Request) {
       }
     }
 
-    // Executa a atualização no banco de dados (usando a DIRECT_URL via Pooler no servidor)
+    // Executa a atualização no banco de dados
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: updateData,
@@ -93,7 +95,6 @@ export async function PATCH(req: Request) {
   } catch (error: any) {
     console.error("ERRO_PATCH_SETTINGS:", error);
     
-    // Se tentar usar um slug que já existe em outro usuário
     if (error.code === 'P2002') {
       return NextResponse.json({ error: "Este link (slug) já está sendo usado por outra loja." }, { status: 400 });
     }
