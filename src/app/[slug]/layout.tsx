@@ -4,13 +4,15 @@ import Link from "next/link";
 import { 
   LogOut, Disc as Discord, ShieldCheck, CreditCard, 
   Landmark, Loader2, Globe, Zap, MessageSquare, 
-  ChevronRight, ExternalLink, ShieldAlert, Camera
+  ChevronRight, ExternalLink, ShieldAlert, Camera,
+  Menu, X // <-- Adicionados para o Menu Mobile
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion"; // <-- Adicionado para a animação do Menu
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -20,11 +22,11 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   
   const [settings, setSettings] = useState<any>(null);
   const [error, setError] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado do Menu Mobile
 
   useEffect(() => {
     async function loadConfigs() {
       try {
-        // Visão de Analista: Forçamos o fetch sem cache para a cor atualizar na hora
         const res = await fetch(`/api/shop/config?slug=${slug}`, {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' }
@@ -37,7 +39,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       }
     }
     if (slug) loadConfigs();
-  }, [slug, pathname]); // Revalida a cor ao navegar entre páginas
+  }, [slug, pathname]);
 
   // TELA DE 404 PERSONALIZADA
   if (error) return (
@@ -89,28 +91,28 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
               <img 
                 src={settings.logoUrl} 
                 alt="Logo do Servidor" 
-                className="h-12 w-auto max-w-[150px] object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
+                className="h-10 md:h-12 w-auto max-w-[120px] md:max-w-[150px] object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
               />
             ) : (
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
-                <span className="font-black text-black text-xl uppercase italic">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
+                <span className="font-black text-black text-lg md:text-xl uppercase italic">
                   {(settings.navbarName || settings.serverName || "B").charAt(0)}
                 </span>
               </div>
             )}
             
             <div className="flex flex-col">
-              <span className="text-xl font-black text-white tracking-tighter leading-none uppercase italic group-hover:text-[var(--primary)] transition-colors">
+              <span className="text-lg md:text-xl font-black text-white tracking-tighter leading-none uppercase italic group-hover:text-[var(--primary)] transition-colors">
                 {settings.navbarName || settings.serverName}
               </span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-[9px] text-zinc-500 font-black tracking-widest uppercase italic">Servidor Verificado</span>
+                <span className="text-[8px] md:text-[9px] text-zinc-500 font-black tracking-widest uppercase italic hidden sm:block">Servidor Verificado</span>
               </div>
             </div>
           </Link>
 
-          {/* NAV CENTRAL */}
+          {/* NAV CENTRAL (Oculta no Mobile/Tablet) */}
           <nav className="hidden lg:flex items-center gap-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -130,14 +132,14 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             })}
           </nav>
 
-          {/* USER ACTIONS */}
-          <div className="flex items-center gap-4">
+          {/* USER ACTIONS & MOBILE TOGGLE */}
+          <div className="flex items-center gap-3 md:gap-4 shrink-0">
             <Link href={settings.discordUrl || "#"} target="_blank" className="hidden md:flex p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-[#5865F2]/20 hover:text-[#5865F2] transition-all group">
               <Discord className="w-4 h-4" />
             </Link>
 
             {session ? (
-              <div className="flex items-center gap-3 bg-white/5 p-1.5 pr-4 rounded-2xl border border-white/10">
+              <div className="hidden sm:flex items-center gap-3 bg-white/5 p-1.5 pr-4 rounded-2xl border border-white/10">
                 {session.user?.image ? (
                   <Image src={session.user.image} alt="Avatar" width={32} height={32} className="rounded-xl border border-[var(--primary)]/30" />
                 ) : (
@@ -149,13 +151,68 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
             ) : (
-              <Button onClick={() => signIn('discord')} className="bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-6 rounded-2xl transition-all flex items-center gap-3 text-[10px] px-6 shadow-xl shadow-[#5865F2]/10 uppercase italic">
-                <Discord className="w-4 h-4 fill-current" /> Entrar
+              <Button onClick={() => signIn('discord')} className="bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-5 md:py-6 rounded-2xl transition-all flex items-center gap-2 md:gap-3 text-[9px] md:text-[10px] px-4 md:px-6 shadow-xl shadow-[#5865F2]/10 uppercase italic">
+                <Discord className="w-4 h-4 fill-current" /> <span className="hidden sm:inline">Entrar</span>
               </Button>
             )}
+
+            {/* BOTÃO HAMBÚRGUER */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-3 bg-white/5 border border-white/10 rounded-xl text-zinc-400 hover:text-white transition-colors"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </header>
+
+      {/* MENU MOBILE EXPANSÍVEL */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="lg:hidden absolute top-20 left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 z-[90] p-6 flex flex-col gap-2 shadow-2xl"
+          >
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`px-5 py-4 text-xs font-black uppercase italic tracking-widest transition-all rounded-xl border ${
+                    isActive 
+                    ? "text-[var(--primary)] bg-[var(--primary)]/10 border-[var(--primary)]/20" 
+                    : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+            
+            {/* Opções de usuário no Mobile */}
+            {session ? (
+              <button 
+                onClick={() => { signOut(); setIsMobileMenuOpen(false); }} 
+                className="mt-4 px-5 py-4 text-xs font-black uppercase italic tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl text-left flex items-center gap-3"
+              >
+                <LogOut className="w-4 h-4" /> Desconectar Conta
+              </button>
+            ) : (
+              <button 
+                onClick={() => { signIn('discord'); setIsMobileMenuOpen(false); }} 
+                className="mt-4 px-5 py-4 text-xs font-black uppercase italic tracking-widest text-white bg-[#5865F2] border border-[#5865F2] rounded-xl text-left flex items-center gap-3 sm:hidden"
+              >
+                <Discord className="w-4 h-4" /> Entrar com Discord
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CONTEÚDO PRINCIPAL */}
       <main className="relative z-10 flex-1">{children}</main>
@@ -168,7 +225,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             {/* BRANDING */}
             <div className="md:col-span-4 space-y-8">
               <div className="flex items-center gap-4">
-                {/* Se houver logo cadastrada, ela aparece aqui também */}
                 {settings.logoUrl ? (
                   <img 
                     src={settings.logoUrl} 
@@ -181,7 +237,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 )}
                 
-                <span className="text-2xl font-black uppercase tracking-tighter italic text-white">
+                <span className="text-2xl font-black uppercase tracking-tighter italic text-white break-words">
                   {displayFooterName}
                 </span>
               </div>
@@ -221,13 +277,13 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             <div className="md:col-span-4 space-y-8 bg-white/[0.02] p-8 rounded-[40px] border border-white/5">
               <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest italic">Métodos Aceitos</p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Badge icon={<Landmark className="w-3 h-3" />} text="PIX" />
                   <Badge icon={<CreditCard className="w-3 h-3" />} text="CARTÃO" />
                 </div>
               </div>
               <div className="pt-6 border-t border-white/5 flex items-center gap-4">
-                <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shrink-0">
                   <ShieldCheck className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
@@ -240,8 +296,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
           {/* COPYRIGHT & TECH STACK */}
           <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-            {/* Substitua o settings.serverName por displayFooterName */}
-            <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em] text-center md:text-left italic">
+            <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em] text-center md:text-left italic leading-relaxed">
               © {new Date().getFullYear()} {displayFooterName}. TODOS OS DIREITOS RESERVADOS.
             </p>
           </div>
