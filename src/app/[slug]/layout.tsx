@@ -68,95 +68,106 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   );
 
 // =========================================================================
-  // 3. TELA DE MANUTENÇÃO PREMIUM: BLOQUEIO TOTAL E REFINADO
+  // 3. TELA DE MANUTENÇÃO SAAS PREMIUM: GLASSMORPHISM & TECH UI
   // =========================================================================
   if (settings.isMaintenance) {
     return (
       <div 
-        className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-[var(--primary)] selection:text-black"
-        style={{ 
-          "--primary": settings.primaryColor || "#facb11",
-          // FUNDO: Preto profundo -> Gradiente Radial para o centro -> Grade Geométrica sutil
-          backgroundColor: "#030303",
-          backgroundImage: `
-            radial-gradient(circle at center, ${settings.primaryColor || "#facb11"}08 0%, rgba(3,3,3,0) 70%),
-            url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.015' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40H40z'/%3E%3C/g%3E%3C/svg%3E")
-          `
-        } as React.CSSProperties}
+        className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden selection:bg-[var(--primary)] selection:text-black"
+        style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
       >
-        {/* Camada de brilho de fundo (Glow Atmosférico) */}
-        <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: `radial-gradient(circle at center, ${settings.primaryColor || "#facb11"}15 0%, rgba(3,3,3,0) 50%)` }} />
+        {/* FUNDO ANIMADO E ATMOSFÉRICO */}
+        <div className="absolute inset-0 bg-[#030303] z-0" />
+        <div 
+          className="absolute inset-0 z-0 opacity-30" 
+          style={{ backgroundImage: `radial-gradient(circle at 50% -20%, var(--primary) 0%, transparent 60%)` }} 
+        />
+        <div 
+          className="absolute inset-0 z-0 opacity-40"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2.5l10 3.5-10 3.5zM0 40h2v-20H0v20z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")` }} 
+        />
 
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} // Ease Out Expo (Premium)
-          className="relative z-10 max-w-xl w-full text-center space-y-10"
+          initial={{ opacity: 0, y: 30 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 max-w-2xl w-full"
         >
-          {/* CONTAINER DO ÍCONE COM EFEITO NEON PULSANTE */}
-          <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
-            {/* Brilho Externo Pulsante */}
-            <motion.div 
-              animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.05, 1] }}
-              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-              className="absolute inset-0 rounded-[48px] blur-2xl opacity-60" 
-              style={{ backgroundColor: `${settings.primaryColor || "#facb11"}30` }}
-            />
-            {/* Container Interno */}
-            <div className="relative w-full h-full bg-zinc-950 rounded-[48px] flex items-center justify-center border-2 border-white/5 shadow-2xl backdrop-blur-sm group-hover:border-[var(--primary)]/30 transition-colors duration-500 overflow-hidden">
-               {/* Reflexo de luz na borda superior */}
-               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-               <Hammer className="w-14 h-14 text-[var(--primary)] group-hover:rotate-[-10deg] transition-transform duration-300" />
-            </div>
-          </div>
-
-          {/* BLOCO DE TEXTO REFINADO */}
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-black uppercase italic text-white leading-none tracking-tighter break-words">
-              {settings.navbarName || settings.serverName} <br/> 
-              {/* Texto com gradiente sutil na cor primária */}
-              <span 
-                className="bg-gradient-to-b from-[var(--primary)] to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(250,203,17,0.3)]"
-              >
-                Em Obras
-              </span>
-            </h1>
+          {/* GLASS CARD PRINCIPAL */}
+          <div className="bg-black/40 backdrop-blur-2xl border border-white/5 rounded-[40px] p-8 md:p-12 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
             
-            {/* Tag de Status Operacional */}
-            <div className="flex items-center gap-3 justify-center px-4 py-1.5 bg-black/50 border border-white/5 rounded-full inline-block">
-                <div className="w-2 h-2 bg-[var(--primary)] rounded-full animate-pulse shadow-[0_0_8px_var(--primary)]" />
-                <p className="text-zinc-500 text-[9px] md:text-[10px] font-black uppercase italic tracking-[0.3em]">
-                  Atualização Técnica em Andamento
-                </p>
+            {/* Linha de energia no topo do card */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent opacity-50" />
+
+            {/* ÍCONE TECNOLÓGICO */}
+            <div className="relative mb-8 group">
+              <div className="absolute inset-0 bg-[var(--primary)] blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 rounded-full" />
+              <div className="w-24 h-24 bg-[#0a0a0a] border border-white/10 rounded-[32px] flex items-center justify-center relative z-10 shadow-inner group-hover:border-[var(--primary)]/30 transition-colors">
+                <Hammer className="w-10 h-10 text-[var(--primary)] group-hover:-rotate-12 transition-transform duration-500" />
+              </div>
             </div>
 
-            <p className="text-zinc-400 text-xs md:text-sm font-medium leading-relaxed max-w-md mx-auto pt-4">
-              {/* Mudamos de uppercase para normal para melhorar a leitura, mas mantivemos o itálico se preferir */}
-              Estamos aplicando melhorias na infraestrutura do portal para garantir mais velocidade e segurança nas suas transações. Voltamos em breve!
-            </p>
+            <div className="space-y-6 w-full">
+              {/* TAG DE STATUS (Correção do texto cortado) */}
+              <div className="inline-flex items-center justify-center gap-3 px-5 py-2.5 bg-[var(--primary)]/10 border border-[var(--primary)]/20 rounded-full w-fit max-w-full mx-auto">
+                <div className="w-2 h-2 bg-[var(--primary)] rounded-full animate-pulse shrink-0 shadow-[0_0_8px_var(--primary)]" />
+                <span className="text-[var(--primary)] text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] truncate">
+                  Protocolo de Manutenção
+                </span>
+              </div>
+
+              {/* TÍTULO PRINCIPAL */}
+              <h1 className="text-4xl md:text-6xl font-black uppercase italic text-white leading-tight tracking-tighter break-words">
+                {settings.navbarName || settings.serverName} <br/> 
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+                  Em Obras
+                </span>
+              </h1>
+              
+              <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-md mx-auto">
+                A nossa infraestrutura está a passar por um upgrade programado para melhorar a performance e segurança da loja.
+              </p>
+            </div>
+
+            {/* BARRA DE PROGRESSO (Animação Visual Tech) */}
+            <div className="w-full max-w-sm mx-auto mt-12 space-y-3">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                <span>Otimizando Base de Dados</span>
+                <span className="text-[var(--primary)] animate-pulse">Processando...</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full bg-[var(--primary)] rounded-full shadow-[0_0_10px_var(--primary)]"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "65%" }}
+                  transition={{ duration: 2, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+
+            {/* BOTÃO DE SUPORTE */}
+            {settings.discordUrl && (
+              <div className="mt-12 pt-8 border-t border-white/5 w-full">
+                <a href={settings.discordUrl} target="_blank" rel="noreferrer" className="inline-flex">
+                  <Button variant="outline" className="border-white/10 bg-white/5 text-zinc-300 hover:bg-[#5865F2]/10 hover:text-[#5865F2] hover:border-[#5865F2]/30 font-black px-8 py-6 rounded-2xl text-xs gap-3 transition-all">
+                    <Discord className="w-4 h-4" /> Acessar Suporte Oficial
+                  </Button>
+                </a>
+              </div>
+            )}
           </div>
-
-          {/* BOTÃO DE SUPORTE (Para o usuário não se sentir perdido) */}
-          {settings.discordUrl && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-              <a href={settings.discordUrl} target="_blank">
-                <Button variant="outline" className="border-white/5 bg-white/5 text-zinc-400 hover:bg-[#5865F2]/10 hover:text-[#5865F2] hover:border-[#5865F2]/20 font-bold px-8 py-6 rounded-2xl text-xs gap-2 transition-all">
-                   <Discord className="w-4 h-4" /> Central de Suporte
-                </Button>
-              </a>
-            </motion.div>
-          )}
-
         </motion.div>
 
-        {/* Rodapé técnico sutil */}
-        <footer className="absolute bottom-6 left-6 z-10 hidden sm:block">
-           <p className="text-[8px] font-black text-zinc-800 uppercase tracking-widest italic">PayMTA SaaS Protocol — MNT Mode ACTIVE</p>
+        {/* RODAPÉ TÉCNICO SUTIL */}
+        <footer className="absolute bottom-6 w-full text-center z-10 px-6">
+           <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.3em] italic">
+             Powered by PayMTA Core
+           </p>
         </footer>
       </div>
     );
   }
-  
+
   // =========================================================================
 
   const navLinks = [
