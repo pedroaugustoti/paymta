@@ -144,34 +144,36 @@ export default function LojaVipPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white" style={{ "--primary": settings?.primaryColor || "#facb11" } as any}>
-      {/* HERO SECTION REDUZIDA E MAIS LEVE */}
-      <section className="relative h-[45vh] flex items-center justify-center overflow-hidden border-b border-white/5">
+      
+      {/* HERO SECTION DA LOJA */}
+      <section className="relative h-[45vh] flex items-center justify-center overflow-hidden border-b border-white/5 bg-[#050505]">
          <div 
             className="absolute inset-0 bg-cover bg-center opacity-10"
             style={{ backgroundImage: `url(${settings?.heroImageUrl || ""})` }}
          />
          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
          
-         <div className="relative z-10 text-center px-6 mt-10">
-            <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase mb-4 text-white">
+         <div className="relative z-10 text-center px-6">
+            <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase mb-4 text-white drop-shadow-xl">
                {settings?.serverName || "MTA SHOP"}
             </h1>
-            <p className="text-[var(--primary)] font-bold uppercase tracking-[0.3em] text-[10px] py-2 px-4 rounded-full border border-[var(--primary)]/20 bg-[var(--primary)]/5 inline-block">
-              {settings?.slogan || "Sua nova vida começa aqui"}
+            <p className="text-[var(--primary)] font-bold uppercase tracking-[0.3em] text-[10px] py-2 px-4 rounded-full border border-[var(--primary)]/20 bg-[var(--primary)]/5 inline-block backdrop-blur-sm">
+              {settings?.slogan || "Catálogo Oficial"}
             </p>
          </div>
       </section>
 
-      <div className="p-6 max-w-7xl mx-auto w-full -mt-10 relative z-20">
+      {/* ÁREA DE CONTEÚDO PRINCIPAL (Filtros e Grid) */}
+      <div className="p-6 max-w-7xl mx-auto w-full relative z-20 py-12">
         
-        {/* BUSCA E FILTROS (Sem Blur Pesado) */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10 bg-[#0a0a0a] p-4 rounded-3xl border border-white/5 shadow-2xl">
-          <div className="relative w-full md:max-w-xs">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        {/* BUSCA E FILTROS */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 bg-[#0a0a0a] p-5 rounded-[32px] border border-white/5 shadow-2xl">
+          <div className="relative w-full md:max-w-sm">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
             <input 
-              type="text" placeholder="Buscar..." 
+              type="text" placeholder="O que você está procurando?" 
               value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-2xl pl-10 pr-4 py-3 text-sm focus:border-[var(--primary)] outline-none transition-colors text-white"
+              className="w-full bg-black border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm focus:border-[var(--primary)] outline-none transition-all text-white placeholder:text-zinc-700"
             />
           </div>
           
@@ -179,7 +181,7 @@ export default function LojaVipPage() {
             {categoriasDisponiveis.map((c) => (
               <button 
                 key={c} onClick={() => setCatAtiva(c)}
-                className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-colors whitespace-nowrap border ${catAtiva === c ? 'bg-[var(--primary)] text-black border-[var(--primary)]' : 'bg-black text-zinc-500 border-white/5 hover:border-white/20 hover:text-white'}`}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap border ${catAtiva === c ? 'bg-[var(--primary)] text-black border-[var(--primary)] shadow-lg shadow-[var(--primary)]/10' : 'bg-black text-zinc-600 border-white/5 hover:border-white/20 hover:text-white'}`}
               >
                 {c}
               </button>
@@ -187,7 +189,7 @@ export default function LojaVipPage() {
           </div>
         </div>
 
-        {/* GRID DE PRODUTOS (Tags HTML normais para máxima performance) */}
+        {/* GRID DE PRODUTOS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filtered.map((p) => (
             <div key={p.id} className="bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden hover:border-[var(--primary)]/30 transition-colors group flex flex-col">
@@ -206,7 +208,6 @@ export default function LojaVipPage() {
                 <h3 className="font-black text-xl text-white mb-1 uppercase tracking-tight truncate">{p.name}</h3>
                 <p className="text-zinc-500 text-[11px] mb-6 line-clamp-2 leading-relaxed">{p.description}</p>
                 
-                {/* RODAPÉ DO CARD - Corrigido o esmagamento */}
                 <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between gap-4">
                    <div className="flex flex-col min-w-0">
                       <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Valor</span>
@@ -227,7 +228,7 @@ export default function LojaVipPage() {
         </div>
       </div>
 
-      {/* CARRINHO FLUTUANTE (Mantido com AnimatePresence pois é um elemento único) */}
+      {/* CARRINHO FLUTUANTE */}
       <AnimatePresence>
         {totalItens > 0 && (
           <motion.button 
@@ -247,7 +248,7 @@ export default function LojaVipPage() {
         )}
       </AnimatePresence>
 
-      {/* DRAWER DO CARRINHO (Animação Tween mais suave) */}
+      {/* DRAWER DO CARRINHO */}
       <AnimatePresence>
         {isCartOpen && (
           <>
@@ -310,7 +311,7 @@ export default function LojaVipPage() {
                     <button onClick={() => setCheckoutStep("none")} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X className="w-5 h-5"/></button>
                     <Smartphone className="w-8 h-8 text-[var(--primary)] mx-auto mb-6 animate-pulse" />
                     <h3 className="text-2xl font-black mb-1 uppercase tracking-tighter text-white">Checkout PIX</h3>
-                    <p className="text-zinc-500 font-medium mb-6 text-[11px] uppercase">Escaneie pelo app do seu banco</p>
+                    <p className="text-zinc-500 font-medium mb-6 text-[11px] uppercase">Escaneie pelo app do banco</p>
                     
                     <div className="bg-white p-3 rounded-2xl mb-6 flex justify-center border-4 border-white/5 shadow-inner">
                         <img 
@@ -331,7 +332,7 @@ export default function LojaVipPage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL DETALHES */}
+      {/* MODAL DETALHES DE PRODUTO */}
       <AnimatePresence>
         {viewProduct && (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
@@ -349,7 +350,7 @@ export default function LojaVipPage() {
                            <p className="text-3xl font-black text-white tracking-tighter">R$ {viewProduct.price.toFixed(2)}</p>
                         </div>
                         <Button onClick={() => { addToCart(viewProduct.id); setViewProduct(null); }} className="w-full sm:w-auto bg-[var(--primary)] hover:brightness-110 text-black font-black py-6 px-8 rounded-xl border-none transition-all active:scale-95">
-                            ADICIONAR
+                           ADICIONAR
                         </Button>
                     </div>
                 </motion.div>
