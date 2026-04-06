@@ -10,32 +10,35 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Slug não fornecido" }, { status: 400 });
     }
 
-    // Visão de Analista: Usamos SELECT para garantir que NUNCA enviaremos dados sensíveis
+    // Visão de Analista: SELECT estrito para performance e segurança
     const store = await prisma.user.findUnique({
       where: { 
         slug: slug.toLowerCase().trim() 
       },
       select: {
-        // CAMPOS PÚBLICOS (Seguros)
+        // CAMPOS PÚBLICOS E DE IDENTIDADE
         id: true,
+        slug: true, // Adicionado para a marca d'água funcionar 100%
         serverName: true,
+        navbarName: true,
+        footerName: true,
         slogan: true,
-        description: true,
+        description: true, // Agora o texto de boas-vindas vai aparecer!
         primaryColor: true,
         logoUrl: true,
         heroImageUrl: true,
-        isMaintenance: true, // IMPORTANTE: Para o martelo aparecer!
+        
+        // INFRAESTRUTURA
+        serverIp: true, // ESSENCIAL: Sem isso o status do MTA fica "Offline"
+        isMaintenance: true,
         termsContent: true,
         
-        // --- ADICIONADOS PARA O SHOPLAYOUT FUNCIONAR ---
-        navbarName: true,
-        footerName: true,
+        // LINKS DE REDES SOCIAIS
         discordUrl: true,
         instagramUrl: true,
         youtubeUrl: true,
-        // -----------------------------------------------
 
-        // RELAÇÕES (Incluindo apenas o necessário de cada uma)
+        // RELAÇÕES (Produtos, Regras e Ranks)
         products: {
           where: { active: true },
           select: {
@@ -50,8 +53,6 @@ export async function GET(req: Request) {
         },
         rules: true,
         ranks: true,
-        
-        // ⚠️ NUNCA COLOQUE password, email OU mpAccessToken AQUI!
       }
     });
 
@@ -59,7 +60,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Loja não encontrada" }, { status: 404 });
     }
 
-    // Visão de ADS: Cache de borda para carregar mais rápido na Vercel
+    // Visão de ADS: Cache de borda para carregamento ultra rápido
     return NextResponse.json(store, {
         headers: {
             "Cache-Control": "public, s-maxage=10, stale-while-revalidate=59"

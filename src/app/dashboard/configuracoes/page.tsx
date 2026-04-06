@@ -13,10 +13,9 @@ export default function GeneralSettingsPage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   
+  // O form agora foca apenas em Infraestrutura e Termos
   const [form, setForm] = useState({
     slug: "",
-    navbarName: "",
-    serverName: "",
     serverIp: "",
     isMaintenance: false,
     termsContent: "",
@@ -28,10 +27,9 @@ export default function GeneralSettingsPage() {
         const res = await fetch("/api/user/settings");
         if (res.ok) {
           const data = await res.json();
+          // Mapeamos apenas os campos de infra
           setForm({
             slug: data.slug || "",
-            navbarName: data.navbarName || "",
-            serverName: data.serverName || "",
             serverIp: data.serverIp || "",
             isMaintenance: data.isMaintenance || false,
             termsContent: data.termsContent || "",
@@ -86,6 +84,7 @@ export default function GeneralSettingsPage() {
       </header>
 
       <div className="grid grid-cols-1 gap-10">
+        {/* SEÇÃO 1: ACESSO E CONEXÃO */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500"><Globe className="w-6 h-6" /></div>
@@ -94,32 +93,27 @@ export default function GeneralSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slug da URL (Link Único)</label>
-              <input type="text" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" />
+              <input 
+                type="text" 
+                value={form.slug} 
+                onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} 
+                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" 
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">IP do Servidor (MTA)</label>
-              <input type="text" value={form.serverIp} onChange={(e) => setForm({...form, serverIp: e.target.value})} placeholder="192.168.1.1:22003" className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" />
+              <input 
+                type="text" 
+                value={form.serverIp} 
+                onChange={(e) => setForm({...form, serverIp: e.target.value})} 
+                placeholder="192.168.1.1:22003" 
+                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" 
+              />
             </div>
           </div>
         </section>
 
-        <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-zinc-800 rounded-2xl text-white"><Monitor className="w-6 h-6" /></div>
-            <h3 className="text-xl font-black italic uppercase text-white leading-tight">Nomes de Identidade</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Nome na Navbar (Curto)</label>
-              <input type="text" value={form.navbarName} onChange={(e) => setForm({...form, navbarName: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Nome Completo do Servidor</label>
-              <input type="text" value={form.serverName} onChange={(e) => setForm({...form, serverName: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold" />
-            </div>
-          </div>
-        </section>
-
+        {/* SEÇÃO 2: ESTADO E TERMOS */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-4">
@@ -128,12 +122,24 @@ export default function GeneralSettingsPage() {
             </div>
             <div className="flex items-center gap-4 bg-black/40 px-6 py-4 rounded-3xl border border-white/5">
               <span className="text-[10px] font-black text-zinc-500 uppercase">Modo Manutenção</span>
-              <button onClick={() => setForm({...form, isMaintenance: !form.isMaintenance})} className={`w-12 h-6 rounded-full transition-all relative ${form.isMaintenance ? 'bg-red-500' : 'bg-zinc-800'}`}>
+              <button 
+                onClick={() => setForm({...form, isMaintenance: !form.isMaintenance})} 
+                className={`w-12 h-6 rounded-full transition-all relative ${form.isMaintenance ? 'bg-red-500' : 'bg-zinc-800'}`}
+              >
                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${form.isMaintenance ? 'left-7' : 'left-1'}`} />
               </button>
             </div>
           </div>
-          <textarea rows={6} value={form.termsContent} onChange={(e) => setForm({...form, termsContent: e.target.value})} placeholder="Termos de uso e reembolso..." className="w-full bg-black border border-white/10 rounded-[32px] p-8 text-sm text-zinc-400 font-medium" />
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Conteúdo Legal (Termos e Reembolso)</label>
+            <textarea 
+              rows={8} 
+              value={form.termsContent} 
+              onChange={(e) => setForm({...form, termsContent: e.target.value})} 
+              placeholder="Descreva aqui as regras de uso e políticas de reembolso do seu servidor..." 
+              className="w-full bg-black border border-white/10 rounded-[32px] p-8 text-sm text-zinc-400 font-medium leading-relaxed focus:border-red-500/30 transition-all outline-none" 
+            />
+          </div>
         </section>
       </div>
     </div>
