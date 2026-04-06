@@ -102,24 +102,6 @@ export default function CityPortalHome() {
 
   const firstName = settings.slug?.replace(/-/g, ' ').toUpperCase() || slug?.replace(/-/g, ' ').toUpperCase() || "CITY";
 
-  if (settings.isMaintenance) {
-    return (
-      <div className="min-h-[85vh] flex items-center justify-center p-6" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
-        <div className="max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-700">
-          <div className="w-24 h-24 bg-[var(--primary)]/10 rounded-[40px] flex items-center justify-center border border-[var(--primary)]/20 mx-auto">
-            <Hammer className="w-10 h-10 text-[var(--primary)] animate-bounce" />
-          </div>
-          <h1 className="text-3xl font-black uppercase italic text-white leading-none">
-            {settings.serverName} <br/> <span className="text-[var(--primary)]">Em Obras</span>
-          </h1>
-          <p className="text-zinc-500 text-[10px] font-black uppercase italic tracking-widest leading-relaxed">
-            Estamos aplicando melhorias técnicas. Voltamos logo!
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
