@@ -123,60 +123,62 @@ export default function CityPortalHome() {
   return (
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
-    {/* 1. HERO SECTION - DIVISÃO CLARA E COMPACTA */}
-    <section className="relative min-h-[50vh] md:min-h-[60vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
+    {/* 1. HERO SECTION - ULTRA COMPACTA (ESTILO HEADER IMPACT) */}
+    <section className="relative h-[38vh] md:h-[48vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
       
-      {/* BACKGROUND COM MÁSCARA SUAVE */}
+      {/* BACKGROUND COM MÁSCARA - Reduzi a opacidade para 15% para o texto saltar mais */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-20 scale-105 transition-all duration-1000"
+        className="absolute inset-0 bg-cover bg-center opacity-15 scale-105 transition-all duration-1000"
         style={{ 
           backgroundImage: `url(${settings.heroImageUrl || "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2070&auto=format&fit=crop"})`,
-          maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
+          maskImage: 'linear-gradient(to bottom, black 30%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 30%, transparent 100%)'
         }}
       ></div>
       
       <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-transparent"></div>
       
-      <div className="relative z-10 text-center max-w-5xl py-12">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-5xl md:text-8xl font-black leading-none bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl">
+      <div className="relative z-10 text-center max-w-5xl">
+        <motion.div initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Mantivemos o tamanho grande, mas usamos leading-tight para economizar espaço vertical */}
+          <h1 className="text-5xl md:text-8xl font-black leading-tight bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter">
             {settings.serverName}
           </h1>
         </motion.div>
 
-        {/* SLOGAN CONDICIONAL */}
-        {settings.slogan && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mt-6">
-            <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.4em] text-[9px] border border-[var(--primary)]/20 px-3 py-1 rounded-full bg-[var(--primary)]/5 backdrop-blur-md">
-              {settings.slogan}
-            </span>
-          </motion.div>
-        )}
+        {/* Agrupamos Slogan e Descrição com margens menores para ganhar espaço */}
+        <div className="flex flex-col items-center gap-3 mt-4">
+          {settings.slogan && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+              <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.4em] text-[9px] border border-[var(--primary)]/20 px-3 py-1 rounded-full bg-[var(--primary)]/5 backdrop-blur-md">
+                {settings.slogan}
+              </span>
+            </motion.div>
+          )}
 
-        {/* DESCRIÇÃO - DE VOLTA E REFINADA */}
-        {settings.description && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <p className="text-[11px] md:text-sm text-zinc-500 font-medium italic leading-relaxed max-w-xl mx-auto mt-8 opacity-80 px-6">
-              {settings.description}
-            </p>
-          </motion.div>
-        )}
+          {settings.description && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+              <p className="text-[10px] md:text-xs text-zinc-500 font-medium italic leading-relaxed max-w-lg mx-auto opacity-70 px-6">
+                {settings.description}
+              </p>
+            </motion.div>
+          )}
+        </div>
 
-        {/* BOTÕES DE AÇÃO */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
+        {/* BOTÕES DE AÇÃO - Margem superior reduzida de mt-12 para mt-8 */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
           <a href={settings.serverIp ? `mtasa://${settings.serverIp}` : "#"} className="group">
             <Button 
-              className="font-black px-10 py-7 rounded-2xl text-lg transition-all group-hover:scale-105 border-none"
-              style={{ backgroundColor: "var(--primary)", color: "#000", boxShadow: `0 15px 40px ${settings.primaryColor}30` }}
+              className="font-black px-8 py-5 rounded-xl text-base transition-all group-hover:scale-105 border-none"
+              style={{ backgroundColor: "var(--primary)", color: "#000", boxShadow: `0 10px 30px ${settings.primaryColor}20` }}
             >
-              <Play className="w-5 h-5 mr-2 fill-current" /> JOGAR AGORA
+              <Play className="w-4 h-4 mr-2 fill-current" /> JOGAR AGORA
             </Button>
           </a>
           
           <Link href={`/${slug}/loja`}>
-            <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-10 py-7 rounded-2xl text-lg backdrop-blur-xl hover:bg-white/10 transition-all">
-              <ShoppingBag className="w-5 h-5 mr-2" /> VER LOJA VIP
+            <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-8 py-5 rounded-xl text-base backdrop-blur-xl hover:bg-white/10 transition-all">
+              <ShoppingBag className="w-4 h-4 mr-2" /> LOJA VIP
             </Button>
           </Link>
         </div>
