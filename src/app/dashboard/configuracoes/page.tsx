@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { 
-  Settings, Globe, ShieldAlert, FileText, 
-  Save, Loader2, Monitor, AlertTriangle
+  Settings, Globe, ShieldAlert, 
+  Save, Loader2, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function GeneralSettingsPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   
-  // O form agora foca apenas em Infraestrutura e Termos
+  // ESTADO DO AVISO FLUTUANTE (TOAST)
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  
   const [form, setForm] = useState({
     slug: "",
     serverIp: "",
@@ -27,7 +30,6 @@ export default function GeneralSettingsPage() {
         const res = await fetch("/api/user/settings");
         if (res.ok) {
           const data = await res.json();
-          // Mapeamos apenas os campos de infra
           setForm({
             slug: data.slug || "",
             serverIp: data.serverIp || "",
@@ -52,11 +54,22 @@ export default function GeneralSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (res.ok) alert("✅ Infraestrutura atualizada!");
+      
+      const data = await res.json();
+
+      if (res.ok) {
+        // Sucesso!
+        setToast({ message: "Infraestrutura atualizada com sucesso!", type: "success" });
+      } else {
+        // AQUI ESTÁ A MÁGICA: Pega o erro exato da API (Ex: "Este link já está sendo usado")
+        setToast({ message: data.error || "Erro ao salvar configurações.", type: "error" });
+      }
     } catch (error) {
-      alert("❌ Falha na sincronização.");
+      setToast({ message: "Falha na comunicação com o servidor.", type: "error" });
     } finally {
       setLoading(false);
+      // Esconde o aviso após 4 segundos
+      setTimeout(() => setToast(null), 4000);
     }
   };
 
@@ -68,7 +81,23 @@ export default function GeneralSettingsPage() {
   );
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-8 max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+      
+      {/* NOTIFICAÇÃO FLUTUANTE (TOAST) */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: 20 }} 
+            className={`fixed bottom-8 right-8 z-[200] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md font-bold text-sm ${toast.type === "success" ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-400" : "bg-red-950/90 border-red-500/30 text-red-400"}`}
+          >
+            {toast.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-10">
         <div>
           <div className="flex items-center gap-2 text-blue-500 mb-2">
@@ -97,7 +126,7 @@ export default function GeneralSettingsPage() {
                 type="text" 
                 value={form.slug} 
                 onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} 
-                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" 
+                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold focus:border-blue-500/50 outline-none transition-all" 
               />
             </div>
             <div className="space-y-2">
@@ -107,7 +136,7 @@ export default function GeneralSettingsPage() {
                 value={form.serverIp} 
                 onChange={(e) => setForm({...form, serverIp: e.target.value})} 
                 placeholder="192.168.1.1:22003" 
-                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" 
+                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold focus:border-blue-500/50 outline-none transition-all" 
               />
             </div>
           </div>
@@ -137,7 +166,7 @@ export default function GeneralSettingsPage() {
               value={form.termsContent} 
               onChange={(e) => setForm({...form, termsContent: e.target.value})} 
               placeholder="Descreva aqui as regras de uso e políticas de reembolso do seu servidor..." 
-              className="w-full bg-black border border-white/10 rounded-[32px] p-8 text-sm text-zinc-400 font-medium leading-relaxed focus:border-red-500/30 transition-all outline-none" 
+              className="w-full bg-black border border-white/10 rounded-[32px] p-8 text-sm text-zinc-400 font-medium leading-relaxed focus:border-blue-500/30 transition-all outline-none" 
             />
           </div>
         </section>
