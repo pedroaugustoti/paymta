@@ -20,6 +20,7 @@ export async function GET(req: Request) {
         id: true,
         serverName: true,
         slogan: true,
+        description: true,
         primaryColor: true,
         logoUrl: true,
         heroImageUrl: true,

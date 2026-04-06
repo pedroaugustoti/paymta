@@ -124,7 +124,6 @@ export default function CityPortalHome() {
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
       {/* HERO SECTION - MAIS ESCURA E CONTRASTADA */}
-      {/* HERO SECTION - CONTRASTE EQUILIBRADO */}
       <section className="relative h-[90vh] flex items-center justify-center px-6 overflow-hidden">
         {/* IMAGEM DE FUNDO: Aumentei a opacidade para 30% para a imagem aparecer bem */}
         <div 
