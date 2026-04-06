@@ -123,10 +123,10 @@ export default function CityPortalHome() {
   return (
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
-    {/* 1. HERO SECTION - AJUSTADA PARA NÃO CORTAR O TEXTO */}
-    <section className="relative h-[42vh] md:h-[52vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
+    {/* 1. HERO SECTION - AJUSTADA COM PADDING DE SEGURANÇA PARA ITÁLICO */}
+    <section className="relative h-[48vh] md:h-[58vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
       
-      {/* BACKGROUND - Mantido com baixa opacidade */}
+      {/* IMAGEM DE FUNDO COM OPACIDADE E MÁSCARA */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-15 scale-105 transition-all duration-1000"
         style={{ 
@@ -140,16 +140,17 @@ export default function CityPortalHome() {
       
       <div className="relative z-10 text-center max-w-5xl flex flex-col items-center">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          {/* MUDANÇA CHAVE: 
-              - leading-[0.9]: Coloca as letras bem juntas verticalmente sem cortar.
-              - pb-2: Pequeno padding na base para garantir que o brilho (drop-shadow) apareça.
+          {/* MUDANÇAS PARA NÃO CORTAR:
+              - px-10: Dá espaço lateral para a inclinação do "S" no itálico.
+              - pb-4: Garante que a base das letras e a sombra não sumam.
+              - leading-tight: Espaçamento vertical padrão e seguro.
           */}
-          <h1 className="text-5xl md:text-8xl font-black leading-[0.9] bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter pb-2">
+          <h1 className="text-6xl md:text-8xl font-black leading-tight bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter px-10 pb-4">
             {settings.serverName}
           </h1>
         </motion.div>
 
-        {/* Slogan e Descrição com margens mais controladas */}
+        {/* Bloco de Slogan e Descrição agrupados */}
         <div className="flex flex-col items-center gap-4 mt-2">
           {settings.slogan && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
@@ -169,7 +170,7 @@ export default function CityPortalHome() {
         </div>
 
         {/* BOTÕES DE AÇÃO */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
           <a href={settings.serverIp ? `mtasa://${settings.serverIp}` : "#"} className="group">
             <Button 
               className="font-black px-8 py-5 rounded-xl text-base transition-all group-hover:scale-105 border-none"
