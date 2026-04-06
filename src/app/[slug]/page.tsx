@@ -150,7 +150,7 @@ export default function CityPortalHome() {
             <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1 rounded-full bg-[var(--primary)]/10 backdrop-blur-md shadow-xl">
               {settings.slogan}
             </span>
-            <p className="text-sm md:text-xl text-zinc-300 font-medium italic leading-relaxed px-4 drop-shadow-md">
+            <p className="text-sm md:text-xl text-zinc-300 font-medium italic leading-relaxed px-5 drop-shadow-md">
               {settings.description}
             </p>
           </motion.div>
