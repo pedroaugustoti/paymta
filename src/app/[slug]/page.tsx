@@ -147,9 +147,12 @@ export default function CityPortalHome() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
             className="mt-12 max-w-3xl mx-auto space-y-6"
           >
-            <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1 rounded-full bg-[var(--primary)]/10 backdrop-blur-md shadow-xl">
-              {settings.slogan}
-            </span>
+            {/* SLOGAN COM RENDERIZAÇÃO CONDICIONAL */}
+            {settings.slogan && (
+              <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1 rounded-full bg-[var(--primary)]/10 backdrop-blur-md shadow-xl">
+                {settings.slogan}
+              </span>
+            )}
             <p className="text-xs md:text-base text-zinc-500 font-normal leading-relaxed max-w-2xl mx-auto mt-10 opacity-80 px-6">
               {settings.description}
             </p>
