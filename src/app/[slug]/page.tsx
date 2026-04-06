@@ -123,55 +123,56 @@ export default function CityPortalHome() {
   return (
     <div className="w-full bg-[#030303] text-white font-sans overflow-x-hidden selection:bg-[var(--primary)] selection:text-black" style={{ "--primary": settings.primaryColor || "#facb11" } as any}>
       
-      {/* HERO SECTION - MAIS ESCURA E CONTRASTADA */}
-      <section className="relative h-[90vh] flex items-center justify-center px-6 overflow-hidden">
-        {/* IMAGEM DE FUNDO: Aumentei a opacidade para 30% para a imagem aparecer bem */}
+      {/* HERO SECTION - ALTURA REDUZIDA E TRANSIÇÃO REFINADA */}
+      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center px-6 overflow-hidden border-b border-white/5">
+        
+        {/* IMAGEM DE FUNDO COM MÁSCARA DE GRADIENTE */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-30 scale-105 transition-all duration-1000"
-          style={{ backgroundImage: `url(${settings.heroImageUrl || "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2070&auto=format&fit=crop"})` }} // Coloquei um wallpaper provisório caso o DB esteja vazio, só para você ver o efeito!
+          className="absolute inset-0 bg-cover bg-center opacity-25 scale-105 transition-all duration-1000"
+          style={{ 
+            backgroundImage: `url(${settings.heroImageUrl || "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2070&auto=format&fit=crop"})`,
+            maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+          }}
         ></div>
         
-        {/* PELÍCULA ESCURA: Reduzi para 60% para não "engolir" o banner */}
-        <div className="absolute inset-0 bg-black/60"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/80 to-transparent"></div>
+        {/* CAMADAS DE COR E PROFUNDIDADE */}
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-transparent"></div>
         
         <div className="relative z-10 text-center max-w-5xl">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            {/* O drop-shadow continua aqui para destacar o INVICTUS */}
-            <h1 className="text-6xl md:text-[10rem] font-black leading-[0.85] bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent uppercase italic pr-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+            <h1 className="text-5xl md:text-8xl font-black leading-none bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
               {settings.serverName}
             </h1>
           </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-            className="mt-12 max-w-3xl mx-auto space-y-6"
-          >
-            {/* SLOGAN COM RENDERIZAÇÃO CONDICIONAL */}
-            {settings.slogan && (
-              <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1 rounded-full bg-[var(--primary)]/10 backdrop-blur-md shadow-xl">
+          {/* RENDERIZAÇÃO CONDICIONAL DO SLOGAN */}
+          {settings.slogan && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+              className="mt-8"
+            >
+              <span className="text-[var(--primary)] font-black uppercase italic tracking-[0.5em] text-[10px] border border-[var(--primary)]/20 px-4 py-1.5 rounded-full bg-[var(--primary)]/5 backdrop-blur-md">
                 {settings.slogan}
               </span>
-            )}
-            <p className="text-xs md:text-base text-zinc-500 font-normal leading-relaxed max-w-2xl mx-auto mt-10 opacity-80 px-6">
-              {settings.description}
-            </p>
-          </motion.div>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16">
-            {/* PROTOCOLO MTASA */}
+            </motion.div>
+          )}
+
+          {/* BOTÕES DE AÇÃO - MAIS COMPACTOS */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
             <a href={settings.serverIp ? `mtasa://${settings.serverIp}` : "#"} className="group">
               <Button 
-                className="font-black px-14 py-9 rounded-3xl text-xl transition-all group-hover:scale-105 shadow-2xl border-none"
-                style={{ backgroundColor: "var(--primary)", color: "#000", boxShadow: `0 20px 60px ${settings.primaryColor}40` }}
+                className="font-black px-10 py-7 rounded-2xl text-lg transition-all group-hover:scale-105 border-none"
+                style={{ backgroundColor: "var(--primary)", color: "#000", boxShadow: `0 15px 40px ${settings.primaryColor}30` }}
               >
-                <Play className="w-6 h-6 mr-3 fill-current" /> JOGAR AGORA
+                <Play className="w-5 h-5 mr-2 fill-current" /> JOGAR AGORA
               </Button>
             </a>
             
             <Link href={`/${slug}/loja`}>
-              <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-14 py-9 rounded-3xl text-xl backdrop-blur-xl hover:bg-white/10 transition-all shadow-2xl">
-                <ShoppingBag className="w-6 h-6 mr-3" /> VER LOJA VIP
+              <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-10 py-7 rounded-2xl text-lg backdrop-blur-xl hover:bg-white/10 transition-all">
+                <ShoppingBag className="w-5 h-5 mr-2" /> LOJA VIP
               </Button>
             </Link>
           </div>
