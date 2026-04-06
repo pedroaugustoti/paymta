@@ -5,14 +5,14 @@ import {
   LogOut, Disc as Discord, ShieldCheck, CreditCard, 
   Landmark, Loader2, Globe, Zap, MessageSquare, 
   ChevronRight, ExternalLink, ShieldAlert, Camera,
-  Menu, X // <-- Adicionados para o Menu Mobile
+  Menu, X, Hammer // <-- HAMMER ADICIONADO AQUI
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion"; // <-- Adicionado para a animação do Menu
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -22,7 +22,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   
   const [settings, setSettings] = useState<any>(null);
   const [error, setError] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado do Menu Mobile
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadConfigs() {
@@ -41,7 +41,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     if (slug) loadConfigs();
   }, [slug, pathname]);
 
-  // TELA DE 404 PERSONALIZADA
+  // 1. TELA DE 404 (NÃO ENCONTRADO)
   if (error) return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-center p-6 text-white">
       <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20 mb-6">
@@ -59,13 +59,38 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 
-  // LOADING STATE
+  // 2. TELA DE LOADING
   if (!settings) return (
     <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center gap-4">
       <Loader2 className="w-10 h-10 animate-spin text-zinc-800" />
       <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.5em]">Sincronizando {slug}...</span>
     </div>
   );
+
+  // =========================================================================
+  // 3. TELA DE MANUTENÇÃO: BLOQUEIA TODO O SITE E SUBSTITUI O LAYOUT
+  // =========================================================================
+  if (settings.isMaintenance) {
+    return (
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center bg-[#030303] text-white p-6"
+        style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
+      >
+        <div className="max-w-lg w-full text-center space-y-8 animate-in fade-in zoom-in duration-700">
+          <div className="w-28 h-28 bg-[var(--primary)]/10 rounded-[40px] flex items-center justify-center border border-[var(--primary)]/20 mx-auto shadow-[0_0_50px_var(--primary)] shadow-[var(--primary)]/10">
+            <Hammer className="w-12 h-12 text-[var(--primary)] animate-bounce" />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black uppercase italic text-white leading-none tracking-tighter">
+            {settings.navbarName || settings.serverName} <br/> <span className="text-[var(--primary)]">Em Obras</span>
+          </h1>
+          <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase italic tracking-[0.3em] leading-relaxed">
+            Estamos aplicando melhorias técnicas. Voltamos logo!
+          </p>
+        </div>
+      </div>
+    );
+  }
+  // =========================================================================
 
   const navLinks = [
     { label: "Início", href: `/${slug}` },
@@ -76,6 +101,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
   const displayFooterName = settings.footerName || settings.serverName;
 
+  // 4. LAYOUT NORMAL (Se não estiver em manutenção)
   return (
     <div 
       className="min-h-screen flex flex-col bg-[#030303] text-white font-sans selection:bg-[var(--primary)] selection:text-black"
@@ -112,7 +138,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             </div>
           </Link>
 
-          {/* NAV CENTRAL (Oculta no Mobile/Tablet) */}
+          {/* NAV CENTRAL */}
           <nav className="hidden lg:flex items-center gap-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -194,7 +220,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
               );
             })}
             
-            {/* Opções de usuário no Mobile */}
             {session ? (
               <button 
                 onClick={() => { signOut(); setIsMobileMenuOpen(false); }} 

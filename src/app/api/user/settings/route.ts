@@ -96,7 +96,7 @@ export async function PATCH(req: Request) {
     console.error("ERRO_PATCH_SETTINGS:", error);
     
     if (error.code === 'P2002') {
-      return NextResponse.json({ error: "Este link (slug) já está sendo usado por outra loja." }, { status: 400 });
+      return NextResponse.json({ error: "Este endereço já está sendo usado por outra loja." }, { status: 400 });
     }
 
     return NextResponse.json({ error: "Erro interno ao salvar no banco de dados." }, { status: 500 });
