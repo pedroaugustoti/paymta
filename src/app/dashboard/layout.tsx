@@ -14,7 +14,6 @@ import {
 import { LogoutButton } from "./logout-button";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  // 1. VALIDAÇÃO DE SESSÃO NO CLIENTE
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -25,7 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userSettings, setUserSettings] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // 2. BUSCA DE DADOS NA API
+  // Busca assíncrona não-bloqueante
   useEffect(() => {
     if (status === "authenticated") {
       fetch("/api/user/settings")
@@ -35,19 +34,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [status]);
 
-  // TELA DE CARREGAMENTO ENQUANTO VALIDA A SESSÃO E BUSCA DADOS
-  if (status === "loading" || !userSettings) {
+  // Se a sessão principal do NextAuth estiver carregando, mostra o loader inicial
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-10 h-10 animate-spin text-yellow-400" />
         <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.3em] animate-pulse">
-          Iniciando Painel...
+          Autenticando Sessão...
         </span>
       </div>
     );
   }
 
-  // 3. COMPONENTE DO MENU (Reaproveitado no PC e Celular)
   const SidebarContent = () => (
     <>
       <div className="p-6 flex items-center gap-4 border-b border-white/5">
@@ -55,7 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {userSettings?.logoUrl ? (
             <img src={userSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
           ) : (
-            <span>{(userSettings?.serverName || "P").charAt(0)}</span>
+            <span>{(userSettings?.serverName || session?.user?.name || "P").charAt(0)}</span>
           )}
         </div>
         <div className="flex flex-col overflow-hidden">
@@ -75,7 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       <div className="px-6 py-5 border-b border-white/5 flex items-center gap-3 bg-white/[0.02]">
-        <div className="relative">
+        <div className="relative shrink-0">
           {session?.user?.image ? (
             <Image 
               src={session.user.image} 
@@ -91,7 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex flex-col overflow-hidden">
           <span className="text-sm font-black text-white truncate italic uppercase tracking-tighter">
-            {session?.user?.name?.split(' ')[0]}
+            {session?.user?.name?.split(' ')[0] || "Admin"}
           </span>
           <span className="text-[10px] text-zinc-500 truncate font-medium">Administrador</span>
         </div>
@@ -123,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-[#030303] text-white flex flex-col md:flex-row font-sans">
       
-      {/* 📱 HEADER MOBILE (Visível apenas em telas pequenas) */}
+      {/* HEADER MOBILE */}
       <div className="md:hidden flex items-center justify-between p-4 bg-zinc-950 border-b border-white/5 sticky top-0 z-40 shadow-xl">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-black bg-yellow-400">
@@ -131,17 +129,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <span className="text-sm font-black tracking-widest uppercase text-zinc-100">PayMTA</span>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-zinc-400 hover:text-white bg-white/5 rounded-lg border border-white/10">
+        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-zinc-400 hover:text-white bg-white/5 rounded-lg border border-white/10" aria-label="Abrir Menu">
           <Menu className="w-5 h-5" />
         </button>
       </div>
 
-      {/* 💻 SIDEBAR DESKTOP (Fixa no PC, Oculta no Mobile) */}
-      <aside className="hidden md:flex w-64 lg:w-72 border-r border-white/5 bg-zinc-950 flex-col sticky top-0 h-screen shadow-2xl shadow-black shrink-0">
+      {/* SIDEBAR DESKTOP */}
+      <aside className="hidden md:flex w-64 lg:w-72 border-r border-white/5 bg-zinc-950 flex-col sticky top-0 h-screen shadow-2xl shrink-0">
         <SidebarContent />
       </aside>
 
-      {/* 📱 SIDEBAR MOBILE (Gaveta flutuante animada) */}
+      {/* SIDEBAR MOBILE */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -155,7 +153,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className="fixed top-0 left-0 w-72 h-full bg-zinc-950 border-r border-white/5 z-[101] flex flex-col shadow-2xl md:hidden"
             >
               <div className="absolute top-4 right-4 z-50">
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-white/5 border border-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-white/5 border border-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors" aria-label="Fechar Menu">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -165,7 +163,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </AnimatePresence>
 
-      {/* CONTEÚDO PRINCIPAL DA PÁGINA */}
+      {/* CONTEÚDO */}
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#030303] w-full max-w-full">
         {children}
       </main>
@@ -173,7 +171,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 
-// COMPONENTE DE LINK REAPROVEITÁVEL
 function NavLink({ href, icon, label, onClick }: { href: string; icon: React.ReactNode; label: string; onClick?: () => void }) {
   return (
     <Link 
