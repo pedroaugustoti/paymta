@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Check, Zap, Shield, Crown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -70,10 +67,10 @@ export default function PlanosPage() {
         {/* Grid de Planos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {planos.map((plano) => (
-            <motion.div 
+            <div 
               key={plano.nome}
-              whileHover={{ y: -10 }}
-              className={`relative bg-[#09090b] p-8 rounded-[32px] border ${plano.border} flex flex-col`}
+              // PERFORMANCE FIX: Trocamos o Framer Motion por hover nativo do CSS
+              className={`relative bg-[#09090b] p-8 rounded-[32px] border ${plano.border} flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-yellow-500/10`}
             >
               {plano.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[10px] font-black uppercase px-4 py-1 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.3)]">
@@ -99,14 +96,14 @@ export default function PlanosPage() {
               <ul className="space-y-4 mb-10 flex-1">
                 {plano.features.map((feat) => (
                   <li key={feat} className="flex items-center gap-3 text-sm font-bold text-zinc-400">
-                    <Check size={16} className="text-emerald-500" />
+                    <Check size={16} className="text-emerald-500 shrink-0" />
                     {feat}
                   </li>
                 ))}
               </ul>
 
-              <Link href="/login" className="w-full">
-                <Button className={`w-full py-6 rounded-2xl font-black transition-all ${
+              <Link href="/login" className="w-full mt-auto">
+                <Button className={`w-full py-6 rounded-2xl font-black transition-all hover:scale-[1.02] active:scale-[0.98] ${
                   plano.popular 
                     ? "bg-yellow-400 hover:bg-yellow-500 text-black shadow-lg shadow-yellow-500/10" 
                     : "bg-white/5 hover:bg-white/10 text-white border border-white/5"
@@ -114,7 +111,7 @@ export default function PlanosPage() {
                   {plano.cta}
                 </Button>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -122,10 +119,10 @@ export default function PlanosPage() {
         <div className="mt-20 p-8 rounded-[32px] border border-white/5 bg-[#050505] text-center max-w-3xl mx-auto">
           <p className="text-zinc-500 text-sm font-medium">
             Precisa de um plano personalizado para uma rede de servidores? <br/>
-            <a href="https://discord.gg/seu-link" className="text-yellow-400 font-bold hover:underline">Entre em contato com o nosso comercial no Discord.</a>
+            <a href="https://discord.gg/seu-link" target="_blank" rel="noopener noreferrer" className="text-yellow-400 font-bold hover:underline">Entre em contato com o nosso comercial no Discord.</a>
           </p>
         </div>
       </div>
     </main>
   );
-} 
+}
