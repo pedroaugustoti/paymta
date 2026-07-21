@@ -1,5 +1,3 @@
-"use client";
-
 import { Server, ShieldAlert, Gavel, FileText, AlertTriangle } from "lucide-react";
 
 export default function TermosPage() {

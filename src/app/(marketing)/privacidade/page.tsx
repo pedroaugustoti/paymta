@@ -1,5 +1,3 @@
-"use client";
-
 import { Lock, EyeOff, DatabaseZap, CheckCircle2 } from "lucide-react";
 
 export default function PrivacidadePage() {

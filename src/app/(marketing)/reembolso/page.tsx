@@ -1,5 +1,3 @@
-"use client";
-
 import { RefreshCcw, AlertOctagon, Scale, AlertTriangle } from "lucide-react";
 
 export default function ReembolsoPage() {
