@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -12,57 +12,29 @@ import {
   FileText, Menu, X, Loader2
 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
+import { DashboardProvider, useDashboard } from "./dashboard-context"; // Importando o context que criamos
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession({
-    required: true,
-    onUnauthenticated() {
-      redirect("/api/auth/signin");
-    },
-  });
+// Componente interno para ler os dados já cacheados da sidebar
+function SidebarWithData({ session, isMobileMenuOpen, setIsMobileMenuOpen }: any) {
+  const { settings } = useDashboard();
 
-  const [userSettings, setUserSettings] = useState<any>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Busca assíncrona não-bloqueante
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/user/settings")
-        .then((res) => res.json())
-        .then((data) => setUserSettings(data))
-        .catch(() => console.error("Erro ao carregar configurações do painel"));
-    }
-  }, [status]);
-
-  // Se a sessão principal do NextAuth estiver carregando, mostra o loader inicial
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="w-10 h-10 animate-spin text-yellow-400" />
-        <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.3em] animate-pulse">
-          Autenticando Sessão...
-        </span>
-      </div>
-    );
-  }
-
-  const SidebarContent = () => (
+  return (
     <>
       <div className="p-6 flex items-center gap-4 border-b border-white/5">
         <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-black text-lg shadow-[0_0_20px_rgba(234,179,8,0.2)] overflow-hidden bg-yellow-400 shrink-0">
-          {userSettings?.logoUrl ? (
-            <img src={userSettings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+          {settings?.logoUrl ? (
+            <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
           ) : (
-            <span>{(userSettings?.serverName || session?.user?.name || "P").charAt(0)}</span>
+            <span>{(settings?.serverName || session?.user?.name || "P").charAt(0)}</span>
           )}
         </div>
         <div className="flex flex-col overflow-hidden">
           <span className="text-xs font-black tracking-widest leading-none uppercase truncate text-zinc-100">
-            {userSettings?.serverName || "Painel PayMTA"}
+            {settings?.serverName || "Painel PayMTA"}
           </span>
-          {userSettings?.slug && (
+          {settings?.slug && (
             <Link 
-              href={`/${userSettings.slug}`} 
+              href={`/${settings.slug}`} 
               target="_blank"
               className="text-[10px] text-zinc-500 hover:text-yellow-400 flex items-center gap-1 mt-1.5 transition-colors font-bold italic"
             >
@@ -80,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               alt="Avatar" 
               width={38} 
               height={38} 
-              className="rounded-full border-2 border-yellow-500/20"
+              className="rounded-full border-2 border-yellow-500/25"
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/10" />
@@ -117,57 +89,81 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
     </>
   );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect("/api/auth/signin");
+    },
+  });
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-yellow-400" />
+        <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.3em] animate-pulse">
+          Autenticando Sessão...
+        </span>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white flex flex-col md:flex-row font-sans">
-      
-      {/* HEADER MOBILE */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-zinc-950 border-b border-white/5 sticky top-0 z-40 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-black bg-yellow-400">
-            {(userSettings?.serverName || "P").charAt(0)}
+    <DashboardProvider>
+      <div className="min-h-screen bg-[#030303] text-white flex flex-col md:flex-row font-sans">
+        
+        {/* HEADER MOBILE */}
+        <div className="md:hidden flex items-center justify-between p-4 bg-zinc-950 border-b border-white/5 sticky top-0 z-40 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-black bg-yellow-400">
+              P
+            </div>
+            <span className="text-sm font-black tracking-widest uppercase text-zinc-100">PayMTA</span>
           </div>
-          <span className="text-sm font-black tracking-widest uppercase text-zinc-100">PayMTA</span>
+          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-zinc-400 hover:text-white bg-white/5 rounded-lg border border-white/10" aria-label="Abrir Menu">
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-zinc-400 hover:text-white bg-white/5 rounded-lg border border-white/10" aria-label="Abrir Menu">
-          <Menu className="w-5 h-5" />
-        </button>
+
+        {/* SIDEBAR DESKTOP */}
+        <aside className="hidden md:flex w-64 lg:w-72 border-r border-white/5 bg-zinc-950 flex-col sticky top-0 h-screen shadow-2xl shrink-0">
+          <SidebarWithData session={session} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+        </aside>
+
+        {/* SIDEBAR MOBILE */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="fixed inset-0 bg-black/80 z-[100] md:hidden backdrop-blur-sm" 
+              />
+              <motion.aside 
+                initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "tween", duration: 0.3 }}
+                className="fixed top-0 left-0 w-72 h-full bg-zinc-950 border-r border-white/5 z-[101] flex flex-col shadow-2xl md:hidden"
+              >
+                <div className="absolute top-4 right-4 z-50">
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-white/5 border border-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors" aria-label="Fechar Menu">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <SidebarWithData session={session} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* CONTEÚDO */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#030303] w-full max-w-full">
+          {children}
+        </main>
       </div>
-
-      {/* SIDEBAR DESKTOP */}
-      <aside className="hidden md:flex w-64 lg:w-72 border-r border-white/5 bg-zinc-950 flex-col sticky top-0 h-screen shadow-2xl shrink-0">
-        <SidebarContent />
-      </aside>
-
-      {/* SIDEBAR MOBILE */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)} 
-              className="fixed inset-0 bg-black/80 z-[100] md:hidden backdrop-blur-sm" 
-            />
-            <motion.aside 
-              initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "tween", duration: 0.3 }}
-              className="fixed top-0 left-0 w-72 h-full bg-zinc-950 border-r border-white/5 z-[101] flex flex-col shadow-2xl md:hidden"
-            >
-              <div className="absolute top-4 right-4 z-50">
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-white/5 border border-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors" aria-label="Fechar Menu">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <SidebarContent />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* CONTEÚDO */}
-      <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#030303] w-full max-w-full">
-        {children}
-      </main>
-    </div>
+    </DashboardProvider>
   );
 }
 

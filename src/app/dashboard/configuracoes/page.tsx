@@ -6,11 +6,11 @@ import {
   Save, Loader2, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDashboard } from "../dashboard-context"; // Importando o context global
 
 export default function GeneralSettingsPage() {
-  const { data: session } = useSession();
+  const { settings, refreshSettings } = useDashboard();
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   
@@ -21,26 +21,17 @@ export default function GeneralSettingsPage() {
     termsContent: "",
   });
 
-  // Busca inicial não-bloqueante otimizada
+  // Preenche o formulário assim que os dados globais estiverem disponíveis em memória
   useEffect(() => {
-    async function loadSettings() {
-      try {
-        const res = await fetch("/api/user/settings");
-        if (res.ok) {
-          const data = await res.json();
-          setForm({
-            slug: data.slug || "",
-            serverIp: data.serverIp || "",
-            isMaintenance: data.isMaintenance || false,
-            termsContent: data.termsContent || "",
-          });
-        }
-      } catch (err) {
-        console.error("Erro ao carregar configurações gerais:", err);
-      }
+    if (settings) {
+      setForm({
+        slug: settings.slug || "",
+        serverIp: settings.serverIp || "",
+        isMaintenance: settings.isMaintenance || false,
+        termsContent: settings.termsContent || "",
+      });
     }
-    if (session) loadSettings();
-  }, [session]);
+  }, [settings]);
 
   const handleSave = async () => {
     setLoading(true);
@@ -54,6 +45,7 @@ export default function GeneralSettingsPage() {
 
       if (res.ok) {
         setToast({ message: "Infraestrutura atualizada com sucesso!", type: "success" });
+        await refreshSettings(); // Atualiza o cache global em segundo plano
       } else {
         setToast({ message: data.error || "Erro ao salvar configurações.", type: "error" });
       }
