@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Palette, ImageIcon, Info, Save, Loader2, 
+  Palette, Save, Loader2, 
   CheckCircle2, AlertCircle, LayoutTemplate, 
   Disc as Discord, Camera, Video, Link2, Type,
   Monitor
@@ -17,7 +17,6 @@ export default function AppearancePage() {
   const [fetching, setFetching] = useState(true);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   
-  // Estado unificado com Identidade, Textos e Visual 
   const [form, setForm] = useState({
     serverName: "",
     navbarName: "",
@@ -69,9 +68,13 @@ export default function AppearancePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (res.ok) setToast({ message: "Identidade visual atualizada!", type: "success" });
+      if (res.ok) {
+        setToast({ message: "Identidade visual atualizada com sucesso!", type: "success" });
+      } else {
+        setToast({ message: "Erro ao salvar design.", type: "error" });
+      }
     } catch (error) {
-      setToast({ message: "Erro ao salvar design.", type: "error" });
+      setToast({ message: "Falha na comunicação com o servidor.", type: "error" });
     } finally {
       setLoading(false);
       setTimeout(() => setToast(null), 4000);
@@ -105,14 +108,12 @@ export default function AppearancePage() {
           <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Design da Loja</h1>
           <p className="text-zinc-500 text-sm font-medium mt-1">Personalize a identidade, cores e mensagens da sua marca.</p>
         </div>
-        <Button onClick={handleSave} disabled={loading} className="bg-white hover:bg-zinc-200 text-black font-black px-10 py-7 rounded-2xl flex items-center gap-2 transition-all">
+        <Button onClick={handleSave} disabled={loading} className="bg-white hover:bg-zinc-200 text-black font-black px-10 py-7 rounded-2xl flex items-center gap-2 transition-all cursor-pointer">
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> ATUALIZAR DESIGN</>}
         </Button>
       </header>
 
       <div className="grid grid-cols-1 gap-8">
-        
-        {/* SEÇÃO 1: NOMES DE IDENTIDADE (Movido de Configurações Gerais)  */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-zinc-800 rounded-2xl text-white"><Monitor className="w-6 h-6" /></div>
@@ -121,26 +122,15 @@ export default function AppearancePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Nome na Navbar (Curto)</label>
-              <input 
-                type="text" 
-                value={form.navbarName} 
-                onChange={(e) => setForm({...form, navbarName: e.target.value})} 
-                className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold focus:border-yellow-500/50 outline-none transition-all" 
-              />
+              <input type="text" value={form.navbarName} onChange={(e) => setForm({...form, navbarName: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold focus:border-yellow-500/50 outline-none transition-all" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Nome Completo do Servidor</label>
-              <input 
-                type="text" 
-                value={form.serverName} 
-                onChange={(e) => setForm({...form, serverName: e.target.value})} 
-                className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold focus:border-yellow-500/50 outline-none transition-all" 
-              />
+              <input type="text" value={form.serverName} onChange={(e) => setForm({...form, serverName: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold focus:border-yellow-500/50 outline-none transition-all" />
             </div>
           </div>
         </section>
 
-        {/* SEÇÃO 2: TEXTOS DE IMPACTO  */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-yellow-500/10 rounded-2xl text-yellow-500"><Type className="w-6 h-6" /></div>
@@ -149,7 +139,7 @@ export default function AppearancePage() {
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slogan Principal (Hero)</label>
-              <input type="text" value={form.slogan} onChange={(e) => setForm({...form, slogan: e.target.value})} placeholder="Ex: O melhor Roleplay do Brasil." className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" />
+              <input type="text" value={form.slogan} onChange={(e) => setForm({...form, slogan: e.target.value})} placeholder="Ex: O melhor Roleplay do Brasil." className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold outline-none focus:border-yellow-500/30" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Descrição / Boas-Vindas</label>
@@ -157,18 +147,11 @@ export default function AppearancePage() {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Nome de Copyright (Rodapé)</label>
-              <input 
-                type="text" 
-                value={form.footerName} 
-                onChange={(e) => setForm({...form, footerName: e.target.value})}
-                placeholder="Ex: Brasil Roleplay Oficial" 
-                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm focus:border-yellow-500/50 outline-none text-white font-bold transition-all"
-              />
+              <input type="text" value={form.footerName} onChange={(e) => setForm({...form, footerName: e.target.value})} placeholder="Ex: Brasil Roleplay Oficial" className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm focus:border-yellow-500/50 outline-none text-white font-bold transition-all" />
             </div>
           </div>
         </section>
 
-        {/* SEÇÃO 3: CORES E MEDIA  */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-500"><LayoutTemplate className="w-6 h-6" /></div>
@@ -184,16 +167,15 @@ export default function AppearancePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">URL da Logo (Fundo Transparente)</label>
-              <input type="text" value={form.logoUrl} onChange={(e) => setForm({...form, logoUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" />
+              <input type="text" value={form.logoUrl} onChange={(e) => setForm({...form, logoUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold outline-none focus:border-yellow-500/30" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">URL do Banner Principal (Hero)</label>
-              <input type="text" value={form.heroImageUrl} onChange={(e) => setForm({...form, heroImageUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold" />
+              <input type="text" value={form.heroImageUrl} onChange={(e) => setForm({...form, heroImageUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold outline-none focus:border-yellow-500/30" />
             </div>
           </div>
         </section>
 
-        {/* SEÇÃO 4: REDES SOCIAIS  */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500"><Link2 className="w-6 h-6" /></div>
@@ -202,15 +184,15 @@ export default function AppearancePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase flex items-center gap-2 ml-1"><Discord size={14}/> Discord</label>
-              <input type="text" value={form.discordUrl} onChange={(e) => setForm({...form, discordUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold" />
+              <input type="text" value={form.discordUrl} onChange={(e) => setForm({...form, discordUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold outline-none focus:border-emerald-500/30" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase flex items-center gap-2 ml-1"><Camera size={14}/> Instagram</label>
-              <input type="text" value={form.instagramUrl} onChange={(e) => setForm({...form, instagramUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold" />
+              <input type="text" value={form.instagramUrl} onChange={(e) => setForm({...form, instagramUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold outline-none focus:border-emerald-500/30" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase flex items-center gap-2 ml-1"><Video size={14}/> YouTube</label>
-              <input type="text" value={form.youtubeUrl} onChange={(e) => setForm({...form, youtubeUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold" />
+              <input type="text" value={form.youtubeUrl} onChange={(e) => setForm({...form, youtubeUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-2xl p-5 text-sm text-white font-bold outline-none focus:border-emerald-500/30" />
             </div>
           </div>
         </section>

@@ -13,8 +13,6 @@ export default function GeneralSettingsPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  
-  // ESTADO DO AVISO FLUTUANTE (TOAST)
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   
   const [form, setForm] = useState({
@@ -54,21 +52,17 @@ export default function GeneralSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      
       const data = await res.json();
 
       if (res.ok) {
-        // Sucesso!
         setToast({ message: "Infraestrutura atualizada com sucesso!", type: "success" });
       } else {
-        // AQUI ESTÁ A MÁGICA: Pega o erro exato da API (Ex: "Este link já está sendo usado")
         setToast({ message: data.error || "Erro ao salvar configurações.", type: "error" });
       }
     } catch (error) {
       setToast({ message: "Falha na comunicação com o servidor.", type: "error" });
     } finally {
       setLoading(false);
-      // Esconde o aviso após 4 segundos
       setTimeout(() => setToast(null), 4000);
     }
   };
@@ -82,16 +76,9 @@ export default function GeneralSettingsPage() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
-      
-      {/* NOTIFICAÇÃO FLUTUANTE (TOAST) */}
       <AnimatePresence>
         {toast && (
-          <motion.div 
-            initial={{ opacity: 0, y: 50 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            exit={{ opacity: 0, y: 20 }} 
-            className={`fixed bottom-8 right-8 z-[200] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md font-bold text-sm ${toast.type === "success" ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-400" : "bg-red-950/90 border-red-500/30 text-red-400"}`}
-          >
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className={`fixed bottom-8 right-8 z-[200] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md font-bold text-sm ${toast.type === "success" ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-400" : "bg-red-950/90 border-red-500/30 text-red-400"}`}>
             {toast.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
             {toast.message}
           </motion.div>
@@ -107,13 +94,12 @@ export default function GeneralSettingsPage() {
           <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Configurações Gerais</h1>
           <p className="text-zinc-500 text-sm font-medium mt-1">Gerencie a infraestrutura básica e diretrizes do portal.</p>
         </div>
-        <Button onClick={handleSave} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-7 rounded-2xl flex items-center gap-2 transition-all">
+        <Button onClick={handleSave} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-7 rounded-2xl flex items-center gap-2 transition-all cursor-pointer">
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> SALVAR CONFIGS</>}
         </Button>
       </header>
 
       <div className="grid grid-cols-1 gap-10">
-        {/* SEÇÃO 1: ACESSO E CONEXÃO */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500"><Globe className="w-6 h-6" /></div>
@@ -122,27 +108,15 @@ export default function GeneralSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Slug da URL (Link Único)</label>
-              <input 
-                type="text" 
-                value={form.slug} 
-                onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} 
-                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold focus:border-blue-500/50 outline-none transition-all" 
-              />
+              <input type="text" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold focus:border-blue-500/50 outline-none transition-all" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">IP do Servidor (MTA)</label>
-              <input 
-                type="text" 
-                value={form.serverIp} 
-                onChange={(e) => setForm({...form, serverIp: e.target.value})} 
-                placeholder="192.168.1.1:22003" 
-                className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold focus:border-blue-500/50 outline-none transition-all" 
-              />
+              <input type="text" value={form.serverIp} onChange={(e) => setForm({...form, serverIp: e.target.value})} placeholder="192.168.1.1:22003" className="w-full bg-black border border-white/10 rounded-2xl py-5 px-6 text-sm text-white font-bold focus:border-blue-500/50 outline-none transition-all" />
             </div>
           </div>
         </section>
 
-        {/* SEÇÃO 2: ESTADO E TERMOS */}
         <section className="bg-zinc-950/50 border border-white/5 p-10 rounded-[40px] shadow-2xl backdrop-blur-sm">
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-4">
@@ -151,23 +125,14 @@ export default function GeneralSettingsPage() {
             </div>
             <div className="flex items-center gap-4 bg-black/40 px-6 py-4 rounded-3xl border border-white/5">
               <span className="text-[10px] font-black text-zinc-500 uppercase">Modo Manutenção</span>
-              <button 
-                onClick={() => setForm({...form, isMaintenance: !form.isMaintenance})} 
-                className={`w-12 h-6 rounded-full transition-all relative ${form.isMaintenance ? 'bg-red-500' : 'bg-zinc-800'}`}
-              >
+              <button onClick={() => setForm({...form, isMaintenance: !form.isMaintenance})} className={`w-12 h-6 rounded-full transition-all relative cursor-pointer ${form.isMaintenance ? 'bg-red-500' : 'bg-zinc-800'}`}>
                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${form.isMaintenance ? 'left-7' : 'left-1'}`} />
               </button>
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-black text-zinc-500 uppercase ml-1">Conteúdo Legal (Termos e Reembolso)</label>
-            <textarea 
-              rows={8} 
-              value={form.termsContent} 
-              onChange={(e) => setForm({...form, termsContent: e.target.value})} 
-              placeholder="Descreva aqui as regras de uso e políticas de reembolso do seu servidor..." 
-              className="w-full bg-black border border-white/10 rounded-[32px] p-8 text-sm text-zinc-400 font-medium leading-relaxed focus:border-blue-500/30 transition-all outline-none" 
-            />
+            <textarea rows={8} value={form.termsContent} onChange={(e) => setForm({...form, termsContent: e.target.value})} placeholder="Descreva aqui as regras de uso e políticas de reembolso do seu servidor..." className="w-full bg-black border border-white/10 rounded-[32px] p-8 text-sm text-zinc-400 font-medium leading-relaxed focus:border-blue-500/30 transition-all outline-none" />
           </div>
         </section>
       </div>
