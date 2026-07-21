@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
-  LayoutDashboard, Palette, Zap, Package, 
+  Palette, Zap, Package, 
   ReceiptText, ArrowRight, TrendingUp, Activity, 
-  ShieldCheck, Loader2, MousePointer2
+  ShieldCheck, Loader2, MousePointer2, LayoutDashboard
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -29,22 +29,18 @@ export default function DashboardHome() {
   useEffect(() => {
     async function loadStats() {
       try {
-        // Tenta buscar os dados reais da sua API
         const res = await fetch("/api/dashboard/stats");
-        
         if (res.ok) {
           const data = await res.json();
           setStats(data);
         } else {
-          // Se a API não responder (comum no localhost), usa os dados de teste
           setStats(MOCK_STATS);
         }
       } catch (err) {
-        // Fallback de segurança para não travar no loading em dev
         setStats(MOCK_STATS);
       } finally {
-        // Pequeno delay apenas para o efeito visual do loader
-        setTimeout(() => setLoading(false), 800);
+        // PERFORMANCE FIX: Removido o delay artificial de 800ms para carregar instantaneamente
+        setLoading(false);
       }
     }
     loadStats();
@@ -94,13 +90,13 @@ export default function DashboardHome() {
         <Loader2 className="w-10 h-10 text-yellow-400" />
       </motion.div>
       <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.3em] animate-pulse">
-        Sincronizando Banco de Dados...
+        Carregando Métricas...
       </span>
     </div>
   );
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 md:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 md:space-y-12">
       
       {/* BOAS VINDAS */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -176,8 +172,6 @@ export default function DashboardHome() {
     </div>
   );
 }
-
-// --- SUB-COMPONENTES PARA ORGANIZAÇÃO ---
 
 function MetricCard({ label, value, icon, color = "text-white" }: any) {
   return (
