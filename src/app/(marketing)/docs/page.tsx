@@ -10,7 +10,6 @@ import { useState, useEffect } from "react";
 
 export default function DocsPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
 
   const menuItems = [
     { group: "Começando", items: [
@@ -26,19 +25,19 @@ export default function DocsPage() {
     ]}
   ];
 
-  // Fecha o menu ao redimensionar para desktop
+  // PERFORMANCE FIX: Adicionado 'passive: true' e cleanup adequado para otimizar o listener de resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768) setIsMobileMenuOpen(false);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
     <main className="min-h-screen bg-[#000000] text-zinc-300 pb-24 font-sans selection:bg-yellow-500/30">
       
-      {/* 1. BOTÃO FLUTUANTE MOBILE (Melhoria de UX) */}
+      {/* BOTÃO FLUTUANTE MOBILE */}
       <div className="md:hidden fixed bottom-8 right-6 z-[60]">
         <motion.button 
           whileTap={{ scale: 0.9 }}
@@ -49,7 +48,7 @@ export default function DocsPage() {
         </motion.button>
       </div>
 
-      {/* 2. DRAWER MOBILE (Menu Lateral que desliza) */}
+      {/* DRAWER MOBILE (Menu Lateral) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -63,11 +62,11 @@ export default function DocsPage() {
             <motion.aside 
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-[80%] max-w-[300px] bg-[#09090b] z-[80] border-l border-white/10 p-8 md:hidden"
+              className="fixed right-0 top-0 bottom-0 w-[80%] max-w-[300px] bg-[#09090b] z-[80] border-l border-white/10 p-8 md:hidden shadow-2xl"
             >
               <div className="flex items-center justify-between mb-10">
                 <h3 className="text-white font-black uppercase text-xs tracking-widest">Navegação</h3>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="text-zinc-500"><X size={20}/></button>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="text-zinc-500 hover:text-white transition-colors"><X size={20}/></button>
               </div>
               <nav className="space-y-8">
                 {menuItems.map((group) => (
@@ -94,7 +93,7 @@ export default function DocsPage() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
+      {/* HEADER DOCUMENTAÇÃO */}
       <header className="pt-24 md:pt-32 pb-12 md:pb-20 border-b border-white/5 bg-gradient-to-b from-[#050505] to-black">
         <div className="max-w-7xl mx-auto px-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-yellow-500/10 text-yellow-400 text-[10px] font-black tracking-widest uppercase mb-6 border border-yellow-500/20">
@@ -109,10 +108,10 @@ export default function DocsPage() {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
+      {/* CONTEÚDO PRINCIPAL */}
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-start gap-16 mt-16">
         
-        {/* Sidebar Desktop (Invisível no Mobile) */}
+        {/* SIDEBAR DESKTOP */}
         <aside className="hidden md:block w-64 shrink-0 sticky top-32 space-y-10">
           {menuItems.map((group) => (
             <div key={group.group}>
@@ -134,7 +133,7 @@ export default function DocsPage() {
           ))}
         </aside>
 
-        {/* Artigo com as Seções */}
+        {/* ARTIGO COM SEÇÕES */}
         <article className="flex-1 w-full max-w-3xl space-y-24">
           <Section id="requisitos" title="1. Requisitos" icon={<CheckCircle2 className="text-yellow-400" />}>
             <p className="mb-6">Certifique-se de que sua infraestrutura atende aos pontos abaixo:</p>
@@ -199,7 +198,7 @@ export default function DocsPage() {
   );
 }
 
-// Componentes Utilitários Reutilizáveis
+// COMPONENTES UTILITÁRIOS REUTILIZÁVEIS
 function Section({ id, title, icon, children }: any) {
   return (
     <section id={id} className="scroll-mt-32">

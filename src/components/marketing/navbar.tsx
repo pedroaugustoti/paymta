@@ -8,10 +8,27 @@ import { useSession, signIn } from "next-auth/react";
 import { Menu, X, Loader2, LayoutDashboard, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Ícone customizado do Discord (SVG mantido do seu design original)
+// Ícone do Discord
 const DiscordIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" fill="currentColor" className={className}>
     <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+  </svg>
+);
+
+// Isotipo Exclusivo PayMTA (Vetor)
+const PayMTALogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path 
+      fillRule="evenodd" clipRule="evenodd" 
+      d="M20 15C20 9.47715 24.4772 5 30 5H65C81.5685 5 95 18.4315 95 35C95 51.5685 81.5685 65 65 65H45V90C45 92.7614 42.7614 95 40 95H25C22.2386 95 20 92.7614 20 90V15ZM45 45H65C70.5228 45 75 40.5228 75 35C75 29.4772 70.5228 25 65 25H45V45Z" 
+      fill="url(#paymta-gradient)" 
+    />
+    <defs>
+      <linearGradient id="paymta-gradient" x1="20" y1="5" x2="95" y2="95" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FDE047" />
+        <stop offset="1" stopColor="#D97706" />
+      </linearGradient>
+    </defs>
   </svg>
 );
 
@@ -22,13 +39,13 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const isLoading = status === "loading";
 
-  // Fecha o menu mobile e reseta o scroll ao trocar de página
+  // Fecha o menu mobile e reseta o scroll ao trocar de rota
   useEffect(() => {
     setMobileMenuOpen(false);
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  // Monitor de Scroll OTIMIZADO (Fim do lag)
+  // Monitor de Scroll Otimizado (Performance 60fps)
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -40,7 +57,6 @@ export function Navbar() {
         ticking = true;
       }
     };
-    // O { passive: true } avisa o navegador que não vamos bloquear o scroll
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -61,11 +77,13 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between">
         
-        {/* Logo */}
+        {/* Logo / Isotipo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer group shrink-0">
-          <div className={`transition-all duration-500 flex items-center justify-center font-black text-black rounded-lg bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_15px_rgba(234,179,8,0.2)] ${isScrolled ? "w-8 h-8 text-[10px]" : "w-10 h-10 text-xs md:text-sm"}`}>
-            P
-          </div>
+          <PayMTALogo 
+            className={`transition-all duration-500 drop-shadow-[0_0_15px_rgba(234,179,8,0.2)] group-hover:scale-105 ${
+              isScrolled ? "w-8 h-8" : "w-10 h-10 md:w-11 md:h-11"
+            }`} 
+          />
           <span className={`font-black text-white tracking-tighter transition-all duration-500 ${isScrolled ? "text-lg md:text-xl" : "text-xl md:text-2xl"}`}>
             PayMTA
           </span>
@@ -91,7 +109,6 @@ export function Navbar() {
           </div>
           
           <div className="flex items-center border-l border-white/10 pl-8">
-            {/* Lógica de Autenticação Integrada */}
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
             ) : session ? (
@@ -112,6 +129,7 @@ export function Navbar() {
         <button 
           className="lg:hidden text-white p-2.5 bg-zinc-900/50 border border-white/10 rounded-xl active:bg-zinc-800 transition-colors" 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Abrir Menu"
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -146,7 +164,6 @@ export function Navbar() {
             </a>
             <hr className="border-white/10 my-1" />
             
-            {/* Lógica Mobile de Autenticação */}
             {session ? (
               <Link href="/dashboard" className="w-full" onClick={() => setMobileMenuOpen(false)}>
                 <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-black w-full py-7 rounded-2xl shadow-lg text-lg flex items-center justify-center gap-2">
