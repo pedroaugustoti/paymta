@@ -12,7 +12,6 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function GeneralSettingsPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   
   const [form, setForm] = useState({
@@ -22,6 +21,7 @@ export default function GeneralSettingsPage() {
     termsContent: "",
   });
 
+  // Busca inicial não-bloqueante otimizada
   useEffect(() => {
     async function loadSettings() {
       try {
@@ -37,8 +37,6 @@ export default function GeneralSettingsPage() {
         }
       } catch (err) {
         console.error("Erro ao carregar configurações gerais:", err);
-      } finally {
-        setFetching(false);
       }
     }
     if (session) loadSettings();
@@ -67,15 +65,8 @@ export default function GeneralSettingsPage() {
     }
   };
 
-  if (fetching) return (
-    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      <span className="text-zinc-500 font-black uppercase italic text-[10px]">Acessando Core do Sistema...</span>
-    </div>
-  );
-
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+    <div className="p-8 max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className={`fixed bottom-8 right-8 z-[200] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md font-bold text-sm ${toast.type === "success" ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-400" : "bg-red-950/90 border-red-500/30 text-red-400"}`}>
