@@ -3,12 +3,17 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, Zap, Terminal, Cpu, Globe, Box, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function MarketingPage() {
   return (
     <main className="min-h-screen bg-[#000000] text-zinc-300 selection:bg-yellow-500/30 font-sans overflow-hidden">
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[500px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-500/15 via-black to-black pointer-events-none"></div>
+      
+      {/* 
+        PERFORMANCE FIX: Substituímos o blur e os radial-gradients pesados 
+        por uma sombra CSS otimizada no topo que não usa GPU intensiva. 
+      */}
+      <div className="absolute top-0 left-0 w-full h-[600px] bg-[radial-gradient(ellipse_at_top,_rgba(234,179,8,0.08),_transparent_70%)] pointer-events-none z-0" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6">
         <HeroSection />
@@ -21,13 +26,14 @@ export default function MarketingPage() {
 }
 
 // ---------------------------------------------------------
-// 1. HERO SECTION (Foco no Plug & Play)
+// 1. HERO SECTION (Foco na Conversão - UX Melhorada)
 // ---------------------------------------------------------
 function HeroSection() {
   return (
     <section className="pt-32 pb-16 flex flex-col items-center text-center">
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }}>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-xs font-bold tracking-widest uppercase mb-8 border border-yellow-500/20">
+        
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-xs font-bold tracking-widest uppercase mb-8 border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
           <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
           Gateway de Pagamento MTA:SA
         </div>
@@ -43,27 +49,33 @@ function HeroSection() {
           Esqueça integrações complexas. Baixe nosso resource em ZIP, coloque sua licença e deixe que o nosso sistema entregue VIPs automaticamente usando os próprios comandos do seu servidor.
         </p>
         
+        {/* UX FIX: Hierarquia clara de CTA (Call to Action) */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-xl px-10 h-14 text-lg transition-transform hover:scale-105 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
-            Explorar Recursos
-          </Button>
-          <Button size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 rounded-xl px-10 h-14 text-lg font-bold transition-all">
-            Falar com a Equipe
-          </Button>
+          <Link href="/planos">
+            <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-xl px-10 h-14 text-lg transition-transform hover:scale-105 shadow-[0_0_30px_rgba(234,179,8,0.2)] w-full sm:w-auto">
+              Começar Teste Grátis
+            </Button>
+          </Link>
+          <Link href="#features">
+            <Button size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 rounded-xl px-10 h-14 text-lg font-bold transition-all w-full sm:w-auto">
+              Ver Como Funciona
+            </Button>
+          </Link>
         </div>
+        
       </motion.div>
     </section>
   );
 }
 
 // ---------------------------------------------------------
-// 2. SOCIAL PROOF / INTEGRAÇÕES (Sem menção a MySQL)
+// 2. SOCIAL PROOF / INTEGRAÇÕES
 // ---------------------------------------------------------
 function IntegrationLogos() {
   return (
     <div className="py-10 border-y border-white/5 my-12 bg-white/[0.02]">
       <p className="text-center text-sm font-bold text-zinc-600 uppercase tracking-widest mb-6">Uma arquitetura construída para segurança</p>
-      <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale">
+      <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
         <div className="font-black text-2xl text-white flex items-center gap-2"><Globe className="w-6 h-6"/> Mercado Pago API</div>
         <div className="font-black text-2xl text-white flex items-center gap-2"><Box className="w-6 h-6"/> Resource Plug & Play</div>
         <div className="font-black text-2xl text-white flex items-center gap-2"><Lock className="w-6 h-6"/> Lua Compilada (Luac)</div>
@@ -73,11 +85,11 @@ function IntegrationLogos() {
 }
 
 // ---------------------------------------------------------
-// 3. BENTO GRID (Apresentação Profissional)
+// 3. BENTO GRID (Sem blurs pesados)
 // ---------------------------------------------------------
 function BentoFeatures() {
   return (
-    <section className="py-20">
+    <section id="features" className="py-20 scroll-mt-24">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Engenharia construída para Roleplay</h2>
         <p className="text-zinc-400 font-medium">O PayMTA foi desenhado para ser seguro, rápido e inviolável.</p>
@@ -85,29 +97,33 @@ function BentoFeatures() {
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* Card 1 */}
-        <div className="md:col-span-2 bg-[#09090b] border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-yellow-500/20 transition-all">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[80px] rounded-full group-hover:bg-yellow-500/10 transition-all"></div>
-          <Zap className="w-10 h-10 text-yellow-400 mb-6" />
-          <h3 className="text-2xl font-black text-white mb-3">Velocidade da Luz in-game</h3>
-          <p className="text-zinc-400 leading-relaxed max-w-md">O jogador paga o QRCode PIX e, em milissegundos, a nossa API Cloud confirma a transação e dispara a liberação direto no console do seu servidor. Sem delays, sem relogar.</p>
+        <div className="md:col-span-2 bg-[#09090b] border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-yellow-500/30 transition-colors">
+          {/* PERFORMANCE FIX: radial-gradient simples ao invés de blur-[80px] */}
+          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_rgba(234,179,8,0.1),_transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          <div className="relative z-10">
+            <Zap className="w-10 h-10 text-yellow-400 mb-6" />
+            <h3 className="text-2xl font-black text-white mb-3">Velocidade da Luz in-game</h3>
+            <p className="text-zinc-400 leading-relaxed max-w-md">O jogador paga o QRCode PIX e, em milissegundos, a nossa API Cloud confirma a transação e dispara a liberação direto no console do seu servidor. Sem delays, sem relogar.</p>
+          </div>
         </div>
 
         {/* Card 2 */}
-        <div className="md:col-span-1 bg-[#09090b] border border-white/5 p-8 rounded-3xl group hover:border-white/10 transition-all flex flex-col justify-center">
+        <div className="md:col-span-1 bg-[#09090b] border border-white/5 p-8 rounded-3xl group hover:border-white/10 transition-colors flex flex-col justify-center">
           <ShieldAlert className="w-10 h-10 text-white mb-6" />
           <h3 className="text-xl font-black text-white mb-3">Zero Banco de Dados</h3>
           <p className="text-zinc-400 text-sm leading-relaxed">Não pedimos a senha do seu MySQL. O sistema roda de forma independente enviando os comandos nativos que você configurar.</p>
         </div>
 
         {/* Card 3 */}
-        <div className="md:col-span-1 bg-[#09090b] border border-white/5 p-8 rounded-3xl group hover:border-white/10 transition-all">
+        <div className="md:col-span-1 bg-[#09090b] border border-white/5 p-8 rounded-3xl group hover:border-white/10 transition-colors">
           <Cpu className="w-10 h-10 text-white mb-6" />
           <h3 className="text-xl font-black text-white mb-3">Core Compilado</h3>
           <p className="text-zinc-400 text-sm leading-relaxed">O núcleo do nosso resource é compilado (Luac). Ninguém consegue ler ou injetar fraudes no script de verificação.</p>
         </div>
 
         {/* Card 4 */}
-        <div className="md:col-span-2 bg-[#09090b] border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-white/10 transition-all flex items-center justify-between">
+        <div className="md:col-span-2 bg-[#09090b] border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-white/10 transition-colors flex items-center justify-between">
           <div className="relative z-10">
             <Terminal className="w-10 h-10 text-white mb-6" />
             <h3 className="text-2xl font-black text-white mb-3">Painel SaaS Completo</h3>
