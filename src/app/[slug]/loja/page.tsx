@@ -87,7 +87,7 @@ export default function LojaVipPage() {
     return Array.from(new Set(produtos.map((p) => p.category)));
   }, [produtos]);
 
-  // Lógica de toggle de categoria
+  // Lógica de toggle de categoria corrigida e agora utilizada no JSX
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev => 
       prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
@@ -254,6 +254,12 @@ export default function LojaVipPage() {
                 const isSelected = selectedCategories.includes(cat);
                 return (
                   <label key={cat} className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      className="hidden" 
+                      checked={isSelected}
+                      onChange={() => toggleCategory(cat)}
+                    />
                     <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300 ${
                       isSelected 
                       ? 'bg-[var(--primary)] border-[var(--primary)]' 
@@ -421,6 +427,14 @@ export default function LojaVipPage() {
                     </div>
                   </div>
                 ))}
+                
+                {cartDetails.length === 0 && (
+                   <div className="flex flex-col items-center justify-center h-full text-center opacity-50 pt-20">
+                     <ShoppingCart className="w-16 h-16 mb-4 text-zinc-600" />
+                     <p className="text-lg font-black uppercase italic tracking-tighter">Carrinho Vazio</p>
+                     <p className="text-[10px] uppercase tracking-widest font-bold mt-2">Adicione itens da loja</p>
+                   </div>
+                )}
               </div>
 
               <div className="p-6 md:p-8 bg-black/40 backdrop-blur-md border-t border-white/5 space-y-6">
