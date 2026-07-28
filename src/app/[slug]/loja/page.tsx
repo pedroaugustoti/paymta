@@ -141,15 +141,9 @@ export default function LojaVipPage() {
   const totalGeral = useMemo(() => cartDetails.reduce((acc, curr) => acc + curr.total, 0), [cartDetails]);
   const totalItens = useMemo(() => cart.reduce((acc, curr) => acc + curr.qtd, 0), [cart]);
 
-  // Formatação super inteligente para as listas vindas sujas do painel
   const renderDescription = (text: string) => {
-    // Separa os itens primeiramente por traço '-'
     let items = text.split('-').map(i => i.trim()).filter(i => i.length > 0);
-    
-    // Filtro cirúrgico: Remove a sujeira "| 1 |", "| 2 |" que os donos de servidor costumam colocar no painel
     items = items.map(i => i.replace(/^\|\s*\d+\s*\|\s*/, '').trim());
-    
-    // Remove qualquer item que tenha ficado vazio ou muito curto após a limpeza
     items = items.filter(i => i.length > 3);
 
     if (items.length > 1) {
@@ -391,7 +385,7 @@ export default function LojaVipPage() {
 
                        <Button 
                          onClick={() => addToCart(p.id)} 
-                         className="flex-1 bg-[var(--primary)]/90 hover:bg-[var(--primary)] text-[#030303] font-black uppercase tracking-widest text-[10px] h-12 rounded-xl transition-all active:scale-95 border-none shadow-none hover:shadow-[0_0_20px_var(--primary)]"
+                         className="flex-1 bg-[var(--primary)] hover:brightness-110 text-[#030303] font-black uppercase tracking-widest text-[10px] h-12 rounded-xl transition-all active:scale-95 border-none shadow-none hover:shadow-[0_0_20px_var(--primary)]"
                        >
                           COMPRAR
                        </Button>
@@ -404,7 +398,7 @@ export default function LojaVipPage() {
         </div>
       </div>
 
-      {/* BOTÃO FLUTUANTE DO CARRINHO (Z-INDEX INFINITO) */}
+      {/* BOTÃO FLUTUANTE DO CARRINHO */}
       <AnimatePresence>
         {totalItens > 0 && (
           <motion.button 
@@ -423,66 +417,80 @@ export default function LojaVipPage() {
         )}
       </AnimatePresence>
 
-      {/* DRAWER DO CARRINHO ESTILO REFERÊNCIA (Z-INDEX 99999) */}
+      {/* DRAWER DO CARRINHO ESTILO REFERÊNCIA OTIMIZADO */}
       <AnimatePresence>
         {isCartOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99998]" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99998]" />
             <motion.aside 
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} 
-              transition={{ type: "tween", duration: 0.3, ease: "easeOut" }} 
+              transition={{ type: "spring", stiffness: 300, damping: 30 }} 
               className="fixed top-0 right-0 h-full w-full max-w-md bg-[#050505] border-l border-white/5 z-[99999] flex flex-col shadow-2xl"
             >
-              <div className="p-6 md:p-8 flex items-center justify-between border-b border-white/5">
-                <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white">Carrinho</h2>
-                  <p className="text-[10px] text-[var(--primary)] uppercase tracking-[0.2em] font-black mt-1">{totalItens} ITENS</p>
+              {/* Header */}
+              <div className="p-8 pb-6 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <h2 className="text-3xl font-black uppercase tracking-tighter italic text-white leading-none">Carrinho</h2>
+                  <p className="text-[10px] text-[var(--primary)] uppercase tracking-widest font-black mt-2">{totalItens} {totalItens === 1 ? 'ITEM' : 'ITENS'}</p>
                 </div>
-                <button onClick={() => setIsCartOpen(false)} className="p-3 bg-[#0a0a0a] hover:bg-white/10 rounded-xl border border-white/5 transition-colors text-zinc-400"><X className="w-5 h-5"/></button>
+                <button onClick={() => setIsCartOpen(false)} className="w-10 h-10 flex items-center justify-center bg-[#0a0a0a] hover:bg-white/10 rounded-2xl border border-white/5 transition-colors text-zinc-400"><X className="w-5 h-5"/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
+              {/* Itens do Carrinho */}
+              <div className="flex-1 overflow-y-auto px-8 py-2 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
                 {cartDetails.map((item) => (
-                  <div key={item.id} className="flex flex-col bg-[#0a0a0a] p-4 rounded-2xl border border-white/5 relative">
+                  <div key={item.id} className="flex gap-4 bg-[#0a0a0a] p-4 rounded-3xl border border-white/5 relative group hover:border-[var(--primary)]/30 transition-colors">
+                    
+                    {/* Lixeira Flutuante */}
                     <button onClick={() => removeTotal(item.id)} className="absolute top-4 right-4 text-zinc-600 hover:text-red-500 transition-colors z-10"><Trash2 className="w-4 h-4" /></button>
                     
-                    <div className="flex items-center gap-4 pr-8 mb-2">
-                      <div className="w-14 h-14 bg-[#050505] rounded-xl overflow-hidden shrink-0 flex items-center justify-center border border-white/5 relative">
-                        {item.image ? (
-                          <Image src={item.image} alt={item.name} fill unoptimized className="object-cover opacity-80" />
-                        ) : (
-                          <Package className="w-6 h-6 text-zinc-800" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-black text-sm text-white uppercase truncate italic tracking-tight">{item.name}</p>
-                        <p className="text-[11px] font-black text-[var(--primary)] tracking-widest mt-1">R$ {item.price.toFixed(2)}</p>
-                      </div>
+                    {/* Imagem */}
+                    <div className="w-16 h-16 bg-[#050505] rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-white/5 relative">
+                      {item.image ? (
+                        <Image src={item.image} alt={item.name} fill unoptimized className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                      ) : (
+                        <Package className="w-6 h-6 text-zinc-800" />
+                      )}
+                    </div>
+                    
+                    {/* Dados do Produto */}
+                    <div className="flex flex-col justify-center flex-1 min-w-0 pr-6">
+                      <p className="font-black text-sm text-white uppercase truncate italic tracking-tight">{item.name}</p>
+                      <p className="text-[11px] font-black text-[var(--primary)] tracking-widest mt-1">R$ {item.price.toFixed(2)}</p>
                     </div>
 
-                    <div className="flex justify-end">
-                      <div className="flex items-center gap-4 bg-[#050505] px-3 py-1.5 rounded-full border border-white/5">
-                          <button onClick={() => removeFromCart(item.id)} className="text-zinc-500 hover:text-white transition-colors"><Minus className="w-3 h-3" /></button>
-                          <span className="text-xs font-black w-4 text-center text-white italic">{item.qtd}</span>
-                          <button onClick={() => addToCart(item.id)} className="text-zinc-500 hover:text-[var(--primary)] transition-colors"><Plus className="w-3 h-3" /></button>
-                      </div>
+                    {/* Quantidade Flutuante (Pill) */}
+                    <div className="absolute bottom-4 right-4 flex items-center gap-3 bg-[#050505] px-3 py-1.5 rounded-full border border-white/5 shadow-inner">
+                        <button onClick={() => removeFromCart(item.id)} className="p-1 text-zinc-500 hover:text-white transition-colors"><Minus className="w-3 h-3" /></button>
+                        <span className="text-xs font-black w-4 text-center text-white italic">{item.qtd}</span>
+                        <button onClick={() => addToCart(item.id)} className="p-1 text-zinc-500 hover:text-[var(--primary)] transition-colors"><Plus className="w-3 h-3" /></button>
                     </div>
                   </div>
                 ))}
+                
+                {cartDetails.length === 0 && (
+                   <div className="flex flex-col items-center justify-center h-full text-center opacity-40 pt-20">
+                     <ShoppingCart className="w-16 h-16 mb-4 text-zinc-600" />
+                     <p className="text-xl font-black uppercase italic tracking-tighter">Carrinho Vazio</p>
+                     <p className="text-[10px] uppercase tracking-widest font-bold mt-2">Adicione pacotes da loja</p>
+                   </div>
+                )}
               </div>
 
-              <div className="p-6 md:p-8 border-t border-white/5 bg-[#080808]">
+              {/* Footer e Checkout */}
+              <div className="p-8 bg-[#050505] border-t border-white/5 mt-auto">
                 <div className="flex justify-between items-end pb-6 border-b border-white/5 mb-6">
-                    <span className="text-zinc-500 font-black uppercase text-[10px] tracking-[0.2em] italic">Total do Pedido</span>
-                    <span className="text-4xl font-black text-white tracking-tighter italic">R$ {totalGeral.toFixed(2)}</span>
+                    <span className="text-zinc-500 font-black uppercase text-[10px] tracking-widest italic mb-1">Total do Pedido</span>
+                    <span className="text-5xl font-black text-white tracking-tighter italic">R$ {totalGeral.toFixed(2)}</span>
                 </div>
                 
                 <Button 
                   onClick={handleGeneratePix} 
                   disabled={checkoutLoading || cart.length === 0}
-                  className="w-full bg-[var(--primary)] hover:brightness-110 text-black font-black py-7 rounded-2xl text-sm border-none transition-all flex justify-center uppercase tracking-widest italic"
+                  className="w-full bg-[var(--primary)] hover:brightness-110 text-[#030303] font-black py-7 rounded-2xl text-sm border-none transition-all flex justify-center uppercase tracking-widest italic"
+                  style={{ boxShadow: "0 10px 30px color-mix(in srgb, var(--primary) 20%, transparent)" }}
                 >
-                  {checkoutLoading ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : "FINALIZAR VIA PIX"}
+                  {checkoutLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "FINALIZAR VIA PIX"}
                 </Button>
               </div>
             </motion.aside>
