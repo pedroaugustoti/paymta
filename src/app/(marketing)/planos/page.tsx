@@ -17,7 +17,7 @@ export default function PlanosPage() {
     },
     {
       nome: "Basic",
-      preco: "R$ 14",
+      preco: "R$ 9,90",
       periodo: "/mês",
       desc: "Ideal para servidores que estão começando agora.",
       icon: <Zap className="text-yellow-400" />,
@@ -28,7 +28,7 @@ export default function PlanosPage() {
     },
     {
       nome: "Intermediate",
-      preco: "R$ 25",
+      preco: "R$ 19,90",
       periodo: "/mês",
       desc: "O equilíbrio perfeito para cidades em crescimento.",
       icon: <Shield className="text-blue-400" />,
@@ -39,7 +39,7 @@ export default function PlanosPage() {
     },
     {
       nome: "Advanced",
-      preco: "R$ 42",
+      preco: "R$ 35,90",
       periodo: "/mês",
       desc: "Para grandes redes de servidores e alto tráfego.",
       icon: <Crown className="text-purple-400" />,
