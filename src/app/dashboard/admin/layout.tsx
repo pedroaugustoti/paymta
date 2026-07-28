@@ -33,11 +33,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <nav className="p-4 space-y-2 mt-4">
             <p className="px-4 text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-4">Gestão do SaaS</p>
             
-            <MenuLink href="/admin" icon={<LayoutDashboard className="w-4 h-4" />} label="Visão Geral" active />
-            <MenuLink href="/admin/clientes" icon={<Users className="w-4 h-4" />} label="Lojas & Clientes" />
-            <MenuLink href="/admin/tickets" icon={<LifeBuoy className="w-4 h-4" />} label="Fila de Chamados" />
-            <MenuLink href="/admin/monitoramento" icon={<Activity className="w-4 h-4" />} label="Monitoramento API" />
-            <MenuLink href="/admin/configuracoes" icon={<Settings className="w-4 h-4" />} label="Ajustes Globais" />
+            <MenuLink href="/dashboard/admin" icon={<LayoutDashboard className="w-4 h-4" />} label="Visão Geral" active />
+            <MenuLink href="/dashboard/admin/clientes" icon={<Users className="w-4 h-4" />} label="Lojas & Clientes" />
+            <MenuLink href="/dashboard/admin/tickets" icon={<LifeBuoy className="w-4 h-4" />} label="Fila de Chamados" />
+            <MenuLink href="/dashboard/admin/monitoramento" icon={<Activity className="w-4 h-4" />} label="Monitoramento API" />
+            <MenuLink href="/dashboard/admin/configuracoes" icon={<Settings className="w-4 h-4" />} label="Ajustes Globais" />
           </nav>
         </div>
 
