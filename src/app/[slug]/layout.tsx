@@ -56,6 +56,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const handleScroll = () => {
+      // Ativa o efeito de ilha quando o scroll passar de 30px
       if (window.scrollY > 30) {
         setScrolled(true);
       } else {
@@ -67,6 +68,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 1. TELA DE ERRO (SLUG NÃO ENCONTRADA)
   if (error) return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-center p-6 text-white">
       <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20 mb-6">
@@ -84,6 +86,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 
+  // 2. TELA DE CARREGAMENTO
   if (!settings) return (
     <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center gap-4">
       <Loader2 className="w-10 h-10 animate-spin text-zinc-800" />
@@ -91,6 +94,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 
+  // 3. TELA DE MANUTENÇÃO
   if (settings.isMaintenance) {
     return (
       <div 
@@ -140,7 +144,8 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     { label: "Loja VIP", href: `/${slug}/loja` },
   ];
 
-  const displayFooterName = settings.footerName || settings.serverName;
+  // Strings com fallbacks seguros para evitar erros de charAt em valores nulos
+  const displayFooterName = settings.footerName || settings.serverName || "CIDADE";
   const serverDisplayName = settings.navbarName || settings.serverName || "CIDADE";
 
   return (
@@ -149,7 +154,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
     >
       
-      {/* NAVBAR: ANIMAÇÃO BUTTERY-SMOOTH E LOGO ABRAÇADA SEM ESPAÇOS */}
+      {/* NAVBAR FLUIDA COM TRANSIÇÃO AMANTEIGADA (CUBIC-BEZIER) E NULL-SAFETY */}
       <header className="fixed top-0 left-0 right-0 z-[100] flex justify-center w-full pointer-events-none">
         <div className={`pointer-events-auto flex items-center justify-between transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
           scrolled 
@@ -158,7 +163,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         }`}>
           
           <Link href={`/${slug}`} className="flex items-center gap-3 md:gap-4 group shrink-0">
-            {settings.logoUrl && settings.logoUrl.trim() !== "" ? (
+            {settings.logoUrl?.trim() ? (
               <Image 
                 src={settings.logoUrl} 
                 alt="Logo do Servidor" 
@@ -283,15 +288,31 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 flex-1 pt-20">{children}</main>
+      {/* Margem superior maior (pt-28 md:pt-32) para não encobrir o conteúdo com a navbar */}
+      <main className="relative z-10 flex-1 pt-28 md:pt-32">{children}</main>
 
       <footer className="border-t border-white/5 bg-zinc-950/40 backdrop-blur-md pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
             
             <div className="md:col-span-4 space-y-8">
+              {/* LOGO RESTAURADA NO RODAPÉ */}
               <div className="flex items-center gap-4">
-                <span className="text-2xl font-black uppercase tracking-tighter italic text-white">
+                {settings.logoUrl?.trim() ? (
+                  <Image 
+                    src={settings.logoUrl} 
+                    alt="Logo" 
+                    width={100}
+                    height={100}
+                    unoptimized
+                    className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300 shrink-0" 
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center font-black text-white text-sm border border-white/10 uppercase italic shadow-inner shrink-0">
+                    {displayFooterName.charAt(0)}
+                  </div>
+                )}
+                <span className="text-2xl font-black uppercase tracking-tighter italic text-white break-words">
                   {displayFooterName}
                 </span>
               </div>
