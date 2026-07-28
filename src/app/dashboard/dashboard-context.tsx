@@ -4,17 +4,19 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { useSession } from "next-auth/react";
 
 interface DashboardContextType {
-  settings: any;
+  settings: Record<string, unknown> | null;
   loading: boolean;
   refreshSettings: () => Promise<void>;
-  updateSettingsLocally: (newValues: any) => void;
+  updateSettingsLocally: (newValues: Record<string, unknown>) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
+  // Retornando a autenticação real
   const { status } = useSession();
-  const [settings, setSettings] = useState<any>(null);
+
+  const [settings, setSettings] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchSettings = async () => {
@@ -37,8 +39,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, [status]);
 
-  const updateSettingsLocally = (newValues: any) => {
-    setSettings((prev: any) => ({ ...prev, ...newValues }));
+  const updateSettingsLocally = (newValues: Record<string, unknown>) => {
+    setSettings((prev) => (prev ? { ...prev, ...newValues } : { ...newValues }));
   };
 
   return (

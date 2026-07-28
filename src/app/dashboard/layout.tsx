@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -12,29 +13,40 @@ import {
   FileText, Menu, X, Loader2
 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
-import { DashboardProvider, useDashboard } from "./dashboard-context"; // Importando o context que criamos
+import { DashboardProvider, useDashboard } from "./dashboard-context";
 
-// Componente interno para ler os dados já cacheados da sidebar
-function SidebarWithData({ session, isMobileMenuOpen, setIsMobileMenuOpen }: any) {
+interface SessionData {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
+
+function SidebarWithData({ session, setIsMobileMenuOpen }: { session: SessionData | null; setIsMobileMenuOpen: (v: boolean) => void }) {
   const { settings } = useDashboard();
+
+  const serverName = (settings?.serverName as string) || session?.user?.name || "PayMTA";
+  const logoUrl = settings?.logoUrl as string;
+  const slug = settings?.slug as string;
 
   return (
     <>
       <div className="p-6 flex items-center gap-4 border-b border-white/5">
         <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-black text-lg shadow-[0_0_20px_rgba(234,179,8,0.2)] overflow-hidden bg-yellow-400 shrink-0">
-          {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
           ) : (
-            <span>{(settings?.serverName || session?.user?.name || "P").charAt(0)}</span>
+            <span>{serverName.charAt(0)}</span>
           )}
         </div>
         <div className="flex flex-col overflow-hidden">
           <span className="text-xs font-black tracking-widest leading-none uppercase truncate text-zinc-100">
-            {settings?.serverName || "Painel PayMTA"}
+            {(settings?.serverName as string) || "Painel PayMTA"}
           </span>
-          {settings?.slug && (
+          {slug && (
             <Link 
-              href={`/${settings.slug}`} 
+              href={`/${slug}`} 
               target="_blank"
               className="text-[10px] text-zinc-500 hover:text-yellow-400 flex items-center gap-1 mt-1.5 transition-colors font-bold italic"
             >
@@ -131,7 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* SIDEBAR DESKTOP */}
         <aside className="hidden md:flex w-64 lg:w-72 border-r border-white/5 bg-zinc-950 flex-col sticky top-0 h-screen shadow-2xl shrink-0">
-          <SidebarWithData session={session} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+          <SidebarWithData session={session} setIsMobileMenuOpen={setIsMobileMenuOpen} />
         </aside>
 
         {/* SIDEBAR MOBILE */}
@@ -152,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <SidebarWithData session={session} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+                <SidebarWithData session={session} setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </motion.aside>
             </>
           )}

@@ -5,11 +5,26 @@ import Link from "next/link";
 import { 
   Palette, Zap, Package, 
   ReceiptText, ArrowRight, TrendingUp, Activity, 
-  ShieldCheck, Loader2, MousePointer2, LayoutDashboard
+  ShieldCheck, MousePointer2, LayoutDashboard
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { useDashboard } from "./dashboard-context";
 
-// --- DADOS DE TESTE (MOCK) PARA AMBIENTE LOCAL ---
+// --- TIPAGENS (INTERFACES) PARA O TYPESCRIPT ---
+interface MetricCardProps {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  color?: string;
+  isLoading?: boolean;
+}
+
+interface FooterInfoCardProps {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}
+
+// --- DADOS DE TESTE (MOCK) ---
 const MOCK_STATS = {
   totalRevenue: 15420.50,
   salesToday: 450.00,
@@ -18,6 +33,8 @@ const MOCK_STATS = {
 };
 
 export default function DashboardHome() {
+  const { settings } = useDashboard();
+  
   const [stats, setStats] = useState({
     totalRevenue: 0,
     salesToday: 0,
@@ -36,10 +53,10 @@ export default function DashboardHome() {
         } else {
           setStats(MOCK_STATS);
         }
-      } catch (err) {
+      } catch {
+        // Removida a variável `err` não utilizada
         setStats(MOCK_STATS);
       } finally {
-        // PERFORMANCE FIX: Removido o delay artificial de 800ms para carregar instantaneamente
         setLoading(false);
       }
     }
@@ -81,24 +98,9 @@ export default function DashboardHome() {
     }
   ];
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center h-[80vh] gap-4">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-      >
-        <Loader2 className="w-10 h-10 text-yellow-400" />
-      </motion.div>
-      <span className="text-zinc-500 font-black uppercase italic text-[10px] tracking-[0.3em] animate-pulse">
-        Carregando Métricas...
-      </span>
-    </div>
-  );
-
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 md:space-y-12">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 md:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      {/* BOAS VINDAS */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 text-zinc-500 mb-2">
@@ -106,7 +108,7 @@ export default function DashboardHome() {
             <span className="text-[10px] font-black uppercase tracking-[0.3em]">Ambiente de Comando</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-white">
-            Painel <span className="text-yellow-400">PayMTA</span>
+            Painel <span className="text-yellow-400">{settings?.serverName || "PayMTA"}</span>
           </h1>
           <p className="text-zinc-500 text-xs md:text-sm font-medium mt-1">Status operacional: <span className="text-emerald-500 font-bold">Totalmente Funcional</span>.</p>
         </div>
@@ -117,15 +119,13 @@ export default function DashboardHome() {
         </div>
       </header>
 
-      {/* METRICAS PRINCIPAIS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <MetricCard label="Vendas Hoje" value={`R$ ${stats.salesToday.toFixed(2)}`} icon={<Activity />} />
-        <MetricCard label="Receita Total" value={`R$ ${stats.totalRevenue.toFixed(2)}`} icon={<TrendingUp />} color="text-emerald-500" />
-        <MetricCard label="Itens Ativos" value={stats.activeProducts.toString()} icon={<Package />} />
-        <MetricCard label="Pendentes" value={stats.pendingOrders.toString()} icon={<ReceiptText />} color="text-amber-500" />
+        <MetricCard label="Vendas Hoje" value={`R$ ${stats.salesToday.toFixed(2)}`} icon={<Activity />} isLoading={loading} />
+        <MetricCard label="Receita Total" value={`R$ ${stats.totalRevenue.toFixed(2)}`} icon={<TrendingUp />} color="text-emerald-500" isLoading={loading} />
+        <MetricCard label="Itens Ativos" value={stats.activeProducts.toString()} icon={<Package />} isLoading={loading} />
+        <MetricCard label="Pendentes" value={stats.pendingOrders.toString()} icon={<ReceiptText />} color="text-amber-500" isLoading={loading} />
       </div>
 
-      {/* NAVEGAÇÃO RÁPIDA */}
       <section className="space-y-6">
         <div className="flex items-center gap-3">
           <MousePointer2 className="w-4 h-4 text-zinc-600" />
@@ -134,7 +134,7 @@ export default function DashboardHome() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {menuCards.map((card, idx) => (
-            <Link href={card.path} key={idx} className="group">
+            <Link href={card.path} key={idx} className="group outline-none">
               <div className="bg-[#050505] border border-white/5 p-6 md:p-8 rounded-[32px] md:rounded-[40px] h-full hover:border-white/20 transition-all shadow-xl hover:shadow-yellow-500/5 flex flex-col items-start gap-4 active:scale-95">
                 <div className={`p-3 md:p-4 rounded-2xl ${card.bg} ${card.color}`}>
                   <card.icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -156,7 +156,6 @@ export default function DashboardHome() {
         </div>
       </section>
 
-      {/* FOOTER TÉCNICO */}
       <footer className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 pt-10 border-t border-white/5">
          <FooterInfoCard 
             icon={<ShieldCheck className="text-emerald-500" />} 
@@ -173,21 +172,27 @@ export default function DashboardHome() {
   );
 }
 
-function MetricCard({ label, value, icon, color = "text-white" }: any) {
+// Aplicando as tipagens ao invés de usar `any`
+function MetricCard({ label, value, icon, color = "text-white", isLoading = false }: MetricCardProps) {
   return (
-    <div className="bg-[#050505] border border-white/5 p-5 md:p-8 rounded-[24px] md:rounded-[32px] relative overflow-hidden group">
+    <div className="bg-[#050505] border border-white/5 p-5 md:p-8 rounded-[24px] md:rounded-[32px] relative overflow-hidden group flex flex-col justify-between min-h-[130px]">
       <div className="absolute -right-2 -top-2 w-16 h-16 text-white/5 opacity-20 group-hover:scale-110 transition-transform">
         {icon}
       </div>
-      <p className="text-[9px] md:text-[10px] font-black text-zinc-500 uppercase mb-2 tracking-widest">{label}</p>
-      <h3 className={`text-xl md:text-3xl font-black italic tracking-tighter ${color}`}>
-        {value}
-      </h3>
+      <p className="text-[9px] md:text-[10px] font-black text-zinc-500 uppercase mb-2 tracking-widest relative z-10">{label}</p>
+      
+      {isLoading ? (
+        <div className="h-8 w-24 bg-white/10 animate-pulse rounded-lg mt-1 relative z-10" />
+      ) : (
+        <h3 className={`text-xl md:text-3xl font-black italic tracking-tighter ${color} relative z-10`}>
+          {value}
+        </h3>
+      )}
     </div>
   );
 }
 
-function FooterInfoCard({ icon, title, text }: any) {
+function FooterInfoCard({ icon, title, text }: FooterInfoCardProps) {
   return (
     <div className="flex items-start gap-4 p-5 bg-white/[0.02] rounded-3xl border border-white/5">
       <div className="shrink-0 mt-1">{icon}</div>
