@@ -61,7 +61,9 @@ export default function LojaVipPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [pixData, setPixData] = useState<{ qrCodeBase64: string, copiaECola: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [viewProduct, setViewProduct] = useState<Produto | null>(null);
 
+  // Carregamento de Configurações
   useEffect(() => {
     async function loadShopData() {
       if (!slug) return;
@@ -81,30 +83,36 @@ export default function LojaVipPage() {
     loadShopData();
   }, [slug]);
 
-  // Extrair categorias únicas
+  // PREVENÇÃO DE STUTTERING (TRAVA O SCROLL QUANDO MODAIS ESTÃO ABERTOS)
+  useEffect(() => {
+    if (isCartOpen || checkoutStep !== "none" || viewProduct !== null || isMobileFilterOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isCartOpen, checkoutStep, viewProduct, isMobileFilterOpen]);
+
+  // Lógica de Filtros
   const categoriasDisponiveis = useMemo(() => {
     if (produtos.length === 0) return [];
     return Array.from(new Set(produtos.map((p) => p.category)));
   }, [produtos]);
 
-  // Lógica de toggle de categoria 100% funcional via onClick no botão
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev => 
       prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
 
-  // Filtragem Mestre
   const filtered = useMemo(() => {
     return produtos.filter((p) => {
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
       const matchCat = selectedCategories.length === 0 || selectedCategories.includes(p.category);
-      
       const price = p.price;
       const min = minPrice === "" ? 0 : parseFloat(minPrice);
       const max = maxPrice === "" ? Infinity : parseFloat(maxPrice);
       const matchPrice = price >= min && price <= max;
-
       return matchSearch && matchCat && matchPrice;
     });
   }, [produtos, search, selectedCategories, minPrice, maxPrice]);
@@ -137,6 +145,7 @@ export default function LojaVipPage() {
   const totalGeral = useMemo(() => cartDetails.reduce((acc, curr) => acc + curr.total, 0), [cartDetails]);
   const totalItens = useMemo(() => cart.reduce((acc, curr) => acc + curr.qtd, 0), [cart]);
 
+  // Integração PIX
   const handleGeneratePix = async () => {
     setCheckoutLoading(true);
     try {
@@ -149,7 +158,7 @@ export default function LojaVipPage() {
       const data = await res.json();
       setPixData({ qrCodeBase64: data.qr_code_base64, copiaECola: data.qr_code });
       setCheckoutStep("pix");
-      setIsCartOpen(false); // Fecha o carrinho ao abrir o PIX
+      setIsCartOpen(false); 
     } catch (error) {
       console.error(error);
       alert("Houve um erro ao conectar com o Mercado Pago. Tente novamente.");
@@ -188,13 +197,13 @@ export default function LojaVipPage() {
             <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter uppercase mb-2 text-white drop-shadow-2xl">
                LOJA VIP
             </h1>
-            <p className="text-[var(--primary)] font-black uppercase tracking-[0.4em] text-[9px] md:text-[11px] drop-shadow-[0_0_10px_var(--primary)]">
+            <p className="text-[var(--primary)] font-black uppercase tracking-[0.4em] text-[9px] md:text-[11px]" style={{ textShadow: "0 0 15px color-mix(in srgb, var(--primary) 50%, transparent)" }}>
               {settings?.slogan || "ONDE SUA HISTÓRIA DE SUCESSO GANHA VIDA."}
             </p>
          </div>
       </section>
 
-      {/* LAYOUT PRINCIPAL: SIDEBAR INVISÍVEL + GRID MODERNO */}
+      {/* LAYOUT PRINCIPAL: SIDEBAR + GRID MODERNO */}
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-10 flex flex-col lg:flex-row gap-10 relative z-20">
         
         {/* BOTÃO FILTROS MOBILE */}
@@ -209,7 +218,7 @@ export default function LojaVipPage() {
           <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">{filtered.length} PACOTES</span>
         </div>
 
-        {/* SIDEBAR DE FILTROS: DESIGN LIMPO, SEM BLOCOS PESADOS */}
+        {/* SIDEBAR DE FILTROS: DESIGN LIMPO */}
         <aside className={`
           ${isMobileFilterOpen ? 'fixed inset-y-0 left-0 w-[85%] max-w-sm z-[110] bg-[#050505] p-6 shadow-2xl overflow-y-auto border-r border-white/10 transition-transform translate-x-0' : 'fixed inset-y-0 left-0 w-[85%] max-w-sm z-[110] bg-[#050505] p-6 shadow-2xl overflow-y-auto border-r border-white/10 transition-transform -translate-x-full lg:static lg:translate-x-0 lg:w-64 lg:p-0 lg:bg-transparent lg:border-none lg:shadow-none lg:overflow-visible lg:block lg:shrink-0'}
         `}>
@@ -218,27 +227,26 @@ export default function LojaVipPage() {
             <button onClick={() => setIsMobileFilterOpen(false)} className="lg:hidden p-2 text-zinc-500 hover:text-white"><X className="w-5 h-5"/></button>
           </div>
 
-          {/* SESSÃO: PREÇO SEM AS SETINHAS NATIVAS DO NAVEGADOR */}
+          {/* SESSÃO: PREÇO TOTALMENTE REFEITO (SEM SETINHAS) */}
           <div className="mb-10">
             <h3 className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-4 pl-1">Faixa de Preço</h3>
             
             {/* Visual de barra de slider falso para estética */}
             <div className="w-full h-1 bg-white/5 rounded-full mb-5 relative">
                <div className="absolute left-[10%] right-[10%] h-full bg-[var(--primary)]/50 rounded-full" />
-               <div className="absolute left-[10%] top-1/2 -translate-y-1/2 w-3 h-3 bg-[var(--primary)] rounded-full shadow-[0_0_10px_var(--primary)]" />
-               <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-3 h-3 bg-[var(--primary)] rounded-full shadow-[0_0_10px_var(--primary)]" />
+               <div className="absolute left-[10%] top-1/2 -translate-y-1/2 w-3 h-3 bg-[var(--primary)] rounded-full" style={{ boxShadow: "0 0 10px var(--primary)" }} />
+               <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-3 h-3 bg-[var(--primary)] rounded-full" style={{ boxShadow: "0 0 10px var(--primary)" }} />
             </div>
 
             <div className="flex items-center gap-3">
               <div className="relative flex-1 group">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-[10px] font-black group-hover:text-[var(--primary)] transition-colors">R$</span>
-                {/* [appearance:textfield] e as tags do webkit removem os botões up/down do input number */}
                 <input 
                   type="number" 
                   placeholder="Mín" 
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/50 focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <span className="text-zinc-600 font-black">-</span>
@@ -249,7 +257,7 @@ export default function LojaVipPage() {
                   placeholder="Máx" 
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/50 focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </div>
@@ -269,9 +277,9 @@ export default function LojaVipPage() {
                   >
                     <div className={`w-5 h-5 rounded-[6px] border flex items-center justify-center transition-all duration-300 shrink-0 ${
                       isSelected 
-                      ? 'bg-[var(--primary)] border-[var(--primary)] shadow-[0_0_10px_var(--primary)]' 
+                      ? 'bg-[var(--primary)] border-[var(--primary)]' 
                       : 'bg-[#0a0a0a] border-white/20 group-hover:border-[var(--primary)]/50'
-                    }`}>
+                    }`} style={isSelected ? { boxShadow: "0 0 10px color-mix(in srgb, var(--primary) 40%, transparent)" } : {}}>
                       {isSelected && <Check className="w-3.5 h-3.5 text-black font-black" />}
                     </div>
                     <span className={`text-xs font-bold uppercase tracking-wider transition-colors truncate ${isSelected ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
@@ -303,7 +311,7 @@ export default function LojaVipPage() {
               placeholder="Pesquisar pacotes..." 
               value={search} 
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#0a0a0a] border border-white/5 rounded-2xl pl-14 pr-6 py-4 text-sm focus:border-[var(--primary)]/50 outline-none transition-all text-white placeholder:text-zinc-600 font-medium"
+              className="w-full bg-[#0a0a0a] border border-white/5 rounded-2xl pl-14 pr-6 py-4 text-sm focus:border-[var(--primary)]/50 focus:ring-1 focus:ring-[var(--primary)]/20 outline-none transition-all text-white placeholder:text-zinc-600 font-medium shadow-inner"
             />
           </div>
 
@@ -312,18 +320,17 @@ export default function LojaVipPage() {
             {filtered.map((p) => (
               <div 
                 key={p.id} 
-                className="bg-[#050505] border border-white/5 rounded-[20px] overflow-hidden group flex flex-col relative transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30"
+                className="bg-[#050505] border border-white/5 rounded-[20px] overflow-hidden group flex flex-col relative transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 shadow-lg"
               >
                 {/* DETALHE NEON CORNERS */}
                 <div className="absolute top-0 left-0 w-8 h-[2px] bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                 <div className="absolute top-0 left-0 w-[2px] h-8 bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
-                
                 <div className="absolute bottom-0 right-0 w-8 h-[2px] bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                 <div className="absolute bottom-0 right-0 w-[2px] h-8 bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
 
                 {/* ÁREA DA IMAGEM */}
-                <div className="h-48 bg-[#0a0a0a] relative flex items-center justify-center p-4 border-b border-white/5 overflow-hidden">
-                  {/* Fundo de luz glow para a imagem */}
+                <div className="h-48 bg-[#0a0a0a] relative flex items-center justify-center p-4 border-b border-white/5 overflow-hidden cursor-pointer" onClick={() => setViewProduct(p)}>
+                  {/* Fundo de luz glow para a imagem com a cor principal salva no painel */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_60%)] opacity-5 group-hover:opacity-20 transition-opacity duration-500" />
                   
                   {p.image ? (
@@ -348,7 +355,7 @@ export default function LojaVipPage() {
 
                 {/* CONTEÚDO E BOTÃO FULL WIDTH */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div className="mb-6">
+                  <div className="mb-6 cursor-pointer" onClick={() => setViewProduct(p)}>
                     <h3 className="font-black text-lg text-white mb-1 uppercase tracking-tight truncate group-hover:text-[var(--primary)] transition-colors">{p.name}</h3>
                     <p className="text-zinc-500 text-[11px] line-clamp-2 leading-relaxed font-medium">{p.description}</p>
                   </div>
@@ -360,7 +367,8 @@ export default function LojaVipPage() {
                      
                      <Button 
                        onClick={() => addToCart(p.id)} 
-                       className="w-full bg-[var(--primary)]/90 hover:bg-[var(--primary)] text-[#030303] font-black uppercase tracking-widest text-[10px] py-6 rounded-xl transition-all active:scale-95 border-none shadow-[0_0_15px_rgba(250,203,17,0)] group-hover:shadow-[0_0_20px_var(--primary)] hover:!shadow-[0_0_30px_var(--primary)]"
+                       className="w-full bg-[var(--primary)] hover:brightness-110 text-[#030303] font-black uppercase tracking-widest text-[10px] py-6 rounded-xl transition-all active:scale-95 border-none"
+                       style={{ boxShadow: "0 0 20px color-mix(in srgb, var(--primary) 15%, transparent)" }}
                      >
                         COMPRAR
                      </Button>
@@ -385,7 +393,8 @@ export default function LojaVipPage() {
           <motion.button 
             initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
             onClick={() => setIsCartOpen(true)}
-            className="fixed bottom-8 right-6 md:right-8 bg-[var(--primary)] text-black p-4 rounded-full font-black shadow-[0_10px_40px_rgba(250,203,17,0.3)] flex items-center justify-center z-40 transition-transform active:scale-95 border border-[#030303]/20 hover:scale-105"
+            className="fixed bottom-8 right-6 md:right-8 bg-[var(--primary)] text-black p-4 rounded-full font-black flex items-center justify-center z-[90] transition-transform active:scale-95 border border-[#030303]/20 hover:scale-105"
+            style={{ boxShadow: "0 10px 40px color-mix(in srgb, var(--primary) 40%, transparent)" }}
           >
             <div className="relative">
                 <ShoppingCart className="w-6 h-6" />
@@ -456,7 +465,8 @@ export default function LojaVipPage() {
                 <Button 
                   onClick={handleGeneratePix} 
                   disabled={checkoutLoading || cart.length === 0}
-                  className="w-full bg-[var(--primary)] hover:brightness-110 text-black font-black py-7 rounded-xl text-sm border-none shadow-[0_10px_30px_rgba(250,203,17,0.15)] transition-all flex justify-center uppercase tracking-widest italic"
+                  className="w-full bg-[var(--primary)] hover:brightness-110 text-black font-black py-7 rounded-xl text-sm border-none transition-all flex justify-center uppercase tracking-widest italic"
+                  style={{ boxShadow: "0 10px 30px color-mix(in srgb, var(--primary) 20%, transparent)" }}
                 >
                   {checkoutLoading ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : "FINALIZAR VIA PIX"}
                 </Button>
@@ -498,6 +508,37 @@ export default function LojaVipPage() {
                     </Button>
                     <div className="flex items-center justify-center gap-2 text-[var(--primary)] text-[10px] font-black uppercase tracking-widest mt-4 italic">
                         <Loader2 className="w-3 h-3 animate-spin" /> Aguardando Pagamento
+                    </div>
+                </motion.div>
+            </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DETALHES DE PRODUTO (QUANDO CLICA NA IMAGEM OU TITULO) */}
+      <AnimatePresence>
+        {viewProduct && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div onClick={() => setViewProduct(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+                <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 md:p-10 rounded-[40px] max-w-md w-full shadow-2xl overflow-hidden">
+                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent opacity-50" />
+                    
+                    <button onClick={() => setViewProduct(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white bg-white/5 p-2 rounded-xl transition-colors"><X className="w-5 h-5"/></button>
+                    
+                    <div className="w-16 h-16 bg-black rounded-3xl flex items-center justify-center text-[var(--primary)] mb-6 border border-white/5 shadow-inner">
+                        {ICON_MAP[viewProduct.icon] || <Gem className="w-8 h-8" />}
+                    </div>
+                    <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-2 block italic">{viewProduct.category}</span>
+                    <h2 className="text-4xl font-black mb-4 uppercase tracking-tighter leading-tight text-white italic">{viewProduct.name}</h2>
+                    <p className="text-zinc-400 font-medium mb-10 leading-relaxed text-sm italic">{viewProduct.description}</p>
+                    
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-black p-5 rounded-3xl border border-white/5 gap-6">
+                        <div className="flex flex-col">
+                           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">Valor Unitário</span>
+                           <p className="text-4xl font-black text-white tracking-tighter italic">R$ {viewProduct.price.toFixed(2)}</p>
+                        </div>
+                        <Button onClick={() => { addToCart(viewProduct.id); setViewProduct(null); }} className="w-full sm:w-auto bg-[var(--primary)] hover:brightness-110 text-black font-black py-7 px-8 rounded-2xl border-none transition-all active:scale-95 tracking-widest uppercase italic" style={{ boxShadow: "0 10px 30px color-mix(in srgb, var(--primary) 20%, transparent)" }}>
+                           ADICIONAR
+                        </Button>
                     </div>
                 </motion.div>
             </div>
