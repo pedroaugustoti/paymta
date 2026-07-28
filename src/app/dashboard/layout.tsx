@@ -110,7 +110,7 @@ function SidebarContent({ session, setIsMobileMenuOpen }: { session: SessionData
               Staff & Gestão
             </p>
             <NavLink 
-              href="/admin" 
+              href="/dashboard/admin" 
               icon={<span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse inline-block" />} 
               label="Quartel General" 
               onClick={() => setIsMobileMenuOpen(false)} 
