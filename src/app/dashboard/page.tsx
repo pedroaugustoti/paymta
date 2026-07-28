@@ -108,7 +108,7 @@ export default function DashboardHome() {
             <span className="text-[10px] font-black uppercase tracking-[0.3em]">Ambiente de Comando</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-white">
-            Painel <span className="text-yellow-400">{settings?.serverName || "PayMTA"}</span>
+            Painel <span className="text-yellow-400">{(settings?.serverName as string) || "PayMTA"}</span>
           </h1>
           <p className="text-zinc-500 text-xs md:text-sm font-medium mt-1">Status operacional: <span className="text-emerald-500 font-bold">Totalmente Funcional</span>.</p>
         </div>
