@@ -58,7 +58,7 @@ export function Navbar() {
               Recursos
             </Link>
             <Link href="/planos" className="hover:text-yellow-400 transition-colors">
-              Preços
+              Planos
             </Link>
             <Link href="/docs" className="hover:text-yellow-400 transition-colors">
               Docs
