@@ -131,3 +131,15 @@ model Sale {
   userId  String
   user    User     @relation(fields: [userId], references: [id])
 }
+
+model Ticket {
+  id         String   @id
+  subject    String
+  department String
+  message    String
+  status     String   @default("open")
+  userEmail  String
+  lastReply  String   @default("Aguardando Suporte")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
