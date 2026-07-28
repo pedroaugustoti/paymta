@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useDashboard } from "./dashboard-context";
 
-// --- TIPAGENS (INTERFACES) PARA O TYPESCRIPT ---
 interface MetricCardProps {
   label: string;
   value: string;
@@ -24,7 +23,15 @@ interface FooterInfoCardProps {
   text: string;
 }
 
-// --- DADOS DE TESTE (MOCK) ---
+interface MenuCardItem {
+  title: string;
+  desc: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  color: string;
+  bg: string;
+}
+
 const MOCK_STATS = {
   totalRevenue: 15420.50,
   salesToday: 450.00,
@@ -54,7 +61,6 @@ export default function DashboardHome() {
           setStats(MOCK_STATS);
         }
       } catch {
-        // Removida a variável `err` não utilizada
         setStats(MOCK_STATS);
       } finally {
         setLoading(false);
@@ -63,7 +69,7 @@ export default function DashboardHome() {
     loadStats();
   }, []);
 
-  const menuCards = [
+  const menuCards: MenuCardItem[] = [
     {
       title: "Aparência",
       desc: "Logo, cores e banners do portal.",
@@ -133,26 +139,29 @@ export default function DashboardHome() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {menuCards.map((card, idx) => (
-            <Link href={card.path} key={idx} className="group outline-none">
-              <div className="bg-[#050505] border border-white/5 p-6 md:p-8 rounded-[32px] md:rounded-[40px] h-full hover:border-white/20 transition-all shadow-xl hover:shadow-yellow-500/5 flex flex-col items-start gap-4 active:scale-95">
-                <div className={`p-3 md:p-4 rounded-2xl ${card.bg} ${card.color}`}>
-                  <card.icon className="w-5 h-5 md:w-6 md:h-6" />
+          {menuCards.map((card, idx) => {
+            const IconComponent = card.icon;
+            return (
+              <Link href={card.path} key={idx} className="group outline-none">
+                <div className="bg-[#050505] border border-white/5 p-6 md:p-8 rounded-[32px] md:rounded-[40px] h-full hover:border-white/20 transition-all shadow-xl hover:shadow-yellow-500/5 flex flex-col items-start gap-4 active:scale-95">
+                  <div className={`p-3 md:p-4 rounded-2xl ${card.bg} ${card.color}`}>
+                    <IconComponent className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base md:text-lg font-black italic uppercase text-white group-hover:text-yellow-500 transition-colors tracking-tight">
+                      {card.title}
+                    </h4>
+                    <p className="text-zinc-500 text-[11px] md:text-xs mt-1 leading-relaxed font-medium">
+                      {card.desc}
+                    </p>
+                  </div>
+                  <div className="mt-auto pt-4 flex items-center gap-2 text-[9px] font-black text-zinc-600 uppercase italic group-hover:text-zinc-400">
+                    Gerenciar <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-base md:text-lg font-black italic uppercase text-white group-hover:text-yellow-500 transition-colors tracking-tight">
-                    {card.title}
-                  </h4>
-                  <p className="text-zinc-500 text-[11px] md:text-xs mt-1 leading-relaxed font-medium">
-                    {card.desc}
-                  </p>
-                </div>
-                <div className="mt-auto pt-4 flex items-center gap-2 text-[9px] font-black text-zinc-600 uppercase italic group-hover:text-zinc-400">
-                  Gerenciar <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -172,7 +181,6 @@ export default function DashboardHome() {
   );
 }
 
-// Aplicando as tipagens ao invés de usar `any`
 function MetricCard({ label, value, icon, color = "text-white", isLoading = false }: MetricCardProps) {
   return (
     <div className="bg-[#050505] border border-white/5 p-5 md:p-8 rounded-[24px] md:rounded-[32px] relative overflow-hidden group flex flex-col justify-between min-h-[130px]">

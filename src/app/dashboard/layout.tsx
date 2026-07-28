@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, Settings, DollarSign, 
   Zap, ExternalLink, Package, Palette, 
-  FileText, Menu, X, Loader2
+  FileText, Menu, X, Loader2, Ticket
 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { DashboardProvider, useDashboard } from "./dashboard-context";
@@ -23,7 +23,8 @@ interface SessionData {
   };
 }
 
-function SidebarWithData({ session, setIsMobileMenuOpen }: { session: SessionData | null; setIsMobileMenuOpen: (v: boolean) => void }) {
+// COMPONENTE EXTERNO DA SIDEBAR (Isolado para evitar o erro de static-components do linter)
+function SidebarContent({ session, setIsMobileMenuOpen }: { session: SessionData | null; setIsMobileMenuOpen: (v: boolean) => void }) {
   const { settings } = useDashboard();
 
   const serverName = (settings?.serverName as string) || session?.user?.name || "PayMTA";
@@ -86,6 +87,7 @@ function SidebarWithData({ session, setIsMobileMenuOpen }: { session: SessionDat
         <p className="px-4 py-2 mt-4 text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em]">Gestão</p>
         <NavLink href="/dashboard/produtos" icon={<Package className="w-5 h-5" />} label="Produtos" onClick={() => setIsMobileMenuOpen(false)} />
         <NavLink href="/dashboard/vendas" icon={<DollarSign className="w-5 h-5" />} label="Vendas & PIX" onClick={() => setIsMobileMenuOpen(false)} />
+        <NavLink href="/dashboard/tickets" icon={<Ticket className="w-5 h-5" />} label="Tickets de Suporte" onClick={() => setIsMobileMenuOpen(false)} />
         
         <p className="px-4 py-2 mt-4 text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em]">Customização</p>
         <NavLink href="/dashboard/aparencia" icon={<Palette className="w-5 h-5" />} label="Design da Loja" onClick={() => setIsMobileMenuOpen(false)} />
@@ -143,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* SIDEBAR DESKTOP */}
         <aside className="hidden md:flex w-64 lg:w-72 border-r border-white/5 bg-zinc-950 flex-col sticky top-0 h-screen shadow-2xl shrink-0">
-          <SidebarWithData session={session} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+          <SidebarContent session={session} setIsMobileMenuOpen={setIsMobileMenuOpen} />
         </aside>
 
         {/* SIDEBAR MOBILE */}
@@ -164,7 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <SidebarWithData session={session} setIsMobileMenuOpen={setIsMobileMenuOpen} />
+                <SidebarContent session={session} setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </motion.aside>
             </>
           )}
