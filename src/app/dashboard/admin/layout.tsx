@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <MenuLink href="/dashboard/admin/monitoramento" icon={<Activity className="w-4 h-4" />} label="Monitoramento API" />
             <MenuLink href="/dashboard/admin/configuracoes" icon={<Settings className="w-4 h-4" />} label="Ajustes Globais" />
           </nav>
-        </div>
+        </div> 
 
         {/* FOOTER DA SIDEBAR (PERFIL STAFF) */}
         <div className="p-4 border-t border-white/5">
