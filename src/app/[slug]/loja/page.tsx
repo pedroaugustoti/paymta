@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, ShoppingCart, Plus, Minus, X, 
   Gem, DollarSign, Zap, Trash2, 
-  Smartphone, Copy, CheckCircle2, Loader2, Package, Filter, Check
+  Smartphone, Copy, CheckCircle2, Loader2, Package, Filter, Check, Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
@@ -61,9 +61,10 @@ export default function LojaVipPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [pixData, setPixData] = useState<{ qrCodeBase64: string, copiaECola: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  
+  // Visualização de Produto
   const [viewProduct, setViewProduct] = useState<Produto | null>(null);
 
-  // Carregamento de Configurações
   useEffect(() => {
     async function loadShopData() {
       if (!slug) return;
@@ -83,17 +84,17 @@ export default function LojaVipPage() {
     loadShopData();
   }, [slug]);
 
-  // PREVENÇÃO DE STUTTERING (TRAVA O SCROLL QUANDO MODAIS ESTÃO ABERTOS)
+  // BLOQUEIO DE SCROLL QUANDO MODAIS ESTÃO ABERTOS
   useEffect(() => {
-    if (isCartOpen || checkoutStep !== "none" || viewProduct !== null || isMobileFilterOpen) {
+    if (isCartOpen || viewProduct || checkoutStep !== "none" || isMobileFilterOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
     return () => { document.body.style.overflow = ""; };
-  }, [isCartOpen, checkoutStep, viewProduct, isMobileFilterOpen]);
+  }, [isCartOpen, viewProduct, checkoutStep, isMobileFilterOpen]);
 
-  // Lógica de Filtros
+  // Extrair categorias únicas
   const categoriasDisponiveis = useMemo(() => {
     if (produtos.length === 0) return [];
     return Array.from(new Set(produtos.map((p) => p.category)));
@@ -105,14 +106,17 @@ export default function LojaVipPage() {
     );
   };
 
+  // Filtragem Mestre
   const filtered = useMemo(() => {
     return produtos.filter((p) => {
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
       const matchCat = selectedCategories.length === 0 || selectedCategories.includes(p.category);
+      
       const price = p.price;
       const min = minPrice === "" ? 0 : parseFloat(minPrice);
       const max = maxPrice === "" ? Infinity : parseFloat(maxPrice);
       const matchPrice = price >= min && price <= max;
+
       return matchSearch && matchCat && matchPrice;
     });
   }, [produtos, search, selectedCategories, minPrice, maxPrice]);
@@ -145,7 +149,6 @@ export default function LojaVipPage() {
   const totalGeral = useMemo(() => cartDetails.reduce((acc, curr) => acc + curr.total, 0), [cartDetails]);
   const totalItens = useMemo(() => cart.reduce((acc, curr) => acc + curr.qtd, 0), [cart]);
 
-  // Integração PIX
   const handleGeneratePix = async () => {
     setCheckoutLoading(true);
     try {
@@ -197,13 +200,13 @@ export default function LojaVipPage() {
             <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter uppercase mb-2 text-white drop-shadow-2xl">
                LOJA VIP
             </h1>
-            <p className="text-[var(--primary)] font-black uppercase tracking-[0.4em] text-[9px] md:text-[11px]" style={{ textShadow: "0 0 15px color-mix(in srgb, var(--primary) 50%, transparent)" }}>
+            <p className="text-[var(--primary)] font-black uppercase tracking-[0.4em] text-[9px] md:text-[11px] drop-shadow-[0_0_10px_var(--primary)]">
               {settings?.slogan || "ONDE SUA HISTÓRIA DE SUCESSO GANHA VIDA."}
             </p>
          </div>
       </section>
 
-      {/* LAYOUT PRINCIPAL: SIDEBAR + GRID MODERNO */}
+      {/* LAYOUT PRINCIPAL: SIDEBAR INVISÍVEL + GRID MODERNO */}
       <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 py-10 flex flex-col lg:flex-row gap-10 relative z-20">
         
         {/* BOTÃO FILTROS MOBILE */}
@@ -218,20 +221,19 @@ export default function LojaVipPage() {
           <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">{filtered.length} PACOTES</span>
         </div>
 
-        {/* SIDEBAR DE FILTROS: DESIGN LIMPO */}
+        {/* SIDEBAR DE FILTROS */}
         <aside className={`
-          ${isMobileFilterOpen ? 'fixed inset-y-0 left-0 w-[85%] max-w-sm z-[110] bg-[#050505] p-6 shadow-2xl overflow-y-auto border-r border-white/10 transition-transform translate-x-0' : 'fixed inset-y-0 left-0 w-[85%] max-w-sm z-[110] bg-[#050505] p-6 shadow-2xl overflow-y-auto border-r border-white/10 transition-transform -translate-x-full lg:static lg:translate-x-0 lg:w-64 lg:p-0 lg:bg-transparent lg:border-none lg:shadow-none lg:overflow-visible lg:block lg:shrink-0'}
+          ${isMobileFilterOpen ? 'fixed inset-y-0 left-0 w-[85%] max-w-sm z-[250] bg-[#050505] p-6 shadow-2xl overflow-y-auto border-r border-white/10 transition-transform translate-x-0' : 'fixed inset-y-0 left-0 w-[85%] max-w-sm z-[250] bg-[#050505] p-6 shadow-2xl overflow-y-auto border-r border-white/10 transition-transform -translate-x-full lg:static lg:translate-x-0 lg:w-64 lg:p-0 lg:bg-transparent lg:border-none lg:shadow-none lg:overflow-visible lg:block lg:shrink-0'}
         `}>
           <div className="flex items-center justify-between lg:mb-8 mb-10">
             <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Filtros</h2>
             <button onClick={() => setIsMobileFilterOpen(false)} className="lg:hidden p-2 text-zinc-500 hover:text-white"><X className="w-5 h-5"/></button>
           </div>
 
-          {/* SESSÃO: PREÇO TOTALMENTE REFEITO (SEM SETINHAS) */}
+          {/* SESSÃO: PREÇO */}
           <div className="mb-10">
             <h3 className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-4 pl-1">Faixa de Preço</h3>
             
-            {/* Visual de barra de slider falso para estética */}
             <div className="w-full h-1 bg-white/5 rounded-full mb-5 relative">
                <div className="absolute left-[10%] right-[10%] h-full bg-[var(--primary)]/50 rounded-full" />
                <div className="absolute left-[10%] top-1/2 -translate-y-1/2 w-3 h-3 bg-[var(--primary)] rounded-full" style={{ boxShadow: "0 0 10px var(--primary)" }} />
@@ -246,7 +248,7 @@ export default function LojaVipPage() {
                   placeholder="Mín" 
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/50 focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <span className="text-zinc-600 font-black">-</span>
@@ -257,13 +259,13 @@ export default function LojaVipPage() {
                   placeholder="Máx" 
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/50 focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-xs text-white focus:border-[var(--primary)] focus:bg-[var(--primary)]/5 outline-none transition-all font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* SESSÃO: CATEGORIAS INTERATIVA E CLICÁVEL */}
+          {/* SESSÃO: CATEGORIAS */}
           <div>
             <h3 className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-4 pl-1">Categorias</h3>
             <div className="flex flex-col gap-2">
@@ -297,10 +299,10 @@ export default function LojaVipPage() {
 
         {/* OVERLAY MOBILE PARA FILTRO */}
         {isMobileFilterOpen && (
-          <div onClick={() => setIsMobileFilterOpen(false)} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[105] lg:hidden" />
+          <div onClick={() => setIsMobileFilterOpen(false)} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[240] lg:hidden" />
         )}
 
-        {/* ÁREA DE PRODUTOS: GRID NEON/TECH */}
+        {/* ÁREA DE PRODUTOS */}
         <div className="flex-1 w-full min-w-0">
           
           {/* BARRA DE PESQUISA TOPO */}
@@ -315,7 +317,7 @@ export default function LojaVipPage() {
             />
           </div>
 
-          {/* GRID COM O NOVO DESIGN REFERÊNCIA (Bordas Neon e Botão Full Width) */}
+          {/* GRID COM O NOVO DESIGN REFERÊNCIA */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {filtered.map((p) => (
               <div 
@@ -328,9 +330,11 @@ export default function LojaVipPage() {
                 <div className="absolute bottom-0 right-0 w-8 h-[2px] bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                 <div className="absolute bottom-0 right-0 w-[2px] h-8 bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
 
-                {/* ÁREA DA IMAGEM */}
-                <div className="h-48 bg-[#0a0a0a] relative flex items-center justify-center p-4 border-b border-white/5 overflow-hidden cursor-pointer" onClick={() => setViewProduct(p)}>
-                  {/* Fundo de luz glow para a imagem com a cor principal salva no painel */}
+                {/* ÁREA DA IMAGEM COM OVERLAY "VER DETALHES" */}
+                <div 
+                  className="h-48 bg-[#0a0a0a] relative flex items-center justify-center p-4 border-b border-white/5 overflow-hidden cursor-pointer" 
+                  onClick={() => setViewProduct(p)}
+                >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_60%)] opacity-5 group-hover:opacity-20 transition-opacity duration-500" />
                   
                   {p.image ? (
@@ -339,21 +343,28 @@ export default function LojaVipPage() {
                       alt={p.name} 
                       fill 
                       unoptimized 
-                      className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 relative z-10" 
+                      className="object-contain p-6 group-hover:scale-105 transition-transform duration-500 relative z-10" 
                     />
                   ) : (
-                    <div className="relative z-10 p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform duration-500">
+                    <div className="relative z-10 p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-105 transition-transform duration-500">
                       {ICON_MAP[p.icon] || <Package className="w-12 h-12 text-zinc-700" />}
                     </div>
                   )}
 
+                  {/* OVERLAY DE "VER DETALHES" NO HOVER DA IMAGEM */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex items-center justify-center backdrop-blur-[2px]">
+                    <span className="bg-black/80 text-white font-black uppercase tracking-widest text-[10px] py-2 px-4 rounded-xl border border-white/10 flex items-center gap-2">
+                       <Search className="w-3 h-3" /> Ver Detalhes
+                    </span>
+                  </div>
+
                   {/* BADGE DA CATEGORIA FLUTUANTE */}
-                  <div className="absolute top-3 left-3 bg-[#030303] px-3 py-1 rounded-md text-[8px] font-black uppercase text-zinc-400 border border-white/10 tracking-[0.2em] z-20 group-hover:border-[var(--primary)]/30 group-hover:text-[var(--primary)] transition-colors">
+                  <div className="absolute top-3 left-3 bg-[#030303] px-3 py-1 rounded-md text-[8px] font-black uppercase text-zinc-400 border border-white/10 tracking-[0.2em] z-30 group-hover:border-[var(--primary)]/30 group-hover:text-[var(--primary)] transition-colors">
                     {p.category}
                   </div>
                 </div>
 
-                {/* CONTEÚDO E BOTÃO FULL WIDTH */}
+                {/* CONTEÚDO E BOTÕES */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div className="mb-6 cursor-pointer" onClick={() => setViewProduct(p)}>
                     <h3 className="font-black text-lg text-white mb-1 uppercase tracking-tight truncate group-hover:text-[var(--primary)] transition-colors">{p.name}</h3>
@@ -365,13 +376,24 @@ export default function LojaVipPage() {
                        R$ {p.price.toFixed(2)}
                      </p>
                      
-                     <Button 
-                       onClick={() => addToCart(p.id)} 
-                       className="w-full bg-[var(--primary)] hover:brightness-110 text-[#030303] font-black uppercase tracking-widest text-[10px] py-6 rounded-xl transition-all active:scale-95 border-none"
-                       style={{ boxShadow: "0 0 20px color-mix(in srgb, var(--primary) 15%, transparent)" }}
-                     >
-                        COMPRAR
-                     </Button>
+                     <div className="flex items-center gap-2">
+                       {/* BOTÃO SECUNDÁRIO DE VER DETALHES */}
+                       <Button 
+                         onClick={() => setViewProduct(p)} 
+                         className="bg-transparent hover:bg-white/5 text-zinc-400 hover:text-white border border-white/10 p-3 h-12 rounded-xl transition-colors shrink-0"
+                         title="Ver Detalhes"
+                       >
+                         <Eye className="w-5 h-5" />
+                       </Button>
+
+                       {/* BOTÃO PRINCIPAL COMPRAR */}
+                       <Button 
+                         onClick={() => addToCart(p.id)} 
+                         className="flex-1 bg-[var(--primary)]/90 hover:bg-[var(--primary)] text-[#030303] font-black uppercase tracking-widest text-[10px] h-12 rounded-xl transition-all active:scale-95 border-none shadow-none hover:shadow-[0_0_20px_var(--primary)]"
+                       >
+                          COMPRAR
+                       </Button>
+                     </div>
                   </div>
                 </div>
               </div>
@@ -387,19 +409,21 @@ export default function LojaVipPage() {
         </div>
       </div>
 
-      {/* CARRINHO FLUTUANTE */}
+      {/* CARRINHO FLUTUANTE INSPIRADO NA REFERÊNCIA (RÁPIDO E FLUIDO) */}
       <AnimatePresence>
         {totalItens > 0 && (
           <motion.button 
-            initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
+            initial={{ scale: 0, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={() => setIsCartOpen(true)}
-            className="fixed bottom-8 right-6 md:right-8 bg-[var(--primary)] text-black p-4 rounded-full font-black flex items-center justify-center z-[90] transition-transform active:scale-95 border border-[#030303]/20 hover:scale-105"
-            style={{ boxShadow: "0 10px 40px color-mix(in srgb, var(--primary) 40%, transparent)" }}
+            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-[#e5e5e5] hover:bg-white text-black w-[60px] h-[60px] rounded-full flex items-center justify-center z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.5)] transition-colors"
           >
-            <div className="relative">
-                <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full font-black border-2 border-[var(--primary)]">{totalItens}</span>
-            </div>
+            <ShoppingCart className="w-6 h-6 ml-[-2px]" />
+            <span className="absolute top-0 right-0 bg-red-600 text-white text-[11px] min-w-[22px] h-[22px] px-1 flex items-center justify-center rounded-full font-black border-[3px] border-[#e5e5e5]">
+              {totalItens}
+            </span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -408,11 +432,11 @@ export default function LojaVipPage() {
       <AnimatePresence>
         {isCartOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]" />
             <motion.aside 
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} 
               transition={{ type: "tween", duration: 0.4, ease: [0.16, 1, 0.3, 1] }} 
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-[#050505] border-l border-white/10 z-[101] flex flex-col shadow-2xl"
+              className="fixed top-0 right-0 h-full w-full max-w-md bg-[#050505] border-l border-white/10 z-[201] flex flex-col shadow-2xl"
             >
               <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-[#0a0a0a]">
                 <div>
@@ -479,9 +503,9 @@ export default function LojaVipPage() {
       {/* MODAL PIX CHECKOUT */}
       <AnimatePresence>
         {checkoutStep === "pix" && pixData && (
-            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4">
                 <div onClick={() => setCheckoutStep("none")} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-                <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 md:p-10 rounded-[32px] max-w-sm w-full text-center shadow-2xl">
+                <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 md:p-10 rounded-[32px] max-w-sm w-full text-center shadow-2xl z-[211]">
                     <button onClick={() => setCheckoutStep("none")} className="absolute top-6 right-6 text-zinc-500 hover:text-white bg-white/5 p-2 rounded-xl"><X className="w-5 h-5"/></button>
                     
                     <div className="w-20 h-20 bg-[var(--primary)]/10 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-[var(--primary)]/20 shadow-inner">
@@ -514,12 +538,12 @@ export default function LojaVipPage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL DETALHES DE PRODUTO (QUANDO CLICA NA IMAGEM OU TITULO) */}
+      {/* MODAL DETALHES DE PRODUTO */}
       <AnimatePresence>
         {viewProduct && (
-            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4">
                 <div onClick={() => setViewProduct(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-                <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 md:p-10 rounded-[40px] max-w-md w-full shadow-2xl overflow-hidden">
+                <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="relative bg-[#0a0a0a] border border-white/10 p-8 md:p-10 rounded-[40px] max-w-md w-full shadow-2xl overflow-hidden z-[211]">
                     <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent opacity-50" />
                     
                     <button onClick={() => setViewProduct(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white bg-white/5 p-2 rounded-xl transition-colors"><X className="w-5 h-5"/></button>
