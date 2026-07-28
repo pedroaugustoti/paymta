@@ -1,32 +1,46 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
-import { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
-import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
     }),
   ],
+  // ADICIONE ESTE BLOCO DE CALLBACKS:
   callbacks: {
-    async session({ session, user }) {
-      // Agora o TypeScript reconhecerá o .id e o .slug
+    // 1. Quando o Token (JWT) é criado na hora do login:
+    async jwt({ token, user, profile }) {
+      if (user) {
+        // Coloque aqui o SEU ID do Discord (e dos seus sócios/staffs)
+        const adminDiscordIds = ["484134751284756483"]; 
+        const discordId = (profile as { id?: string })?.id;
+
+        if (profile && adminDiscordIds.includes(discordId as string)) {
+          token.role = "ADMIN";
+        } else {
+          token.role = "USER";
+        }
+      }
+      return token;
+    },
+
+    // 2. Quando a Sessão vai para o Front-End (useSession):
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
-        session.user.slug = user.slug; 
+        // Injetamos a role do token para dentro da sessão
+        // @ts-ignore (Ignora o aviso de tipagem do TypeScript temporariamente)
+        session.user.role = token.role; 
       }
       return session;
-    },
+    }
   },
-  pages: {
-    signIn: "/login",
+  
+  session: {
+    strategy: "jwt", // Obrigatório para o middleware funcionar
   },
 };
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
