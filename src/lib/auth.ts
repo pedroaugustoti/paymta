@@ -1,11 +1,16 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
+import GoogleProvider from "next-auth/providers/google"; // <-- Adicionado o Provider do Google
 
 export const authOptions: NextAuthOptions = {
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   
@@ -30,7 +35,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         // Injetamos a role do token para dentro da sessão
-        // @ts-ignore (Ignora o aviso de tipagem do TypeScript temporariamente)
+        // @ts-ignore
         session.user.role = token.role; 
       }
       return session;
@@ -41,11 +46,11 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt", // Obrigatório para o JWT funcionar
   },
 
-  // GARANTE O REDIRECIONAMENTO DIRETO PARA O DASHBOARD
+  // GARANTE O REDIRECIONAMENTO DIRETO PARA AS NOVAS PÁGINAS
   pages: {
-    signIn: "/login", // Se tiver uma página de login customizada, ou deixe padrão
+    signIn: "/auth/login", // <-- Atualizado para a nova rota
     signOut: "/",
-    error: "/login",
+    error: "/auth/login",  // <-- Se der erro (ex: senha errada), volta pra cá
   },
 };
 

@@ -1,20 +1,19 @@
 import Link from "next/link";
 import { Navbar } from "@/components/marketing/navbar";
 
-// Isotipo Exclusivo PayMTA (Vetor para o Rodapé)
+// Isotipo Exclusivo PayMTA (Vetor para o Rodapé em Verde)
 const FooterLogo = () => (
-  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] shrink-0">
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 drop-shadow-[0_0_10px_rgba(34,197,94,0.2)] shrink-0">
     <path fillRule="evenodd" clipRule="evenodd" d="M20 15C20 9.47715 24.4772 5 30 5H65C81.5685 5 95 18.4315 95 35C95 51.5685 81.5685 65 65 65H45V90C45 92.7614 42.7614 95 40 95H25C22.2386 95 20 92.7614 20 90V15ZM45 45H65C70.5228 45 75 40.5228 75 35C75 29.4772 70.5228 25 65 25H45V45Z" fill="url(#footer-grad)" />
     <defs>
       <linearGradient id="footer-grad" x1="20" y1="5" x2="95" y2="95" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#FDE047" />
-        <stop offset="1" stopColor="#D97706" />
+        <stop stopColor="#4ADE80" />
+        <stop offset="1" stopColor="#16A34A" />
       </linearGradient>
     </defs>
   </svg>
 );
 
-// O FOOTER ESTÁTICO NÃO PRECISA DO USE CLIENT
 function Footer() {
   return (
     <footer className="border-t border-white/10 bg-[#030303] pt-20 pb-10 mt-auto transform-gpu">
@@ -34,18 +33,18 @@ function Footer() {
           <div>
             <h4 className="text-white font-bold mb-6 text-xs uppercase tracking-[0.2em]">Produto</h4>
             <ul className="space-y-4 text-sm text-zinc-500 font-medium">
-              <li><Link href="/" className="hover:text-yellow-400 transition-colors">Visão Geral</Link></li>
-              <li><Link href="/planos" className="hover:text-yellow-400 transition-colors">Preços e Planos</Link></li>
-              <li><Link href="/#features" className="hover:text-yellow-400 transition-colors">Funcionalidades</Link></li>
+              <li><Link href="/" className="hover:text-green-500 transition-colors">Visão Geral</Link></li>
+              <li><Link href="/planos" className="hover:text-green-500 transition-colors">Preços e Planos</Link></li>
+              <li><Link href="/#features" className="hover:text-green-500 transition-colors">Funcionalidades</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-white font-bold mb-6 text-xs uppercase tracking-[0.2em]">Suporte</h4>
             <ul className="space-y-4 text-sm text-zinc-500 font-medium">
-              <li><Link href="/docs" className="hover:text-yellow-400 transition-colors">Documentação</Link></li>
-              <li><a href="https://discord.gg/seu-link" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors">Discord Oficial</a></li>
-              <li><Link href="/docs#troubleshooting" className="hover:text-yellow-400 transition-colors">FAQ</Link></li>
+              <li><Link href="/docs" className="hover:text-green-500 transition-colors">Documentação</Link></li>
+              <li><a href="https://discord.gg/seu-link" target="_blank" rel="noopener noreferrer" className="hover:text-green-500 transition-colors">Discord Oficial</a></li>
+              <li><Link href="/faq" className="hover:text-green-500 transition-colors">FAQ</Link></li>
             </ul>
           </div>
 
@@ -69,19 +68,16 @@ function Footer() {
   );
 }
 
-// LAYOUT PRINCIPAL COMO SERVER COMPONENT PARA MÁXIMA PERFORMANCE
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative bg-[#000000] min-h-screen text-zinc-300 antialiased flex flex-col selection:bg-yellow-500/30">
-      {/* Navbar puxada do componente isolado */}
+    // Mudamos o selection:bg-yellow-500/30 para selection:bg-green-500/30 aqui
+    <div className="relative bg-[#000000] min-h-screen text-zinc-300 antialiased flex flex-col selection:bg-green-500/30">
       <Navbar />
       
-      {/* Conteúdo Dinâmico (Sempre otimizado e fluído) */}
       <div className="flex-1 transform-gpu">
         {children}
       </div>
 
-      {/* Footer Estático */}
       <Footer />
     </div>
   );

@@ -1,33 +1,35 @@
-"use client";
+// src/app/(marketing)/page.tsx
+"use client"; // Necessário se for usar os lucide-react interativos ou states futuros
 
 import { 
   HeroSection, 
-  IntegrationLogos, 
   StatsSection, 
   BentoFeatures, 
   HowItWorksSection, 
   DeveloperSection, 
-  FaqSection, 
   FinalCTA 
-} from "../../components/marketing/home-sections";
+} from "@/components/marketing/home-sections";
 
 export default function MarketingPage() {
   return (
-    <main className="min-h-screen bg-[#000000] text-zinc-300 selection:bg-yellow-500/30 font-sans overflow-hidden">
+    <main className="min-h-screen bg-[#030303] text-zinc-300 font-sans selection:bg-green-500/30 overflow-hidden relative">
       
-      {/* BACKGROUND OTIMIZADO (GPU) */}
-      <div className="absolute top-0 left-0 w-full h-[600px] bg-[radial-gradient(ellipse_at_top,_rgba(234,179,8,0.08),_transparent_70%)] pointer-events-none z-0 transform-gpu" />
+      {/* Background Otimizado (Grid estilo Blueprint/Matrix) */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#22c55e0a_1px,transparent_1px),linear-gradient(to_bottom,#22c55e0a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+      
+      {/* Glow amarelo superior super leve na GPU */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-green-500/10 to-transparent pointer-events-none rounded-full" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6">
+      {/* Container Principal */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 space-y-32">
         <HeroSection />
-        <IntegrationLogos />
         <StatsSection />
         <BentoFeatures />
-        <HowItWorksSection />
         <DeveloperSection />
-        <FaqSection />
+        <HowItWorksSection />
         <FinalCTA />
       </div>
+
     </main>
   );
 }
