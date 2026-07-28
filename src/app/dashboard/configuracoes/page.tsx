@@ -5,7 +5,7 @@ import {
   Settings, Globe, ShieldAlert, 
   Save, Loader2, CheckCircle2, AlertCircle
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDashboard } from "../dashboard-context"; // Importando o context global
 
@@ -22,13 +22,14 @@ export default function GeneralSettingsPage() {
   });
 
   // Preenche o formulário assim que os dados globais estiverem disponíveis em memória
+  // Preenche o formulário assim que os dados globais estiverem disponíveis em memória
   useEffect(() => {
     if (settings) {
       setForm({
-        slug: settings.slug || "",
-        serverIp: settings.serverIp || "",
-        isMaintenance: settings.isMaintenance || false,
-        termsContent: settings.termsContent || "",
+        slug: (settings.slug as string) || "",
+        serverIp: (settings.serverIp as string) || "",
+        isMaintenance: (settings.isMaintenance as boolean) || false,
+        termsContent: (settings.termsContent as string) || "",
       });
     }
   }, [settings]);
@@ -49,8 +50,8 @@ export default function GeneralSettingsPage() {
       } else {
         setToast({ message: data.error || "Erro ao salvar configurações.", type: "error" });
       }
-    } catch (error) {
-      setToast({ message: "Falha na comunicação com o servidor.", type: "error" });
+    } catch {
+      setToast({ message: "Erro de comunicação com o servidor.", type: "error" });
     } finally {
       setLoading(false);
       setTimeout(() => setToast(null), 4000);
