@@ -62,7 +62,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         setScrolled(false);
       }
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -149,12 +148,12 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
     >
       
-      {/* NAVBAR: ALTURA FIXA (H-20 TOPO / H-16 ROLAGEM) PARA EVITAR EXPANSÕES BUGADAS */}
-      <header className="fixed top-0 left-0 right-0 z-[100] flex justify-center w-full pointer-events-none">
-        <div className={`pointer-events-auto flex items-center justify-between transition-all duration-500 ease-out ${
+      {/* NAVBAR Z-INDEX AJUSTADO PARA PERMITIR MODAIS DA LOJA COBRIREM A TELA */}
+      <header className="fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none">
+        <div className={`pointer-events-auto flex items-center justify-between transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
           scrolled 
-            ? "w-[calc(100%-2rem)] max-w-7xl bg-[#030303]/90 backdrop-blur-xl border border-white/15 rounded-2xl px-6 md:px-8 h-14 md:h-16 mt-3 md:mt-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
-            : "w-full max-w-full bg-[#030303] border-b border-white/5 px-6 md:px-8 h-16 md:h-20 rounded-none mt-0 shadow-none"
+            ? "w-[calc(100%-2rem)] max-w-7xl bg-[#030303]/90 backdrop-blur-xl border border-white/15 rounded-2xl px-6 md:px-8 py-3.5 mt-3 md:mt-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
+            : "w-full max-w-full bg-[#030303] border-b border-white/5 px-6 md:px-8 py-5 rounded-none mt-0 shadow-none"
         }`}>
           
           <Link href={`/${slug}`} className="flex items-center gap-3 md:gap-4 group shrink-0">
@@ -165,11 +164,11 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 width={200}
                 height={100}
                 unoptimized
-                className="w-auto h-8 md:h-10 object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
+                className="w-auto h-9 md:h-11 object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
               />
             ) : (
-              <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300 shrink-0">
-                <span className="font-black text-black text-base md:text-lg uppercase italic">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300 shrink-0">
+                <span className="font-black text-black text-lg uppercase italic">
                   {serverDisplayName.charAt(0)}
                 </span>
               </div>
@@ -219,7 +218,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
             ) : (
-              <Button onClick={() => signIn('discord')} className="hidden sm:flex bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-2 px-4 rounded-xl transition-all items-center gap-2 text-[10px] uppercase italic shadow-lg shadow-[#5865F2]/20">
+              <Button onClick={() => signIn('discord')} className="hidden sm:flex bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-2.5 px-4 rounded-xl transition-all items-center gap-2 text-[10px] uppercase italic shadow-lg shadow-[#5865F2]/20">
                 Entrar
               </Button>
             )}
@@ -240,7 +239,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[90] bg-[#030303]/95 backdrop-blur-2xl pt-28 px-6 lg:hidden flex flex-col justify-between pb-12"
+            className="fixed inset-0 z-[100] bg-[#030303]/95 backdrop-blur-2xl pt-28 px-6 lg:hidden flex flex-col justify-between pb-12"
           >
             <nav className="flex flex-col gap-4 text-center">
               {navLinks.map((link) => {
@@ -283,7 +282,8 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 flex-1 pt-24 md:pt-28">{children}</main>
+      {/* REMOVIDO: "relative z-10" PARA PERMITIR QUE OS MODAIS FUNCIONEM PERFEITAMENTE */}
+      <main className="flex-1 pt-24 md:pt-28">{children}</main>
 
       <footer className="border-t border-white/5 bg-zinc-950/40 backdrop-blur-md pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-6">
