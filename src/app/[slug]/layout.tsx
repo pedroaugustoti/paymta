@@ -56,7 +56,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
+      if (window.scrollY > 30) {
         setScrolled(true);
       } else {
         setScrolled(false);
@@ -141,6 +141,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   ];
 
   const displayFooterName = settings.footerName || settings.serverName;
+  const serverDisplayName = settings.navbarName || settings.serverName || "CIDADE";
 
   return (
     <div 
@@ -148,35 +149,46 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
     >
       
-      {/* NAVBAR DINÂMICA: OCUPA 100% NO TOPO E FLUTUA CENTRALIZADA AO ROLAR */}
-      <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out ${
+      {/* NAVBAR COM TRANSIÇÃO LENTA, SUAVE E ELEGANTE (DURATION-700) */}
+      <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ease-in-out ${
         scrolled ? "px-4 pt-3 flex justify-center" : "px-0 pt-0 w-full"
       }`}>
-        <div className={`flex items-center justify-between transition-all duration-500 ease-in-out ${
+        <div className={`flex items-center justify-between transition-all duration-700 ease-in-out ${
           scrolled 
             ? "w-full max-w-7xl bg-[#030303]/90 backdrop-blur-xl border border-white/15 rounded-2xl px-8 py-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
             : "w-full bg-[#030303] border-b border-white/5 px-8 py-5 rounded-none shadow-none"
         }`}>
           
-          <Link href={`/${slug}`} className="flex items-center gap-4 group shrink-0">
+          {/* LOGO + NOME DA CIDADE GERENCIADO PELO DASHBOARD */}
+          <Link href={`/${slug}`} className="flex items-center gap-3.5 group shrink-0">
             {settings.logoUrl && settings.logoUrl.trim() !== "" ? (
-              <div className="relative h-12 w-40 md:w-48 flex items-center">
+              <div className="relative h-10 w-32 md:w-40 flex items-center">
                 <Image 
                   src={settings.logoUrl} 
                   alt="Logo do Servidor" 
                   fill
-                  sizes="200px"
+                  sizes="160px"
                   unoptimized
                   className="object-contain object-left drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
                 />
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
-                <span className="font-black text-black text-lg uppercase italic">
-                  {(settings.navbarName || settings.serverName || "B").charAt(0)}
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
+                <span className="font-black text-black text-base uppercase italic">
+                  {serverDisplayName.charAt(0)}
                 </span>
               </div>
             )}
+            
+            <div className="flex flex-col">
+              <span className="text-base md:text-lg font-black text-white tracking-tighter leading-none uppercase italic group-hover:text-[var(--primary)] transition-colors">
+                {serverDisplayName}
+              </span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[8px] text-zinc-500 font-black tracking-widest uppercase italic">Verificado</span>
+              </div>
+            </div>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
