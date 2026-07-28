@@ -7,7 +7,7 @@ import {
   ChevronRight, ShieldAlert, Camera,
   Menu, X, Hammer 
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useEffect, ReactNode } from "react";
@@ -156,14 +156,15 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         }`}>
           
           <Link href={`/${slug}`} className="flex items-center gap-3.5 group shrink-0">
-            {settings.logoUrl ? (
-              <div className="relative h-9 md:h-10 w-28 object-contain">
+            {settings.logoUrl && settings.logoUrl.trim() !== "" ? (
+              <div className="relative h-9 md:h-10 w-28 flex items-center">
                 <Image 
                   src={settings.logoUrl} 
                   alt="Logo do Servidor" 
                   fill
                   sizes="120px"
-                  className="object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
+                  unoptimized
+                  className="object-contain object-left drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
                 />
               </div>
             ) : (
