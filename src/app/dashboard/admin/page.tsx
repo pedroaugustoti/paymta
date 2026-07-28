@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { ShieldAlert, Users, LifeBuoy, TrendingUp, Activity, ArrowUpRight, Lock, CheckCircle2 } from "lucide-react";
+import { ShieldAlert, Users, LifeBuoy, TrendingUp, Activity, ArrowUpRight, Lock, CheckCircle2, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function AdminOverviewPage() {
-  const { data: session } = useSession();
+  // 1. Extraímos o 'status' para verificar se o NextAuth ainda está processando
+  const { data: session, status } = useSession();
   const [ticketsCount, setTicketsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -27,9 +28,23 @@ export default function AdminOverviewPage() {
         setLoading(false);
       }
     }
-    if (isAdmin) loadAdminData();
+    // Só tenta fazer o fetch na API se confirmarmos que ele é admin
+    if (isAdmin) {
+      loadAdminData();
+    }
   }, [isAdmin]);
 
+  // 2. Trava de Segurança: Enquanto a sessão carrega, exibe um spinner Verde PIX
+  if (status === "loading") {
+    return (
+      <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
+        <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+        <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest animate-pulse">Carregando Quartel General...</p>
+      </div>
+    );
+  }
+
+  // 3. Se a sessão terminou de carregar e ele NÃO é admin, bloqueia.
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] gap-4 p-6 text-center">
@@ -75,7 +90,12 @@ export default function AdminOverviewPage() {
         <div className="bg-[#050505] border border-violet-500/20 p-8 rounded-[32px] relative overflow-hidden shadow-[0_0_30px_rgba(124,58,237,0.05)]">
           <div className="absolute -right-4 -top-4 w-28 h-28 text-red-500/10"><LifeBuoy className="w-full h-full" /></div>
           <p className="text-[10px] font-black text-zinc-500 uppercase mb-2 tracking-widest relative z-10">Tickets no Banco</p>
-          <h3 className="text-3xl lg:text-4xl font-black italic text-white tracking-tighter relative z-10">{ticketsCount}</h3>
+          
+          {/* Exibe o número de tickets ou um loading suave enquanto busca da API */}
+          <h3 className="text-3xl lg:text-4xl font-black italic text-white tracking-tighter relative z-10">
+            {loading ? <Loader2 className="w-6 h-6 animate-spin text-zinc-600 mt-2" /> : ticketsCount}
+          </h3>
+          
           <div className="mt-4 inline-flex items-center gap-2 text-[9px] font-black uppercase text-violet-400 bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/20 relative z-10">
             <Activity className="w-3 h-3" /> Banco Conectado com Sucesso
           </div>
