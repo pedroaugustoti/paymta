@@ -54,13 +54,10 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     if (slug) loadConfigs();
   }, [slug, pathname]);
 
+  // OTIMIZAÇÃO: Listener passivo para não travar a rolagem do mouse
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 30) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -68,7 +65,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
   if (error) return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-center p-6 text-white">
-      <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20 mb-6">
+      <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20 mb-6 transform-gpu">
         <ShieldAlert className="w-10 h-10 text-red-500" />
       </div>
       <h1 className="text-5xl font-black italic uppercase tracking-tighter">Cidade Offline</h1>
@@ -77,7 +74,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       </p>
       <Link href="/" className="mt-10 group">
         <Button variant="outline" className="border-white/10 bg-white/5 text-white font-black px-8 py-6 rounded-2xl flex items-center gap-2">
-          VOLTAR AO HUB <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-all" />
+          VOLTAR AO HUB <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </Button>
       </Link>
     </div>
@@ -96,16 +93,11 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden selection:bg-[var(--primary)] selection:text-black"
         style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
       >
-        <div className="absolute inset-0 bg-[#030303] z-0" />
-        <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: `radial-gradient(circle at 50% -20%, var(--primary) 0%, transparent 60%)` }} />
+        <div className="absolute inset-0 bg-[#030303] z-0 transform-gpu" />
+        <div className="absolute inset-0 z-0 opacity-20 transform-gpu" style={{ backgroundImage: `radial-gradient(circle at 50% -20%, var(--primary) 0%, transparent 60%)` }} />
         
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.8 }}
-          className="relative z-10 max-w-2xl w-full"
-        >
-          <div className="bg-black/40 backdrop-blur-2xl border border-white/5 rounded-[40px] p-8 md:p-12 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+        <div className="relative z-10 max-w-2xl w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="bg-[#050505] border border-white/5 rounded-[40px] p-8 md:p-12 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent opacity-50" />
 
             <div className="w-24 h-24 bg-[#0a0a0a] border border-white/10 rounded-[32px] flex items-center justify-center relative z-10 shadow-inner mb-8">
@@ -127,7 +119,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -148,12 +140,16 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
     >
       
-      {/* NAVBAR Z-INDEX AJUSTADO PARA PERMITIR MODAIS DA LOJA COBRIREM A TELA */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none">
-        <div className={`pointer-events-auto flex items-center justify-between transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      {/* 
+        NAVBAR HYPER-OTIMIZADA PARA PCS FRACOS:
+        Em vez de mexer no width ou margins que causam Reflow (layout shift), 
+        usamos padding transition e background color com aceleração de hardware (transform-gpu).
+      */}
+      <header className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ease-out transform-gpu will-change-auto pointer-events-none ${scrolled ? 'p-3 md:p-4' : 'p-0'}`}>
+        <div className={`pointer-events-auto mx-auto w-full max-w-7xl flex items-center justify-between transition-all duration-300 ease-out transform-gpu ${
           scrolled 
-            ? "w-[calc(100%-2rem)] max-w-7xl bg-[#030303]/90 backdrop-blur-xl border border-white/15 rounded-2xl px-6 md:px-8 py-3.5 mt-3 md:mt-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
-            : "w-full max-w-full bg-[#030303] border-b border-white/5 px-6 md:px-8 py-5 rounded-none mt-0 shadow-none"
+            ? "bg-[#050505]/90 backdrop-blur-lg border border-white/10 rounded-2xl px-6 md:px-8 py-3.5 shadow-2xl" 
+            : "bg-[#030303] border-b border-white/5 px-6 md:px-8 py-5 rounded-none"
         }`}>
           
           <Link href={`/${slug}`} className="flex items-center gap-3 md:gap-4 group shrink-0">
@@ -164,10 +160,10 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 width={200}
                 height={100}
                 unoptimized
-                className="w-auto h-9 md:h-11 object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
+                className="w-auto h-9 md:h-11 object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-300 transform-gpu" 
               />
             ) : (
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300 shrink-0">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center overflow-hidden shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 transition-transform duration-300 transform-gpu shrink-0">
                 <span className="font-black text-black text-lg uppercase italic">
                   {serverDisplayName.charAt(0)}
                 </span>
@@ -179,7 +175,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 {serverDisplayName}
               </span>
               <div className="flex items-center gap-1.5 mt-1">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_5px_rgba(16,185,129,0.8)]" />
                 <span className="text-[8px] text-zinc-500 font-black tracking-widest uppercase italic">Verificado</span>
               </div>
             </div>
@@ -192,7 +188,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 <Link 
                   key={link.href} 
                   href={link.href} 
-                  className={`px-4 py-2 text-[11px] font-black uppercase italic tracking-widest transition-all rounded-xl border border-transparent ${
+                  className={`px-4 py-2 text-[11px] font-black uppercase italic tracking-widest transition-colors rounded-xl border border-transparent ${
                     isActive 
                     ? "text-[var(--primary)] bg-[var(--primary)]/10 border-[var(--primary)]/20" 
                     : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -218,7 +214,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
             ) : (
-              <Button onClick={() => signIn('discord')} className="hidden sm:flex bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-2.5 px-4 rounded-xl transition-all items-center gap-2 text-[10px] uppercase italic shadow-lg shadow-[#5865F2]/20">
+              <Button onClick={() => signIn('discord')} className="hidden sm:flex bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-2.5 px-4 rounded-xl transition-colors items-center gap-2 text-[10px] uppercase italic shadow-lg shadow-[#5865F2]/20 border-none">
                 Entrar
               </Button>
             )}
@@ -233,13 +229,15 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         </div>
       </header>
 
+      {/* MENU MOBILE OTIMIZADO */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[100] bg-[#030303]/95 backdrop-blur-2xl pt-28 px-6 lg:hidden flex flex-col justify-between pb-12"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[35] bg-[#030303]/95 backdrop-blur-xl pt-28 px-6 lg:hidden flex flex-col justify-between pb-12 transform-gpu"
           >
             <nav className="flex flex-col gap-4 text-center">
               {navLinks.map((link) => {
@@ -249,7 +247,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                     key={link.href} 
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`px-5 py-4 text-sm font-black uppercase italic tracking-widest transition-all rounded-2xl border ${
+                    className={`px-5 py-4 text-sm font-black uppercase italic tracking-widest transition-colors rounded-2xl border ${
                       isActive 
                       ? "text-[var(--primary)] bg-[var(--primary)]/10 border-[var(--primary)]/20" 
                       : "text-zinc-300 hover:text-white hover:bg-white/5 border-white/5"
@@ -282,10 +280,10 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         )}
       </AnimatePresence>
 
-      {/* REMOVIDO: "relative z-10" PARA PERMITIR QUE OS MODAIS FUNCIONEM PERFEITAMENTE */}
       <main className="flex-1 pt-24 md:pt-28">{children}</main>
 
-      <footer className="border-t border-white/5 bg-zinc-950/40 backdrop-blur-md pt-20 pb-10">
+      {/* FOOTER */}
+      <footer className="border-t border-white/5 bg-[#050505] pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
             
@@ -298,7 +296,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                     width={100}
                     height={100}
                     unoptimized
-                    className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300 shrink-0" 
+                    className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity shrink-0" 
                   />
                 ) : (
                   <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center font-black text-white text-sm border border-white/10 uppercase italic shadow-inner shrink-0">
@@ -337,7 +335,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
               </ul>
             </div>
 
-            <div className="md:col-span-4 space-y-8 bg-white/[0.02] p-8 rounded-[40px] border border-white/5">
+            <div className="md:col-span-4 space-y-8 bg-[#0a0a0a] p-8 rounded-[40px] border border-white/5">
               <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest italic">Métodos Aceitos</p>
                 <div className="flex flex-wrap gap-3">
@@ -372,7 +370,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 function SocialLink({ href, icon, color }: { href?: string; icon: ReactNode; color: string }) {
   if (!href) return null;
   return (
-    <a href={href} target="_blank" rel="noreferrer" className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-zinc-500 transition-all border border-white/5 ${color} hover:text-white hover:-translate-y-1 shadow-lg`}>
+    <a href={href} target="_blank" rel="noreferrer" className={`w-12 h-12 rounded-2xl bg-[#0a0a0a] flex items-center justify-center text-zinc-500 transition-colors border border-white/5 ${color} hover:text-white transform-gpu`}>
       {icon}
     </a>
   );
@@ -380,8 +378,8 @@ function SocialLink({ href, icon, color }: { href?: string; icon: ReactNode; col
 
 function FooterLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="text-[11px] font-bold text-zinc-500 hover:text-[var(--primary)] transition-all flex items-center gap-2 group italic uppercase tracking-wider">
-      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+    <Link href={href} className="text-[11px] font-bold text-zinc-500 hover:text-[var(--primary)] transition-colors flex items-center gap-2 group italic uppercase tracking-wider transform-gpu">
+      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
       {children}
     </Link>
   );

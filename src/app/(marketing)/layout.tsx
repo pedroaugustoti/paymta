@@ -17,7 +17,7 @@ const FooterLogo = () => (
 // O FOOTER ESTÁTICO NÃO PRECISA DO USE CLIENT
 function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-[#030303] pt-20 pb-10 mt-auto">
+    <footer className="border-t border-white/10 bg-[#030303] pt-20 pb-10 mt-auto transform-gpu">
       <div className="max-w-7xl mx-auto px-6 md:px-8 text-center sm:text-left">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           
@@ -69,19 +69,19 @@ function Footer() {
   );
 }
 
-// LAYOUT PRINCIPAL AGORA É UM SERVER COMPONENT (MUITO MAIS RÁPIDO)
+// LAYOUT PRINCIPAL COMO SERVER COMPONENT PARA MÁXIMA PERFORMANCE
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative bg-[#000000] min-h-screen text-zinc-300 antialiased flex flex-col selection:bg-yellow-500/30">
-      {/* Navbar puxada do componente isolado com o novo isotipo */}
+      {/* Navbar puxada do componente isolado */}
       <Navbar />
       
-      {/* Conteúdo Dinâmico */}
-      <div className="flex-1">
+      {/* Conteúdo Dinâmico (Sempre otimizado e fluído) */}
+      <div className="flex-1 transform-gpu">
         {children}
       </div>
 
-      {/* Footer Estático com o novo isotipo */}
+      {/* Footer Estático */}
       <Footer />
     </div>
   );
