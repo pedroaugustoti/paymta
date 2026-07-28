@@ -11,7 +11,6 @@ import Link from "next/link";
 import { useEffect, useState, ReactNode } from "react";
 import { useParams } from "next/navigation";
 
-// Interface rigorosa para tipar os dados vindos do Dashboard do cliente
 interface ShopSettings {
   slug?: string;
   serverName?: string;
@@ -31,7 +30,6 @@ export default function CityPortalHome() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   
-  // Estado para armazenar os dados em tempo real do servidor MTA
   const [serverStatus, setServerStatus] = useState({
     online: 0,
     max: 0,
@@ -118,39 +116,34 @@ export default function CityPortalHome() {
       style={{ "--primary": primaryColor } as React.CSSProperties}
     >
       
-      {/* 1. HERO SECTION - REDESENHADA PARA IMPACTO MÁXIMO */}
-      <section className="relative min-h-[65vh] md:min-h-[75vh] flex flex-col items-center justify-center px-6 overflow-hidden border-b border-white/5 bg-[#050505]">
+      {/* 1. HERO SECTION - FLUIDA E IMERSIVA SEM CORTES */}
+      <section className="relative min-h-[60vh] md:min-h-[70vh] flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden border-b border-white/5 bg-[#050505]">
         
-        {/* IMAGEM DE FUNDO COM GRADIENTES PROFISSIONAIS */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-25 scale-105 transition-all duration-1000"
+          className="absolute inset-0 bg-cover bg-center opacity-20 scale-105 transition-all duration-1000 pointer-events-none"
           style={{ 
             backgroundImage: `url(${settings.heroImageUrl || "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2070&auto=format&fit=crop"})`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/60 to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--primary)_0%,_transparent_70%)] opacity-5 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/70 to-transparent pointer-events-none" />
         
-        <div className="relative z-10 text-center max-w-5xl flex flex-col items-center pt-16">
+        <div className="relative z-10 text-center max-w-5xl flex flex-col items-center">
           
-          {/* BADGE DE STATUS */}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-            {settings.slogan && (
+          {settings.slogan && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
               <span className="inline-flex items-center gap-2 text-[var(--primary)] font-black uppercase italic tracking-[0.3em] text-[10px] border border-[var(--primary)]/30 px-4 py-2 rounded-full bg-[var(--primary)]/10 backdrop-blur-md mb-6 shadow-[0_0_20px_rgba(250,203,17,0.15)]">
                 <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
                 {settings.slogan}
               </span>
-            )}
-          </motion.div>
+            </motion.div>
+          )}
 
-          {/* TÍTULO PRINCIPAL */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <h1 className="text-6xl md:text-9xl font-black leading-none bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter px-4 pb-2">
+            <h1 className="text-5xl md:text-8xl font-black leading-none bg-gradient-to-b from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent uppercase italic drop-shadow-2xl tracking-tighter px-4 pb-2">
               {settings.serverName}
             </h1>
           </motion.div>
 
-          {/* DESCRIÇÃO */}
           {settings.description && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
               <p className="text-xs md:text-sm text-zinc-400 font-medium italic leading-relaxed max-w-2xl mx-auto mt-4 px-6">
@@ -159,12 +152,11 @@ export default function CityPortalHome() {
             </motion.div>
           )}
 
-          {/* CTA PRINCIPAL E CÓPIA DE IP */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 w-full max-w-md"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 w-full max-w-md"
           >
             <a href={settings.serverIp ? `mtasa://${settings.serverIp}` : "#"} className="w-full sm:w-auto group">
               <Button 
@@ -182,11 +174,10 @@ export default function CityPortalHome() {
             </Link>
           </motion.div>
 
-          {/* IP DO SERVIDOR COM BOTÃO DE COPIAR RÁPIDO */}
           {settings.serverIp && (
             <div 
               onClick={() => handleCopyIp(settings.serverIp || "")}
-              className="mt-8 inline-flex items-center gap-3 px-5 py-2.5 bg-black/60 border border-white/10 rounded-xl cursor-pointer hover:border-[var(--primary)]/40 transition-all group"
+              className="mt-6 inline-flex items-center gap-3 px-5 py-2.5 bg-black/60 border border-white/10 rounded-xl cursor-pointer hover:border-[var(--primary)]/40 transition-all group"
             >
               <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest italic">IP:</span>
               <span className="text-xs font-mono font-bold text-white group-hover:text-[var(--primary)] transition-colors">{settings.serverIp}</span>
@@ -199,8 +190,8 @@ export default function CityPortalHome() {
         </div>
       </section>
 
-      {/* 2. STATUS CARDS EM TEMPO REAL */}
-      <section className="max-w-7xl mx-auto -mt-10 relative z-20 px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 2. STATUS CARDS (AGORA ORGANIZADOS EM SEÇÃO PRÓPRIA SEM SOBREPOSIÇÃO) */}
+      <section className="max-w-7xl mx-auto py-16 px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatusCard 
           icon={<Users style={{ color: "var(--primary)" }} />} 
           label="Cidadãos Online" 
@@ -222,7 +213,7 @@ export default function CityPortalHome() {
       </section>
 
       {/* 3. BANNER DE CONVERSÃO RÁPIDA PARA A LOJA */}
-      <section className="max-w-7xl mx-auto px-6 pt-24">
+      <section className="max-w-7xl mx-auto px-6 pb-12">
         <div className="bg-gradient-to-r from-[var(--primary)]/10 via-black to-[#09090b] border border-[var(--primary)]/20 p-8 md:p-12 rounded-[40px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--primary)] blur-[120px] opacity-10 pointer-events-none" />
           
@@ -247,8 +238,8 @@ export default function CityPortalHome() {
       </section>
 
       {/* 4. DIFERENCIAIS DA CIDADE */}
-      <section className="max-w-7xl mx-auto py-28 px-6">
-        <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
+      <section className="max-w-7xl mx-auto py-20 px-6">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] italic">Experiência Única</span>
           <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter">
             Por que jogar na <span style={{ color: "var(--primary)" }}>{settings.serverName}?</span>
