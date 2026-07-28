@@ -129,9 +129,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Adicionado para estabilizar o toque e prevenir travamentos de rolagem no mobile */
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
   }
   html {
     @apply font-sans;
+    /* Trava o bounce/elasticidade excessiva da janela principal no mobile */
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    height: 100%;
+    overflow-y: auto;
+  }
+  input, select, textarea {
+    font-size: 16px !important; /* Impede o Safari/Chrome mobile de dar zoom automático */
   }
 }
 
