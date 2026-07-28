@@ -8,7 +8,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
     }),
   ],
-  // ADICIONE ESTE BLOCO DE CALLBACKS:
+  
   callbacks: {
     // 1. Quando o Token (JWT) é criado na hora do login:
     async jwt({ token, user, profile }) {
@@ -38,7 +38,14 @@ export const authOptions: NextAuthOptions = {
   },
   
   session: {
-    strategy: "jwt", // Obrigatório para o middleware funcionar
+    strategy: "jwt", // Obrigatório para o JWT funcionar
+  },
+
+  // GARANTE O REDIRECIONAMENTO DIRETO PARA O DASHBOARD
+  pages: {
+    signIn: "/login", // Se tiver uma página de login customizada, ou deixe padrão
+    signOut: "/",
+    error: "/login",
   },
 };
 

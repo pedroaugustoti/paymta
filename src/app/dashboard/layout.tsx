@@ -31,6 +31,10 @@ function SidebarContent({ session, setIsMobileMenuOpen }: { session: SessionData
   const logoUrl = settings?.logoUrl as string;
   const slug = settings?.slug as string;
 
+  // VERIFICAÇÃO DE ADMIN (Lê o role injetado pelo NextAuth no token/session)
+  // @ts-ignore
+  const isAdmin = session?.user?.role === "ADMIN";
+
   return (
     <>
       <div className="p-6 flex items-center gap-4 border-b border-white/5">
@@ -96,6 +100,23 @@ function SidebarContent({ session, setIsMobileMenuOpen }: { session: SessionData
         <p className="px-4 py-2 mt-4 text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em]">Sistema</p>
         <NavLink href="/dashboard/integracao" icon={<Zap className="w-5 h-5" />} label="Integração API" onClick={() => setIsMobileMenuOpen(false)} />
         <NavLink href="/dashboard/configuracoes" icon={<Settings className="w-5 h-5" />} label="Configurações" onClick={() => setIsMobileMenuOpen(false)} />
+
+        {/* ======================================================== */}
+        {/* ÁREA RESTRITA: SÓ APARECE SE FOR ADMIN NO DISCORD       */}
+        {/* ======================================================== */}
+        {isAdmin && (
+          <>
+            <p className="px-4 py-2 mt-6 text-[9px] font-black text-violet-400 uppercase tracking-[0.3em] border-t border-white/5 pt-4">
+              Staff & Gestão
+            </p>
+            <NavLink 
+              href="/admin" 
+              icon={<span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse inline-block" />} 
+              label="Quartel General" 
+              onClick={() => setIsMobileMenuOpen(false)} 
+            />
+          </>
+        )}
       </nav>
 
       <div className="p-4 border-t border-white/5">
