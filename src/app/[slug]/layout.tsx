@@ -56,7 +56,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const handleScroll = () => {
-      // Ativa o efeito de ilha quando o scroll passar de 30px
       if (window.scrollY > 30) {
         setScrolled(true);
       } else {
@@ -68,7 +67,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 1. TELA DE ERRO (SLUG NÃO ENCONTRADA)
   if (error) return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-center p-6 text-white">
       <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20 mb-6">
@@ -86,7 +84,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 
-  // 2. TELA DE CARREGAMENTO
   if (!settings) return (
     <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center gap-4">
       <Loader2 className="w-10 h-10 animate-spin text-zinc-800" />
@@ -94,7 +91,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 
-  // 3. TELA DE MANUTENÇÃO
   if (settings.isMaintenance) {
     return (
       <div 
@@ -144,7 +140,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     { label: "Loja VIP", href: `/${slug}/loja` },
   ];
 
-  // Strings com fallbacks seguros para evitar erros de charAt em valores nulos
   const displayFooterName = settings.footerName || settings.serverName || "CIDADE";
   const serverDisplayName = settings.navbarName || settings.serverName || "CIDADE";
 
@@ -154,12 +149,12 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
     >
       
-      {/* NAVBAR FLUIDA COM TRANSIÇÃO AMANTEIGADA (CUBIC-BEZIER) E NULL-SAFETY */}
+      {/* NAVBAR: ALTURA FIXA (H-20 TOPO / H-16 ROLAGEM) PARA EVITAR EXPANSÕES BUGADAS */}
       <header className="fixed top-0 left-0 right-0 z-[100] flex justify-center w-full pointer-events-none">
-        <div className={`pointer-events-auto flex items-center justify-between transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        <div className={`pointer-events-auto flex items-center justify-between transition-all duration-500 ease-out ${
           scrolled 
-            ? "w-[calc(100%-2rem)] max-w-7xl bg-[#030303]/90 backdrop-blur-xl border border-white/15 rounded-2xl px-6 md:px-8 py-3.5 mt-3 md:mt-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
-            : "w-full max-w-full bg-[#030303] border-b border-white/5 px-6 md:px-8 py-5 rounded-none mt-0 shadow-none"
+            ? "w-[calc(100%-2rem)] max-w-7xl bg-[#030303]/90 backdrop-blur-xl border border-white/15 rounded-2xl px-6 md:px-8 h-14 md:h-16 mt-3 md:mt-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
+            : "w-full max-w-full bg-[#030303] border-b border-white/5 px-6 md:px-8 h-16 md:h-20 rounded-none mt-0 shadow-none"
         }`}>
           
           <Link href={`/${slug}`} className="flex items-center gap-3 md:gap-4 group shrink-0">
@@ -170,11 +165,11 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 width={200}
                 height={100}
                 unoptimized
-                className="w-auto h-9 md:h-11 object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
+                className="w-auto h-8 md:h-10 object-contain drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
               />
             ) : (
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300 shrink-0">
-                <span className="font-black text-black text-lg uppercase italic">
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300 shrink-0">
+                <span className="font-black text-black text-base md:text-lg uppercase italic">
                   {serverDisplayName.charAt(0)}
                 </span>
               </div>
@@ -224,7 +219,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
             ) : (
-              <Button onClick={() => signIn('discord')} className="hidden sm:flex bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-2.5 px-4 rounded-xl transition-all items-center gap-2 text-[10px] uppercase italic shadow-lg shadow-[#5865F2]/20">
+              <Button onClick={() => signIn('discord')} className="hidden sm:flex bg-[#5865F2] hover:bg-[#4752C4] text-white font-black py-2 px-4 rounded-xl transition-all items-center gap-2 text-[10px] uppercase italic shadow-lg shadow-[#5865F2]/20">
                 Entrar
               </Button>
             )}
@@ -288,15 +283,13 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         )}
       </AnimatePresence>
 
-      {/* Margem superior maior (pt-28 md:pt-32) para não encobrir o conteúdo com a navbar */}
-      <main className="relative z-10 flex-1 pt-28 md:pt-32">{children}</main>
+      <main className="relative z-10 flex-1 pt-24 md:pt-28">{children}</main>
 
       <footer className="border-t border-white/5 bg-zinc-950/40 backdrop-blur-md pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
             
             <div className="md:col-span-4 space-y-8">
-              {/* LOGO RESTAURADA NO RODAPÉ */}
               <div className="flex items-center gap-4">
                 {settings.logoUrl?.trim() ? (
                   <Image 
