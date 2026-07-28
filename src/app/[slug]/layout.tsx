@@ -148,28 +148,31 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       style={{ "--primary": settings.primaryColor || "#facb11" } as React.CSSProperties}
     >
       
-      <header className="fixed top-0 left-0 right-0 z-[100] flex justify-center px-4 pt-3 transition-all duration-500 ease-in-out">
+      {/* NAVBAR: TOTALMENTE RESPONSIVA E SEM BRECHAS NO TOPO */}
+      <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out ${
+        scrolled ? "flex justify-center px-4 pt-3" : "w-full"
+      }`}>
         <div className={`flex items-center justify-between transition-all duration-500 ease-in-out ${
           scrolled 
-            ? "w-full max-w-6xl bg-[#030303]/85 backdrop-blur-md border border-white/15 rounded-2xl px-6 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
-            : "w-full max-w-full bg-[#030303] border-b border-white/5 px-6 md:px-8 py-5 rounded-none shadow-none"
+            ? "w-full max-w-7xl bg-[#030303]/85 backdrop-blur-md border border-white/15 rounded-2xl px-8 py-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.8)]" 
+            : "w-full bg-[#030303] border-b border-white/5 px-8 py-5 rounded-none shadow-none"
         }`}>
           
-          <Link href={`/${slug}`} className="flex items-center gap-3.5 group shrink-0">
+          <Link href={`/${slug}`} className="flex items-center gap-4 group shrink-0">
             {settings.logoUrl && settings.logoUrl.trim() !== "" ? (
-              <div className="relative h-9 md:h-10 w-28 flex items-center">
+              <div className="relative h-11 w-36 flex items-center">
                 <Image 
                   src={settings.logoUrl} 
                   alt="Logo do Servidor" 
                   fill
-                  sizes="120px"
+                  sizes="160px"
                   unoptimized
                   className="object-contain object-left drop-shadow-xl group-hover:scale-105 transition-all duration-300" 
                 />
               </div>
             ) : (
-              <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
-                <span className="font-black text-black text-base uppercase italic">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden transition-all shadow-2xl border border-white/10 bg-[var(--primary)] group-hover:scale-105 duration-300">
+                <span className="font-black text-black text-lg uppercase italic">
                   {(settings.navbarName || settings.serverName || "B").charAt(0)}
                 </span>
               </div>
